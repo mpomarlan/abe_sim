@@ -29,7 +29,7 @@ mb.updateNavigationMap()
 So far, not much seems to have happened but we created the agent's "brain" and had it create a navigation map; this is what it will use to navigate around obstacles. We can have a look at how this map looks like:
 
 ```python
-for line in mb.cellMap.passables:
+for line in reverse(mb.cellMap.passables):
     s = ""
     for c in line:
         if c:
