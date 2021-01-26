@@ -1,7 +1,9 @@
 # abe_sim
 A little agent simulation in MORSE, to be used in a MUHAI pipeline to evaluate semspecs. (Very much a work in progress now.)
 
-To try the current stuff out, you will first need to [install MORSE ](https://www.openrobots.org/morse/doc/stable/user/installation.html) and pip-install trimesh.
+To try the current stuff out, you will first need to [install MORSE ](https://www.openrobots.org/morse/doc/stable/user/installation.html) and pip-install trimesh and python-fcl.
+
+schemasim should also be either pip-installed or the schemasim module copied into the abe_sim/src folder.
 
 Once these dependencies are installed, and this repository cloned, go to the folder in which you have cloned it (not the repository folder itself, but its parent folder). Once there, run
 
