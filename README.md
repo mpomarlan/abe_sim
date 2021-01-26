@@ -31,14 +31,7 @@ mb.updateNavigationMap()
 So far, not much seems to have happened but we created the agent's "brain" and had it create a navigation map; this is what it will use to navigate around obstacles. We can have a look at how this map looks like:
 
 ```python
-for line in reversed(mb.cellMap.passables):
-    s = ""
-    for c in line:
-        if c:
-            s = s + "."
-        else:
-            s = s + "#"
-    print(s)
+print(mb.cellMap)
 ```
 
 You will see a grid of either "." (meaning, this square cell of the grid is free) or "#" (the cell is occupied and should not be walked through).
