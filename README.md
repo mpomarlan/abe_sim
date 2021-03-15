@@ -22,7 +22,7 @@ git clone https://github.com/mpomarlan/abe_sim
 git clone https://github.com/mpomarlan/schemasim
 ln -s ./schemasim/schemasim ./abe_sim/src/schemasim
 ```
-## Running the simulation
+# Running the simulation
 
 Once the dependencies and the repositories above are installed/cloned, go to the folder in which you have placed the repositories (in the commands above, that would be the MORSE folder). Once there, run
 
