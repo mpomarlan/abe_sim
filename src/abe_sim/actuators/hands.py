@@ -62,18 +62,22 @@ class Hands(Actuator):
             if self.left_holding:
                 if self.left_holding.parent == self.left_hand:
                     self.left_holding.removeParent()
+                    self.left_holding.restoreDynamics()
                 self.left_holding = None
         elif ('' != self.local_data['lgrab']) and (None == self.left_holding) and (self.local_data['lgrab'] in self.left_hand.scene.objects):
             ## TODO: add some distance based sanity check here
             self.left_holding = self.left_hand.scene.objects[self.local_data['lgrab']]
             self.left_holding.setParent(self.left_hand)
+            self.left_holding.suspendDynamics()
         if self.local_data['rrelease']:
             if self.right_holding:
                 if self.right_holding.parent == self.right_hand:
                     self.right_holding.removeParent()
+                    self.right_holding.restoreDynamics()
                 self.right_holding = None
         elif ('' != self.local_data['rgrab']) and (None == self.right_holding) and (self.local_data['rgrab'] in self.right_hand.scene.objects):
             ## TODO: add some distance based sanity check here
             self.right_holding = self.right_hand.scene.objects[self.local_data['rgrab']]
             self.right_holding.setParent(self.right_hand)
+            self.right_holding.suspendDynamics()
 

@@ -14,6 +14,47 @@ def angle_diff(target, current):
         retq = retq + 2*math.pi
     return retq
 
+def euler_to_quaternion(r):
+    (yaw, pitch, roll) = (r[0], r[1], r[2])
+    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+    qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    return [qx, qy, qz, qw]
+
+def quaternion_to_euler(q):
+    (x, y, z, w) = (q[0], q[1], q[2], q[3])
+    t0 = +2.0 * (w * x + y * z)
+    t1 = +1.0 - 2.0 * (x * x + y * y)
+    roll = math.atan2(t0, t1)
+    t2 = +2.0 * (w * y - z * x)
+    t2 = +1.0 if t2 > +1.0 else t2
+    t2 = -1.0 if t2 < -1.0 else t2
+    pitch = math.asin(t2)
+    t3 = +2.0 * (w * z + x * y)
+    t4 = +1.0 - 2.0 * (y * y + z * z)
+    yaw = math.atan2(t3, t4)
+    return [yaw, pitch, roll]
+
+def invert_quaternion(q):
+    return [q[0], q[1], q[2], -q[3]]
+
+def quaternion_product(qA, qB):
+    b1, c1, d1, a1 = qA
+    b2, c2, d2, a2 = qB
+    return [a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2, a1*a2-b1*b2-c1*c2-d1*d2]
+
+def euler_diff_to_angvel(fromRPY, toRPY, dt):
+    qF = euler_to_quaternion(fromRPY)
+    qT = euler_to_quaternion(toRPY)
+    qD = quaternion_product(qT, invert_quaternion(qF))
+    halfAlpha = math.acos(qD[3])
+    if 0.005 > halfAlpha:
+        return [0,0,0]
+    s = math.sin(halfAlpha)
+    u = [qD[0]/s, qD[1]/s, qD[2]/s]
+    return [u[0]*halfAlpha/dt, u[1]*halfAlpha/dt, u[2]*halfAlpha/dt]
+
 def vdot(va, vb):
     return va[0]*vb[0]+va[1]*vb[1]+va[2]*vb[2]
 
