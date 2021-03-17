@@ -54,24 +54,41 @@ mb = Midbrain(head, hands, base, pose, world, simu)
 mb.updateNavigationMap()
 mb.startOperations()
 
-schs = mb.getObjectSchemas()
+objSchemas = mb.getObjectSchemas()
 
 from schemasim.schemas.l11_functional_control import Support
 
-bottle = schs['bottleOil'].unplace(mb.sim3D)
-destspec = [Support(supporter=schs['table.000'],supportee=bottle),bottle]
-mb.carryObject("bottleOil", destspec)
+def placeTrajectorOnSupport(trajector, supporter):
+    trajSchema = objSchemas[trajector].unplace(mb.sim3D)
+    destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajector]
+
+placeTrajectorOnSupport('bottleOil', 'table.000')
 ```
 
 What you should see is that, after some time to start up its "brain", the agent is going to move towards the oil bottle near the top of the screen, pick it up, and deliver it to the table on the left of the screen. We can also place some other object, for example the potted herb, on a table. To place it on the table on the right of the screen, you would run (but ONLY AFTER the agent is finished with moving the bottle!):
 
 ```
-plant = schs['plantSmall1'].unplace(mb.sim3D)
-destspec = [Support(supporter=schs['table.002'],supportee=plant),plant]
-mb.carryObject("plantSmall1", destspec)
+placeTrajectorOnSupport('plantSmall1', 'table.002')
 ```
 
-We could also have a look at some auxiliary structures the agent maintains about the world. One such structure is the navigation map, which the agent uses to navigate around obstacles. We can have a look at how this map looks like:
+But wait, there's myrrh! Or in this case, "butter": there is a couple of clumps in the scene, made of particles which will try to stick to each other, stronger if they are cold, less so if they are hot. You can see what happens when you try to manipulate the clumps with the robot. But first we need to figure out what names these clumps have (because of how they are made up, i.e., because which particles are in which clump may change, these names will change):
+
+```
+objs = mb.cerebellum._retrieveObjects()
+butterNames = [x for x in objs.keys() if "['Butter']" == objs[x]["type"]]
+for n in butterNames:
+    print(n, objs[n]["temperature"])
+```
+
+The code above is going to first get a dictionary of objects (which will be described in more detail below) and is going to select which objects in the scene are of type butter, and then print the temperatures of each of these objects. Let's say that 'ButterParticle.007' is the name of one of the butter clumps, then we could use
+
+```
+placeTrajectorOnSupport('ButterParticle.007', 'table.002')
+```
+
+to have the robot place the butter on one of the tables. Try this on both clumps -- they will behave very differently!
+
+We could also have a look at some other auxiliary structures the agent maintains about the world. One such structure is the navigation map, which the agent uses to navigate around obstacles. We can have a look at how this map looks like:
 
 ```python
 print(mb.cellMap)
