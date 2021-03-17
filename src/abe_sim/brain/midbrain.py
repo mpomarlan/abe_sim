@@ -346,6 +346,9 @@ class Midbrain:
             if (None == minD) or (minD > d):
                 minD = d
                 minC = c
+        if None == minC:
+            print("Huh. Couldn't seem to find any point to grasp from.")
+            return False
         x, y, z = minC
         def retractFn():
             if self.bringHandToPosition(hand, 0, parkY[hand], 0.9, 0, 0, 0, objects=objects):
