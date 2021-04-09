@@ -11,17 +11,30 @@ To try the current stuff out, you will first need to [install MORSE ](https://ww
 sudo pip3 install trimesh python-fcl
 ```
 
+Warning: because of API changes, newer versions of Blender will not work with MORSE. This can create problems on newer versions of Linux. For instance, at the moment installing on Ubuntu 20.04 will not work via the debian, but 18.04 should.
+
+To see whether your configuration is proper, try this:
+
+```
+morse check
+```
+
+This will report errors such as the python version assumed by Blender and Morse being different (they must not be for the system to work). You can also use it to see whether the Blender version will be a problem. In the output from the check, look for the Blender version: it must be 2.79 or less. **Blender version 2.80 and above will not work with Morse, regardless of what morse check says.**
+
 ## Setting up a workspace
 
-Create a MORSE folder in your home directory. This is where you will store the abe_sim, and some other code. The list of commands shows you how you might do this on a Linux system, including setting up a link to the schemasim package so that you can access it when running abe_sim.
+Create a MORSE folder in your home directory. This is where you will store the abe_sim, and some other code. The list of commands shows you how you might do this on a Linux system, including setting up a link to the schemasim package so that you can access it when running abe_sim. The last two lines are there to register the abe_sim simulation with MORSE so you can run it.
 
 ```
 mkdir MORSE
 cd ./MORSE
 git clone https://github.com/mpomarlan/abe_sim
 git clone https://github.com/mpomarlan/schemasim
-ln -s ./schemasim/schemasim ./abe_sim/src/schemasim
+ln -s ../../schemasim/schemasim ./abe_sim/src/schemasim
+cd ./abe_sim
+register.py
 ```
+
 # Running the simulation
 
 Once the dependencies and the repositories above are installed/cloned, go to the folder in which you have placed the repositories (in the commands above, that would be the MORSE folder). Once there, run
