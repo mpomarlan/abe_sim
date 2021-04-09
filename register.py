@@ -16,14 +16,14 @@ if not os.path.isfile(morseConfig):
 else:
     abeLine = "abe_sim=%s" % ownPath
     txt = open(morseConfig).read()
-    if abeLine not in txt:
-        lines = txt.splitlines()
-        with open(morseConfig,"w") as outfile:
-            for l in lines:
-                if "abe_sim" == l.strip()[0:7]:
-                    print("WARNING: encountered a previous definition of abe_sim: \n\t%s" % l)
-                outfile.write("%s\n" % l)
-                if "[sites]" == l.strip():
-                    outfile.write("%s\n" % abeLine)
+    lines = txt.splitlines()
+    with open(morseConfig,"w") as outfile:
+        for l in lines:
+            if ("abe_sim" == l.strip()[0:7]):
+                print("WARNING: encountered a previous definition of abe_sim: \n\t%s" % l)
+                continue
+            outfile.write("%s\n" % l)
+            if "[sites]" == l.strip():
+                outfile.write("%s\n" % abeLine)
                 
 
