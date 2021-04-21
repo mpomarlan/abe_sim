@@ -124,7 +124,7 @@ import json
 dhi = {'op': 'hi', 'args': {}}
 r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dhi), "utf-8"))
 print(r)
-print(t.text)
+print(r.text)
 ```
 
 Assuming everything went right, you should see the following as a printout of the text produced by the request:
@@ -164,3 +164,12 @@ r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dump
 ```
 
 to have the robot place the butter on one of the tables. Try this on both clumps -- they will behave very differently!
+
+Finally, we can try to reset the simulated world to some state it had in the past. We have such a stored state -- the one we queried way at the beginning of this section -- so let's try this:
+
+```
+dsws = {'op': 'sws', 'args': worldState}
+r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dsws), "utf-8"))
+```
+
+If you now look into the simulation window, you should see all objects and the robot returned to their original locations.
