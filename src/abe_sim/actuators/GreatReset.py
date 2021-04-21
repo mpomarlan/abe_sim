@@ -92,7 +92,7 @@ class GreatReset(Actuator):
         for ik, entry in data.items():
             if "particles" in entry:
                 for name, ent in entry["particles"].items():
-                    self.setObject(obj, ent, oMap)
+                    self.setObject(oMap[name], ent, oMap)
         return json.dumps({'status': 'ok'})
 
 

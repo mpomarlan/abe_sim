@@ -100,7 +100,8 @@ class WorldDump(morse.core.sensor.Sensor):
         pMap = {}
         for k in ccMap.keys():
             for n in persistentData['neighborhoods'][k]:
-                cccomputer.link(n, k)
+                if n in ccMap.keys():
+                    cccomputer.link(n, k)
         clumps = {}
         for k in ccMap.keys():
             pk = cccomputer.find(k)

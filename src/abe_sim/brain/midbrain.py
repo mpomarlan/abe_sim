@@ -196,10 +196,10 @@ class Midbrain:
             if ('object' in data) and ('destination' in data):
                 trajector = data['object']
                 supporter = data['destination']
-                #objSchemas = self.getObjectSchemas()
-                #trajSchema = objSchemas[trajector].unplace(self.sim3D)
-                #destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajector]
-                #self.carryObject(trajectorName, destinationSpec)
+                objSchemas = self.getObjectSchemas()
+                trajSchema = objSchemas[trajector].unplace(self.sim3D)
+                destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
+                self.carryObject(trajector, destspec)
                 retq['status'] = 'ok'
                 retq['response'] = 'carrying object %s to %s' % (trajector, supporter)
             else:
@@ -381,9 +381,9 @@ class Midbrain:
         validator = self._makeValidator(objects, blacklistNames, trajectors)
         resolution = 0.2
         xBack = {"hands/left": -0.2, "hands/right": -0.2}
-        yRight = {"hands/left": -0.4, "hands/right": -1.0}
+        yRight = {"hands/left": -0.6, "hands/right": -1.2}
         zDown = {"hands/left": 0, "hands/right": 0}
-        cellMap = space3D.Grid3D(planes=round(2/resolution), lines=round(2/resolution), cols=round(2.5/resolution), resolution=resolution, xBack=xBack[hand], yRight=yRight[hand], zDown=zDown[hand], gridQ=(0, 0, 0, 1), validator=validator, velocity=1)
+        cellMap = space3D.Grid3D(planes=round(2/resolution), lines=round(2.5/resolution), cols=round(3/resolution), resolution=resolution, xBack=xBack[hand], yRight=yRight[hand], zDown=zDown[hand], gridQ=(0, 0, 0, 1), validator=validator, velocity=1)
         timedMap = space.TimedPointGraph(cellMap, cellMap.graphIngressPoints((crHandPos["x"], crHandPos["y"], crHandPos["z"])))
         pidDBG = timedMap._pointGraph.embeddingCoordinates2PointId((x,y,z))
         waypoints = timedMap.generatePath((x, y, z))
