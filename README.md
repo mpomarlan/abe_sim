@@ -85,23 +85,6 @@ What you should see is that, after some time to start up its "brain", the agent 
 placeTrajectorOnSupport('plantSmall1', 'table.002')
 ```
 
-But wait, there's myrrh! Or in this case, "butter": there is a couple of clumps in the scene, made of particles which will try to stick to each other, stronger if they are cold, less so if they are hot. You can see what happens when you try to manipulate the clumps with the robot. But first we need to figure out what names these clumps have (because of how they are made up, i.e., because which particles are in which clump may change, these names will change):
-
-```
-objs = mb.cerebellum._retrieveObjects()
-butterNames = [x for x in objs.keys() if "['Butter']" == objs[x]["type"]]
-for n in butterNames:
-    print(n, objs[n]["temperature"])
-```
-
-The code above is going to first get a dictionary of objects (which will be described in more detail below) and is going to select which objects in the scene are of type butter, and then print the temperatures of each of these objects. Let's say that 'ButterParticle.007' is the name of one of the butter clumps, then we could use
-
-```
-placeTrajectorOnSupport('ButterParticle.007', 'table.002')
-```
-
-to have the robot place the butter on one of the tables. Try this on both clumps -- they will behave very differently!
-
 We could also have a look at some other auxiliary structures the agent maintains about the world. One such structure is the navigation map, which the agent uses to navigate around obstacles. We can have a look at how this map looks like:
 
 ```python
@@ -125,3 +108,59 @@ objs = mb.cerebellum._retrieveObjects()
 ```
 
 objs is a dictionary, where they keys are object names and the values are dictionaries containing information about these objects, such as their position, type, mesh filename and so on.
+
+# Communicating with the simulation using HTTP requests
+
+This section supposes that you have the abe_sim running, and a python instance for the agent's brain (the code above, up to and including the call to startOperations).
+
+HTTP post requests can be sent from many programs and using many programming languages; in this section, we will give an example in python of how to communicate with the simulation.
+
+So, start another python instance. Run this code:
+
+```
+import requests
+import json
+
+dhi = {'op': 'hi', 'args': {}}
+r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dhi), "utf-8"))
+print(r)
+print(t.text)
+```
+
+Assuming everything went right, you should see the following as a printout of the text produced by the request:
+
+```
+{'status': 'ok', 'response': 'hi!'}
+```
+
+Let's look at the structure of the request. First, it is a POST request, sending a json dictionary with two keys: 'op' (the command) and 'args' (the arguments). What arguments are needed depend on the command; the 'hi' command needs no arguments, and the 'args' key can even be ommitted entirely.
+
+'hi' is a very simple command: you can use it to check the server is running. Note the address and port, and the path to send the POST request to.
+
+There are other commands you can try however. For example, you can get a record of the current world state.
+
+```
+dws = {'op': 'rws'}
+r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dws), "utf-8"))
+worldState = json.loads(r.text)['response']
+```
+
+'rws' (or 'retrieveworldstate') is a command that takes no arguments but returns a lot of data. You can try printing the worldState -- that's a lot of lines!
+
+Another interesting command is to tell the robot to put an object on another. We'll try to do this with one of the "butter" clumps in the scene. These are made of particles which will try to stick to each other, stronger if they are cold, less so if they are hot. You can see what happens when you try to manipulate the clumps with the robot. But first we need to figure out what names these clumps have (because of how they are made up, i.e., because which particles are in which clump may change, these names will change):
+
+```
+objs = worldState['worldState']
+butterNames = [x for x in objs.keys() if ('props' in objs[x]) and ('type' in objs[x]['props']) and ("['Butter']" == objs[x]['props']['type'])]
+for n in butterNames:
+    print(n, objs[n]["props"]["temperature"])
+```
+
+The code above is selecting which objects in the scene are of type butter, and then prints the temperatures of each of these objects. Let's say that 'ButterParticle.007' is the name of one of the butter clumps, then we could use
+
+```
+dpo = {'op': 'placeon', 'args': {'object': 'ButterParticle.007', 'destination': 'table.002'}}
+r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dpo), "utf-8"))
+```
+
+to have the robot place the butter on one of the tables. Try this on both clumps -- they will behave very differently!
