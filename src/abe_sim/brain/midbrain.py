@@ -13,6 +13,16 @@ import heapq
 import ast
 import json
 
+import socket
+import threading
+
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+PORTS = 65432        # Port to listen on (non-privileged ports are > 1023)
+PORTF = 54321
+from flask import Flask
+from flask import request
+import json
+
 import schemasim.space.space3D as space3D
 import schemasim.space.space2D as space2D
 import schemasim.space.space as space
@@ -29,6 +39,8 @@ import schemasim.simulators.physics_simulator_3D as ps3D
 import schemasim.scene_generator as sg
 
 from schemasim.util.geometry import fibonacci_sphere
+
+from schemasim.schemas.l11_functional_control import Support
 
 def simpleOnNavigationDoneCallback(x):
     print("Base arrived at %s" % x)
@@ -72,6 +84,9 @@ class Midbrain:
         self.simu = simu
         self.sim2D = ps2D.PhysicsSimulator2D(particleSamplingResolution=0.1, translationSamplingResolution=1.0, rotationSamplingResolution=math.pi/4, speedSamplingResolution=1.0)
         self.sim3D = ps3D.PhysicsSimulator3D(particleSamplingResolution=0.01, translationSamplingResolution=0.1, rotationSamplingResolution=0.1, speedSamplingResolution=0.1, sampleValidationStrictness=0.005, collisionPadding=0.005)
+        self._socketThread = None
+        self._flaskThread = None
+        self._flask = Flask(__name__)
     def _simplifyWaypoints(self, waypoints):
         retq = []
         if waypoints:
@@ -165,12 +180,86 @@ class Midbrain:
         testBox = geom.Box()
         testBox.vertices = [[-0.5, -0.5, 0], [0.5, -0.5, 0], [-0.5, 0.5, 0], [0.5, 0.5, 0], [-0.5, -0.5, 1], [0.5, -0.5, 1], [-0.5, 0.5, 1], [0.5, 0.5, 1]]
         self.cellMap = space2D.Grid2DVW8(lines=10, cols=10, resolution=1, xLeft=-4.5, yDown=-4.5, gridYaw=0, validator=Validator2DVW(self.collisionManager, testBox), velocity=3, angularVelocity=3)
+    def _interpretSocketCommand(self, command):
+        opcode = ""
+        if 'op' in command:
+            opcode = command['op']
+        opcode = opcode.lower()
+        data = {}
+        if 'args' in command:
+            data = command['args']
+        retq = {'status': 'command not recognized', 'response': ''}
+        if opcode in ['hello', 'hi']:
+            retq['status'] = 'ok'
+            retq['response'] = 'hi!'
+        elif opcode in ['placeon']:
+            if ('object' in data) and ('destination' in data):
+                trajector = data['object']
+                supporter = data['destination']
+                #objSchemas = self.getObjectSchemas()
+                #trajSchema = objSchemas[trajector].unplace(self.sim3D)
+                #destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajector]
+                #self.carryObject(trajectorName, destinationSpec)
+                retq['status'] = 'ok'
+                retq['response'] = 'carrying object %s to %s' % (trajector, supporter)
+            else:
+                retq['status'] = 'insufficient parameters'
+                retq['response'] = 'missing object or destination'
+        elif opcode in ['retrieveobjects', 'ro']:
+            retq['status'] = 'ok'
+            retq['response'] = self.cerebellum._retrieveObjects()
+        elif opcode in ['retrieveworldstate', 'rws']:
+            retq['status'] = 'ok'
+            retq['response'] = self.cerebellum._retrieveWorldState()
+        elif opcode in ['setworldstate', 'sws']:
+            retq['status'] = 'ok'
+            retq['response'] = ''
+            try:
+                self.cerebellum._setWorldState(data)
+            except KeyError:
+                retq['status'] = 'missing entries from state data'
+        return json.dumps(retq)
+    def _startSocket(self):
+        def thread_function_socket():
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((HOST, PORTS))
+                s.listen(0)
+                while True:
+                    conn, addr = s.accept()
+                    comm = ""
+                    with conn:
+                        while True:
+                            data = conn.recv(1024).decode('UTF-8')
+                            comm = comm + data
+                            if (not data) or (data[-1] in ['\n']):
+                                break
+                        comm = comm.strip()
+                        try:
+                            res = self._interpretSocketCommand(json.loads(comm))
+                        except SyntaxError:
+                            res = json.dumps({'status': 'ill-formed json for command'})
+                        conn.sendall(bytes(res, 'UTF-8'))
+        def thread_function_flask():
+            @self._flask.route("/abe-sim-command", methods = ['POST'])
+            def abe_sim_command():
+                try:
+                    request_data = request.get_json(force=True)
+                    retq = self._interpretSocketCommand(request_data)
+                except SyntaxError:
+                    retq = json.dumps({'status': 'ill-formed json for command'})
+                return retq
+            self._flask.run(port=PORTF, debug=True, use_reloader=False)
+        self._socketThread = threading.Thread(target=thread_function_socket, args=())
+        self._socketThread.start()
+        self._flaskThread = threading.Thread(target=thread_function_flask, args=())
+        self._flaskThread.start()
     def startOperations(self, onNavigationDoneCallback=simpleOnNavigationDoneCallback, onHandsLeftPositioningDoneCallback=simpleHandsLeftPositioningDoneCallback, onHandsRightPositioningDoneCallback=simpleHandsRightPositioningDoneCallback):
         self.updateNavigationMap()
         self.cerebellum.setCallback("base", onNavigationDoneCallback)
         self.cerebellum.setCallback("hands/left", onHandsLeftPositioningDoneCallback)
         self.cerebellum.setCallback("hands/right", onHandsRightPositioningDoneCallback)
         self.cerebellum.startMonitoring()
+        self._startSocket()
     def navigateToPosition(self, x, y, yaw):
         if not self.cellMap:
             print("Don't have a navigation map: perhaps startOperation has not been called?")

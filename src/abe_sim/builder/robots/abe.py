@@ -1,6 +1,6 @@
 from morse.builder import *
 
-from abe_sim.builder.actuators import Hands, Base, Head
+from abe_sim.builder.actuators import Hands, Base, Head, GreatReset
 from abe_sim.builder.sensors import WorldDump
 
 import logging; logger = logging.getLogger("morse." + __name__)
@@ -47,4 +47,6 @@ class Abe(GroundRobot):
         self.append(self.pose)
         self.worlddump = WorldDump()
         self.append(self.worlddump)
+        self.greatreset = GreatReset()
+        self.append(self.greatreset)
 

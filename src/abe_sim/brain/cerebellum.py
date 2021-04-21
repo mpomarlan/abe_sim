@@ -265,15 +265,34 @@ class Cerebellum:
         self._controllers = {"base": Vel2DR(), "hands/left": Pos3D(), "hands/right": Pos3D(), "head": PosPT()}
         self._positions = {"base": {"x": 0, "y": 0, "yaw": 0}, "hands/left": {"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0}, "hands/right": {"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0}, "head": {"pan": 0, "tilt": 0}}
         self._velocities = {"base": {"v": 0, "w": 0}, "hands/left": {"x": 0, "y": 0, "z": 0, "rx": 0, "ry": 0, "rz": 0}, "hands/right": {"x": 0, "y": 0, "z": 0, "rx": 0, "ry": 0, "rz": 0}, "head": {"pan": 0, "tilt": 0}}
-    def _retrieveObjects(self):
+    def _retrieveObjects(self, fullDump=False):
         haveObjs = False
         while not haveObjs:
             try:
-                self._objects = json.loads(self._simu.rpc('robot.worlddump', 'world_dump'))
+                self._objects = json.loads(self._simu.rpc('robot.worlddump', 'world_dump', fullDump))
                 haveObjs = True
             except OSError:
                 continue
         return self._objects
+    def _setObjects(self, data):
+        tfile = '/tmp/.tmp_abe_sim'
+        with open(tfile, 'w') as outfile:
+            outfile.write(json.dumps(data))
+        haveObjs = False
+        while not haveObjs:
+            try:
+                self._simu.rpc('robot.greatreset', 'great_reset', tfile)
+                haveObjs = True
+            except OSError:
+                continue
+        os.remove(tfile)
+    def _retrieveWorldState(self):
+        return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms, "objectInHandMesh": self._objectInHandMesh}, "worldState": self._retrieveObjects(fullDump=True)}
+    def _setWorldState(self, state):
+        self._handItems = state["robotState"]["handItems"]
+        self._objectInHandTransforms = state["robotState"]["objectInHandTransforms"]
+        self._objectInHandMesh = state["robotState"]["objectInHandMesh"]
+        self._setObjects(state["worldState"])
     def robotTransform(self):
         x = self._positions["base"]["x"]
         y = self._positions["base"]["y"]
