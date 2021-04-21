@@ -73,7 +73,7 @@ from schemasim.schemas.l11_functional_control import Support
 
 def placeTrajectorOnSupport(trajector, supporter):
     trajSchema = objSchemas[trajector].unplace(mb.sim3D)
-    destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajector]
+    destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
     mb.carryObject(trajector, destspec)
 
 placeTrajectorOnSupport('bottleOil', 'table.000')
