@@ -8,7 +8,7 @@ A little agent simulation in MORSE, to be used in a MUHAI pipeline to evaluate s
 To try the current stuff out, you will first need to [install MORSE ](https://www.openrobots.org/morse/doc/stable/user/installation.html) and pip-install trimesh and python-fcl. For example, assuming you have pip3 as a command to install packages for a python3.4 or newer distribution, you can run:
 
 ```
-sudo pip3 install trimesh python-fcl
+sudo pip3 install rtree trimesh python-fcl
 ```
 
 Warning: because of API changes, newer versions of Blender will not work with MORSE. This can create problems on newer versions of Linux. For instance, at the moment installing on Ubuntu 20.04 will not work via the debian, but 18.04 should.
