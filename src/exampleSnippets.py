@@ -51,6 +51,7 @@ for n in butterNames:
         tempMap['hot'].append(n)
     else:
         tempMap['cold'].append(n)
+
 dpo = {'op': 'placeon', 'args': {'object': tempMap['hot'][0], 'destination': 'table.002'}}
 r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dpo), "utf-8"))
 ##Command 5 end

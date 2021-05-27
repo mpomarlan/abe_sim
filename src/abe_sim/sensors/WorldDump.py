@@ -63,12 +63,9 @@ class WorldDump(morse.core.sensor.Sensor):
         for obj in blenderapi.scene().objects:
             if (obj.get('Object', False)) or (fullDump and obj.get('Robot', True)):
                 name = obj.name
-                description = obj.get('Description', '')
-                objType = obj.get('Type', '')
-                furniture = obj.get('Furniture', False)
-                graspable = obj.get('Graspable', False)
-                particle = obj.get('Particle', False)
-                mesh = obj.get('MeshFile', '')
+                props = {}
+                for propName in obj.getPropertyNames():
+                    props[propName.lower()] = obj.get(propName)
                 transformation = Transformation3d(obj)
                 pos = {"x": transformation.translation[0], "y": transformation.translation[1], "z": transformation.translation[2]}
                 rot = {"x": transformation.rotation[1], "y": transformation.rotation[2], "z": transformation.rotation[3], "w": transformation.rotation[0]}
@@ -76,25 +73,20 @@ class WorldDump(morse.core.sensor.Sensor):
                 vel = {"x": vel[0], "y": vel[1], "z": vel[2]}
                 aVel = obj.getAngularVelocity()
                 aVel = {"x": aVel[0], "y": aVel[1], "z": aVel[2]}
-                temperature = obj.get('Temperature', 0.0) 
-                substance = obj.get('Substance', '')
                 parent = obj.parent
                 if parent:
                     parent = parent.name
                 else:
                     parent = ""
                 if (not obj.get('Particle', False)):
-                    if fullDump:
-                        if obj.get('Object', False):
-                            retq[name] = {"parent": parent, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "props": {"description": description, "furniture": furniture, "graspable": graspable, "type": objType, "mesh": mesh, "particle": particle, "temperature": temperature, "substance": substance}}
-                        elif obj.get('Robot', False):
-                            retq[name] = {"parent": parent, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "props": {}}
+                    if fullDump and obj.get('Robot', False):
+                        retq[name] = {"parent": parent, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "props": {}}
                     else:
-                        retq[name] = {"description": description, "furniture": furniture, "graspable": graspable, "type": objType, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "mesh": mesh, "parent": parent, "particle": particle, "temperature": temperature, "substance": substance}
+                        retq[name] = {"parent": parent, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "props": props}
                 elif (obj.get('Particle', False)):
                     ccMap[name] = name
                     oMap[name] = obj
-                    dMap[name] = {"parent": parent, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "props": {"description": description, "furniture": furniture, "graspable": graspable, "type": objType, "mesh": mesh, "particle": particle, "temperature": temperature, "substance": substance}}
+                    dMap[name] = {"parent": parent, "position": pos, "orientation": rot, "velocity": vel, "angular_velocity": aVel, "props": props}
         persistentData = logic.globalDict
         cccomputer = CCComputer(ccMap)
         pMap = {}
@@ -149,10 +141,17 @@ class WorldDump(morse.core.sensor.Sensor):
                 parent = ""
             transformation = Transformation3d(oMap[pname])
             pos = {"x": transformation.translation[0], "y": transformation.translation[1], "z": transformation.translation[2]}
+            props = {}
+            for propName in oMap[pname].getPropertyNames():
+                props[propName.lower()] = oMap[pname].get(propName)
+            props["particle"] = False
+            props["meshfile"] = "PAggregate.stl"
+            props["type"] = c["type"]
+            props["temperature"] = c["temperature"]
             if fullDump:
-                retq[pname] = {"position": pos, "orientation": {"x": 0, "y": 0, "z": 0, "w": 1}, "props": {"graspable": oMap[pname].get('Graspable', False), "particle": False, "furniture": oMap[pname].get('Furniture', False), "mesh": "PAggregate.stl", "parent": parent, "type": c["type"], "temperature": c["temperature"]}, "particles": particles}
+                retq[pname] = {"position": pos, "orientation": {"x": 0, "y": 0, "z": 0, "w": 1}, "props": props, "particles": particles}
             else:
-                retq[pname] = {"graspable": oMap[pname].get('Graspable', False), "particle": False, "furniture": oMap[pname].get('Furniture', False), "mesh": "PAggregate.stl", "parent": parent, "type": c["type"], "position": pos, "orientation": {"x": 0, "y": 0, "z": 0, "w": 1}, "temperature": c["temperature"]}
+                retq[pname] = {"particle": False, "parent": parent, "position": pos, "orientation": {"x": 0, "y": 0, "z": 0, "w": 1}, "props": props}
         self.local_data['jsondump'] = json.dumps(retq)
         return self.local_data['jsondump']
 

@@ -126,7 +126,7 @@ class Midbrain:
         objects = self.cerebellum._retrieveObjects()
         retq = {}
         for k,o in objects.items():
-            retq[k] = eo.MiscellaneousRigidObject(name=k, object_type=o["type"], mesh=os.path.join(pathPrefix, o["mesh"]))
+            retq[k] = eo.MiscellaneousRigidObject(name=k, object_type=o["props"]["type"], mesh=os.path.join(pathPrefix, o["props"]["meshfile"]))
             retq[k]._parameters["tx"] = o["position"]["x"]
             retq[k]._parameters["ty"] = o["position"]["y"]
             retq[k]._parameters["tz"] = o["position"]["z"]
@@ -144,37 +144,19 @@ class Midbrain:
     def listObjects(self):
         objects = self.cerebellum._retrieveObjects()
         for k in sorted(objects.keys()):
-            otype = "\t(untyped)\n"
-            if "type" in objects[k]:
-                otype = "\t"+objects[k]["type"]+"\n"
-            description = "\n"
-            if "description" in objects[k]:
-                description = "\t"+objects[k]["description"]+"\n"
-            graspable = "\t(not graspable)"
-            if "graspable" in objects[k]:
-                if objects[k]["graspable"]:
-                    graspable = "\tgraspable\n"
-                else:
-                    graspable = "\tnot graspable\n"
-            furniture = "\t(not furniture)\n"
-            if "furniture" in objects[k]:
-                if objects[k]["furniture"]:
-                    furniture = "\tfurniture\n"
-                else:
-                    furniture = "\tnot furniture\n"
-            meshfile = "\n"
-            if "mesh" in objects[k]:
-                meshfile = "\t"+objects[k]["mesh"]+"\n"
+            props = ""
+            for propName in sorted(objects[k]["props"].keys()):
+                props = props + "\t" + propName + ": " + objects[k]["props"][propName] + "\n"
             position = "\t(x: %f; y: %f; z: %f)\n" % (objects[k]["position"]["x"], objects[k]["position"]["y"], objects[k]["position"]["z"])
             orientation = "\t(x: %f; y: %f; z: %f; w: %f)\n" % (objects[k]["orientation"]["x"], objects[k]["orientation"]["y"], objects[k]["orientation"]["z"], objects[k]["orientation"]["w"])
-            s = k+"\n"+otype+description+graspable+furniture+meshfile+position+orientation
+            s = k+"\n"+props+position+orientation
             print(s)
     def updateNavigationMap(self):
         objects = self.cerebellum._retrieveObjects()
         self.collisionManager.clear_objects()
         for k in objects.keys():
-            if ("furniture" in objects[k]) and objects[k]["furniture"]:
-                box = geom.boxFromPath(objects[k]["mesh"])
+            if ("furniture" in objects[k]["props"]) and objects[k]["props"]["furniture"]:
+                box = geom.boxFromPath(objects[k]["props"]["meshfile"])
                 if box:
                     self.collisionManager.add_object(k, box, ((objects[k]["position"]["x"], objects[k]["position"]["y"], objects[k]["position"]["z"]), (objects[k]["orientation"]["x"], objects[k]["orientation"]["y"], objects[k]["orientation"]["z"], objects[k]["orientation"]["w"])))
         testBox = geom.Box()
@@ -284,7 +266,7 @@ class Midbrain:
         for oname in objects.keys():
             if oname in blacklistNames:
                 continue
-            mesh = self.sim3D.space().loadVolume(os.path.join(pathPrefix, objects[oname]["mesh"]))
+            mesh = self.sim3D.space().loadVolume(os.path.join(pathPrefix, objects[oname]["props"]["meshfile"]))
             oC = objects[oname]
             oCP = [oC["position"]["x"], oC["position"]["y"], oC["position"]["z"]]
             oCQ = [oC["orientation"]["x"], oC["orientation"]["y"], oC["orientation"]["z"], oC["orientation"]["w"]]
@@ -316,7 +298,7 @@ class Midbrain:
             return False
         pathPrefix = os.path.join(os.path.dirname(__file__), "../meshes")
         pathAbe = os.path.join(pathPrefix, "abe.2d")
-        return self.navigateToObject({"name": "aux", "type": "aux", "mesh": pathAbe, "position": {"x": pos[0], "y": pos[1], "z": pos[2]}, "orientation": {"x": q[0], "y": q[1], "z": q[2], "w": q[3]}}, fwd_align=False)
+        return self.navigateToObject({"name": "aux", "props": {"type": "aux", "meshfile": pathAbe}, "position": {"x": pos[0], "y": pos[1], "z": pos[2]}, "orientation": {"x": q[0], "y": q[1], "z": q[2], "w": q[3]}}, fwd_align=False)
     def navigateToObject(self, objectD, fwd_align=True):
         pathPrefix = os.path.join(os.path.dirname(__file__), "../meshes")
         pathAbe = os.path.join(pathPrefix, "abe.2d")
@@ -331,8 +313,8 @@ class Midbrain:
             objectD = objects[objectD]
         else:
             objectName = objectD["name"]
-        pathRel = os.path.join(pathPrefix, "%s.2d" % objectD["mesh"][:objectD["mesh"].rfind(".")])
-        rel = eo.MiscellaneousRigidObject(name=objectName, object_type=objectD["type"], mesh=pathRel)
+        pathRel = os.path.join(pathPrefix, "%s.2d" % objectD["props"]["meshfile"][:objectD["props"]["meshfile"].rfind(".")])
+        rel = eo.MiscellaneousRigidObject(name=objectName, object_type=objectD["props"]["type"], mesh=pathRel)
         rel._parameters["tx"] = objectD["position"]["x"]
         rel._parameters["ty"] = objectD["position"]["y"]
         rel._parameters["yaw"] = geom.quaternion_to_euler([objectD["orientation"]["x"], objectD["orientation"]["y"], objectD["orientation"]["z"], objectD["orientation"]["w"]])[0]
@@ -407,7 +389,7 @@ class Midbrain:
         if objectName not in objects:
             print("Either couldn't retrieve objects, or didn't find %s among them." % objectD)
             return False
-        if not objects[objectName]["graspable"]:
+        if not objects[objectName]["props"]["graspable"]:
             print("Object not graspable.")
             return False
         rP, rQ = self.cerebellum.robotTransform()
@@ -417,11 +399,11 @@ class Midbrain:
         invRobT = self.sim3D.space().invertTransform((rP, rQ))
         oP, oQ = self.sim3D.space().transformTransform(invRobT, (oPW, oQW))
         pathPrefix = os.path.join(os.path.dirname(__file__), "../meshes")
-        volume = self.sim3D.space().loadVolume(os.path.join(pathPrefix, objects[objectName]["mesh"]))
+        volume = self.sim3D.space().loadVolume(os.path.join(pathPrefix, objects[objectName]["props"]["meshfile"]))
         handVolume = self.sim3D.space().loadVolume(os.path.join(pathPrefix, "Hand.stl"))
         validator = self._makeValidator(objects, [], [[handVolume, [[0,0,0], [0,0,0,1]]]])
         radius = self.sim3D.space().boundaryBoxDiameter(self.sim3D.space().volumeBounds(volume))/2.0
-        if objects[objectName]["particle"]:
+        if objects[objectName]["props"]["particle"]:
             radius = radius + 0.1
         candidates = []
         for x in fibonacci_sphere(samples=40, only_positive_quadrant=True):

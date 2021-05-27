@@ -5,13 +5,15 @@ import json
 
 from threading import Lock
 
-from abe_sim.brain.geom import angle_diff, euler_to_quaternion, euler_diff_to_angvel, invert_quaternion, quaternion_product, quaternion_to_euler
+from abe_sim.brain.geom import angle_diff, euler_to_quaternion, euler_diff_to_angvel, invert_quaternion, quaternion_product, quaternion_to_euler, poseFromTQ
 
 import math
 import time
 import numpy as np
 
 import _thread
+
+import trimesh
 
 class TaskList:
     def __init__(self):
@@ -252,6 +254,9 @@ class Cerebellum:
         self._objectInHandMesh = {"hands/left": None, "hands/right": None}
         self._tasks = TaskList()
         self._objects = {}
+        self._volumes = {}
+        self._interiors = {}
+        self._sortedInteriors = []
         self._dt = 0.001
         self._previousT = None
         self._simu = simu
@@ -265,11 +270,46 @@ class Cerebellum:
         self._controllers = {"base": Vel2DR(), "hands/left": Pos3D(), "hands/right": Pos3D(), "head": PosPT()}
         self._positions = {"base": {"x": 0, "y": 0, "yaw": 0}, "hands/left": {"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0}, "hands/right": {"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0}, "head": {"pan": 0, "tilt": 0}}
         self._velocities = {"base": {"v": 0, "w": 0}, "hands/left": {"x": 0, "y": 0, "z": 0, "rx": 0, "ry": 0, "rz": 0}, "hands/right": {"x": 0, "y": 0, "z": 0, "rx": 0, "ry": 0, "rz": 0}, "head": {"pan": 0, "tilt": 0}}
+    def _loadVolume(self, name, path):
+        pathPrefix = os.path.join(os.path.dirname(__file__), "../meshes")
+        noext = path[:path.rfind('.')]
+        volumePath = os.path.join(pathPrefix, noext + ".stl")
+        interiorPath = os.path.join(pathPrefix, noext + "_interior.stl")
+        if os.path.isfile(volumePath):
+            self._volumes[name] = trimesh.load(volumePath)
+        else:
+            self._volumes[name] = None
+        if os.path.isfile(interiorPath):
+            self._interiors[name] = trimesh.load(interiorPath)
+        else:
+            self._interiors[name] = None
+    def _transformVolume(self, vol, name, objs):
+        if None == vol:
+            return None
+        dp = objs[name]['position']
+        dr = objs[name]['orientation']
+        return vol.copy().apply_transform(poseFromTQ([dp['x'], dp['y'], dp['z']], [dr['x'], dr['y'], dr['z'], dr['w']]))
     def _retrieveObjects(self, fullDump=False):
         haveObjs = False
         while not haveObjs:
             try:
                 self._objects = json.loads(self._simu.rpc('robot.worlddump', 'world_dump', fullDump))
+                if fullDump:
+                    for n in self._objects.keys():
+                        if n not in self._volumes:
+                            if 'meshfile' in self._objects[n]['props']:
+                                self._loadVolume(n, self._objects[n]['props']['meshfile'])
+                    if not self._sortedInteriors:
+                        self._sortedInteriors = sorted([(self._interiors[n].volume, n) for n in self._interiors.keys() if None != self._interiors[n]])
+                    ## TODO: add transforms for the volumes and interiors
+                    transformedInteriors = {n: self._transformVolume(v, n, self._objects) for n, v in self._interiors.items()}
+                    transformedVolumes = {n: self._transformVolume(v, n, self._objects) for n, v in self._volumes.items()}
+                    for n in transformedVolumes.keys():
+                        self._objects[n]['inside'] = None
+                        for v, c in self._sortedInteriors:
+                            if transformedInteriors[c].contains(transformedVolumes[n].vertices).all():
+                                self._objects[n]['inside'] = c
+                                break
                 haveObjs = True
             except OSError:
                 continue

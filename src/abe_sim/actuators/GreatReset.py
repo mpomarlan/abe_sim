@@ -36,22 +36,8 @@ class GreatReset(Actuator):
 
         logger.info('Component initialized')
     def setObject(self, obj, entry, oMap):
-        if 'description' in entry["props"]:
-            obj['Description'] = entry["props"]["description"]
-        if 'type' in entry["props"]:
-            obj['Type'] = entry["props"]["type"]
-        if 'furniture' in entry["props"]:
-            obj['Furniture'] = entry["props"]["furniture"]
-        if 'graspable' in entry["props"]:
-            obj['Graspable'] = entry["props"]["graspable"]
-        if 'particle' in entry["props"]:
-            obj['Particle'] = entry["props"]["particle"]
-        if 'mesh' in entry["props"]:
-            obj['Mesh'] = entry["props"]["mesh"]
-        if 'temperature' in entry["props"]:
-            obj['Temperature'] = entry["props"]["temperature"]
-        if 'substance' in entry["props"]:
-            obj['Substance'] = entry["props"]["substance"]
+        for propName in entry["props"].keys():
+            obj[propName.capitalize()] = entry["props"][propName]
         parent = ""
         if 'parent' in entry:
             parent = entry['parent']
