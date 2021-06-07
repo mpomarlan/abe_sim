@@ -1,0 +1,2069 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#"
+     xml:base="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#brushes -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#brushes">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBrushedWith"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#contents -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#contents">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#covers -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#covers">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCoveredWith"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasAmount -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasAmount">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Amount"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Arrangeable"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasComponent -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasComponent">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HeterogeneousMixture"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasFluidPart -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasFluidPart">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ConservedIngredient"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasOnTop -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasOnTop">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasQuantity -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasQuantity">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Amount"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Quantity"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasShape -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasShape">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shapeable"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shape"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasSolidPart -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasSolidPart">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ConservedIngredient"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasUnit -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasUnit">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Amount"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBrushedWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBrushedWith">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brushable"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeBrushedWith"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCoveredWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCoveredWith">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CoverableContainer"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCover"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isDippedIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isDippedIn">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Dippable"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeDippedIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isLinedWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isLinedWith">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#lines"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Lineable"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeLinedWith"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSpreadWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSpreadWith">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#spreadedOn"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSpreadUpon"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spreadable"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSprinkledWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSprinkledWith">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#sprinkledOn"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledOn"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledWith"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#lines -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#lines"/>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#spreadedOn -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#spreadedOn"/>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#sprinkledOn -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#sprinkledOn"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasTemperature -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasTemperature">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasValue -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasValue">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Quantity"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBaked -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBaked">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bakeable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBeaten -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBeaten">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Beatable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isConcept -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isConcept">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCracked -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCracked">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Crackable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCut -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isCut">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isDrained -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isDrained">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Drainable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isMashed -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isMashed">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mashable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isMelted -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isMelted">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Meltable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isMixed -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isMixed">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isPeeled -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isPeeled">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Peelable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSeeded -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSeeded">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Seedable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isShaken -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isShaken">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shakeable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSifted -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSifted">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Siftable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSpread -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSpread">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spreadable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSprinkled -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSprinkled">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sprinklable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isUsed -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isUsed">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsFreezing -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsFreezing">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Perishable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Perishable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AllPurposeFlour -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AllPurposeFlour">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Flour"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AlmondExtract -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AlmondExtract">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FlavoringExtract"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AlmondFlakes -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AlmondFlakes">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sprinklable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AlmondFlour -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#AlmondFlour">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Flour"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Amount -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Amount">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Arrangeable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Arrangeable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bakeable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bakeable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingDish -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingDish">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingPaper -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingPaper">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeLinedWith"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingPowder -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingPowder">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingSoda -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingSoda">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingTray -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BakingTray">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brushable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Lineable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BallShape -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BallShape">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shape"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Banana -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Banana">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mashable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Beatable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Beatable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isBeaten"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BlackBean -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BlackBean">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bowl -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bowl">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CoverableContainer"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BowlLid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BowlLid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCover"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BrownSugar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BrownSugar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sugar"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brush -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brush">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBrush"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brushable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brushable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Butter -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Butter">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Beatable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeBrushedWith"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Meltable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spreadable"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeBrushedWith -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeBrushedWith">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeDippedIn -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeDippedIn">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeLinedWith -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeLinedWith">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSpreadUpon -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSpreadUpon">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledOn -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledOn">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledWith -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledWith">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeat -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeat">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBrush -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBrush">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCover -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCover">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCut -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCut">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanDrain -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanDrain">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMash -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMash">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMix -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMix">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanPeel -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanPeel">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSeed -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSeed">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSift -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSift">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSpread -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSpread">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CannedPeaches -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CannedPeaches">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bakeable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ConservedIngredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Drainable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CasterSugar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CasterSugar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sugar"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CherryTomato -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CherryTomato">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Chopped -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Chopped">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ChoppedWalnut -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ChoppedWalnut">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CocoaPowder -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CocoaPowder">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Collander -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Collander">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanDrain"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isConcept"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ConservedIngredient -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ConservedIngredient">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Drainable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Arrangeable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookieSheet -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookieSheet">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brushable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Lineable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CookingUtensil">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fetchable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CornFlakes -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CornFlakes">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CounterTop -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CounterTop">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SideToSide"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CoverableContainer -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CoverableContainer">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Crackable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Crackable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Crescent -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Crescent">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shape"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cucumber -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cucumber">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#DegreesCelsius -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#DegreesCelsius">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#DevilsFoodCakeMix -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#DevilsFoodCakeMix">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Diced -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Diced">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Dippable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Dippable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Drainable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Drainable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#DriedDillWeed -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#DriedDillWeed">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Egg -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Egg">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Crackable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#EvenlySpread -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#EvenlySpread">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fetchable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fetchable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FinelyChopped -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FinelyChopped">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Chopped"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FlattenedBallShape -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FlattenedBallShape">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BallShape"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FlavoringExtract -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FlavoringExtract">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Flour -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Flour">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fork -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fork">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeat"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMash"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMix"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Freezer -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Freezer">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FreshBasil -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FreshBasil">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FreshCilantro -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FreshCilantro">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fridge -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fridge">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FrozenCorn -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FrozenCorn">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsFreezing"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Gram -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Gram">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundAllSpice -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundAllSpice">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundBlackPepper -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundBlackPepper">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundCinnamon -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundCinnamon">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundCloves -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundCloves">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundCumin -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundCumin">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundGinger -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundGinger">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundNutmeg -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#GroundNutmeg">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Halved -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Halved">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasTemperature"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HeterogeneousMixture -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HeterogeneousMixture">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HomogenousMixture -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HomogenousMixture">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#IcingSugar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#IcingSugar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sugar"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fetchable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Perishable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Jalapeno -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Jalapeno">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Seedable"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Jar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Jar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CoverableContainer"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shakeable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#JarLid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#JarLid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCover"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Juice -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Juice">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenCabinet -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenCabinet">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenState -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenState"/>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Knife -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Knife">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanCut"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanPeel"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSeed"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSpread"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#LargeBowl -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#LargeBowl">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bowl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#LargeBowlLid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#LargeBowlLid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BowlLid"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#LimeJuice -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#LimeJuice">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Juice"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Lineable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Lineable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Liter -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Liter">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mashable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mashable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#MediumBowl -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#MediumBowl">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bowl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#MediumBowlLid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#MediumBowlLid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BowlLid"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Meltable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Meltable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Milk -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Milk">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Juice"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#MilliLiter -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#MilliLiter">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Minced -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Minced">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Minute -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Minute">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixture -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixture">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bakeable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Beatable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSpreadUpon"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledOn"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSprinkledWith"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Dippable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mashable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Meltable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shakeable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shapeable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Siftable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spreadable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sprinklable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Molasses -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Molasses">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#OliveOil -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#OliveOil">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Onion -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Onion">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Oven -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Oven">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pan -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pan">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Brushable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSpreadUpon"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pantry -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pantry">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pattern -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Pattern">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isConcept"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#PeachJuice -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#PeachJuice">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Juice"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Peelable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Peelable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Percent -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Percent">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Perishable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Perishable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsFreezing"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#needsRefrigeration"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Piece -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Piece">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#PowderedWhiteSugar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#PowderedWhiteSugar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WhiteSugar"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Quantity -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Quantity">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#QuickCookingOats -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#QuickCookingOats">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Raisin -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Raisin">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#RedOnion -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#RedOnion">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Onion"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#RedPepperFlakes -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#RedPepperFlakes">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isUsed"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Salt -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Salt">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Seedable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Seedable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSeeded"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SelfRisingFlour -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SelfRisingFlour">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Flour"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SemisweetChocolateChips -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SemisweetChocolateChips">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shakeable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shakeable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isShaken"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shallot -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shallot">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Onion"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Peelable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shape -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shape">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isConcept"/>
+                <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:hasValue>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shapeable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shapeable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Shelved">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SideToSide -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SideToSide">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sift -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sift">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSift"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Siftable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Siftable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSifted"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Slices -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Slices">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CuttingPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SmallBowl -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SmallBowl">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bowl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SmallBowlLid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SmallBowlLid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BowlLid"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spatula -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spatula">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSpread"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spreadable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Spreadable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSpread"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sprinklable -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sprinklable">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#KitchenEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#isSprinkled"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sugar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sugar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Beatable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Mixable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SweetPotato -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#SweetPotato">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Cuttable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Peelable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TableSpoon -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TableSpoon">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanSpread"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ThreeQuarterInchCubes -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ThreeQuarterInchCubes">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Diced"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Toast -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Toast">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Bakeable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeSpreadUpon"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanHaveOnTop"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Container"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fetchable"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#hasArrangement"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#UnorderedHeap"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TwoInch -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TwoInch">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Unit">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Conceptualizable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#UnorderedHeap -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#UnorderedHeap">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#ArrangementPattern"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#VanillaExtract -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#VanillaExtract">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#FlavoringExtract"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#VegetableOil -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#VegetableOil">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeBrushedWith"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Vinegar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Vinegar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WalnutBallShape -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WalnutBallShape">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#BallShape"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Water -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Water">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Fluid"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#HasTemperature"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Ingredient"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Whisk -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Whisk">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanBeat"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMix"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WhiteSugar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WhiteSugar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Sugar"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WhiteVinegar -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WhiteVinegar">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Vinegar"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WholeEgg -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WholeEgg">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Egg"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WholeWheatFlour -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WholeWheatFlour">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Flour"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WireRack -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WireRack">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Lineable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#TransferableContainer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WoodenSpoon -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#WoodenSpoon">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#CanMix"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/blandcorporatio/ontologies/2021/5/untitled-ontology-305#Reusable"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+

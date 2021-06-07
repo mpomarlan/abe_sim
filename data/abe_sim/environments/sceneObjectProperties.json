@@ -1,1 +1,1 @@
-{"objProps": {"snark": {"description": "Doesn't exist. Shhhh!"}, "plantSmall1" : {"aroma": "mint"}}}
+{"objProps": {"butter": {"props": {"aggregate": true, "temperature": 20.0, "substance": "butter"}, "at": "fryingPan"}, "plantSmall1" : {"props": {"aroma": "mint"}}}}
