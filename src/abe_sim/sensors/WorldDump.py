@@ -91,6 +91,8 @@ class WorldDump(morse.core.sensor.Sensor):
         cccomputer = CCComputer(ccMap)
         pMap = {}
         for k in ccMap.keys():
+            if k not in persistentData['neighborhoods']:
+                continue
             for n in persistentData['neighborhoods'][k]:
                 if n in ccMap.keys():
                     cccomputer.link(n, k)

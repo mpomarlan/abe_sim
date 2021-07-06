@@ -42,16 +42,20 @@ def invert_quaternion(q):
 def quaternion_product(qA, qB):
     b1, c1, d1, a1 = qA
     b2, c2, d2, a2 = qB
-    return [a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2, a1*a2-b1*b2-c1*c2-d1*d2]
+    retq = [a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2, a1*a2-b1*b2-c1*c2-d1*d2]
+    n = math.sqrt(retq[0]*retq[0] + retq[1]*retq[1] + retq[2]*retq[2] + retq[3]*retq[3])
+    return [retq[0]/n, retq[1]/n, retq[2]/n, retq[3]/n]
 
 def euler_diff_to_angvel(fromRPY, toRPY, dt):
     qF = euler_to_quaternion(fromRPY)
     qT = euler_to_quaternion(toRPY)
     qD = quaternion_product(qT, invert_quaternion(qF))
+    if 0 > qD[3]:
+        qD = [-qD[0], -qD[1], -qD[2], -qD[3]]
     halfAlpha = math.acos(qD[3])
-    if 0.005 > halfAlpha:
-        return [0,0,0]
     s = math.sin(halfAlpha)
+    if 1e-6 > s:
+        return [0,0,0]
     u = [qD[0]/s, qD[1]/s, qD[2]/s]
     return [u[0]*halfAlpha/dt, u[1]*halfAlpha/dt, u[2]*halfAlpha/dt]
 

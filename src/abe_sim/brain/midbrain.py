@@ -82,8 +82,8 @@ class Midbrain:
         self.cellMap = None
         self.collisionManager = geom.BoxCollisionManager()
         self.simu = simu
-        self.sim2D = ps2D.PhysicsSimulator2D(particleSamplingResolution=0.1, translationSamplingResolution=1.0, rotationSamplingResolution=math.pi/4, speedSamplingResolution=1.0)
-        self.sim3D = ps3D.PhysicsSimulator3D(particleSamplingResolution=0.01, translationSamplingResolution=0.1, rotationSamplingResolution=0.1, speedSamplingResolution=0.1, sampleValidationStrictness=0.005, collisionPadding=0.005)
+        self.sim2D = self.cerebellum._sim2D
+        self.sim3D = self.cerebellum._sim3D
         self._socketThread = None
         self._flaskThread = None
         self._flask = Flask(__name__)
@@ -334,7 +334,10 @@ class Midbrain:
         crPos = self.cerebellum.currentPosition("base")
         rpd.append([1.0, (crPos["x"], crPos["y"]), (crPos["yaw"],)])
         for s,strictness in schemas:
-            rpd = s.filterPD(rpd, self.sim2D,strictness=strictness)
+            if "PointProximity" == s._type:
+                rpd = s.filterPD(rpd, [0,0,0,1], self.sim2D,strictness=strictness)
+            else:
+                rpd = s.filterPD(rpd, self.sim2D, strictness=strictness)
         maxE = rpd[0]
         for e in rpd[1:]:
             if maxE[0] < e[0]:
@@ -403,7 +406,7 @@ class Midbrain:
         handVolume = self.sim3D.space().loadVolume(os.path.join(pathPrefix, "Hand.stl"))
         validator = self._makeValidator(objects, [], [[handVolume, [[0,0,0], [0,0,0,1]]]])
         radius = self.sim3D.space().boundaryBoxDiameter(self.sim3D.space().volumeBounds(volume))/2.0
-        if objects[objectName]["props"]["particle"]:
+        if ('particle' in objects[objectName]["props"]) and (objects[objectName]["props"]["particle"]):
             radius = radius + 0.1
         candidates = []
         for x in fibonacci_sphere(samples=40, only_positive_quadrant=True):

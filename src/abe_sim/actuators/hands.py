@@ -42,8 +42,9 @@ class Hands(Actuator):
 
         self.left_hand = parent.bge_object.children["LeftHand"]
         self.right_hand = parent.bge_object.children["RightHand"]
-        self.left_holding = None
-        self.right_holding = None
+        ### HAXX
+        self.left_holding = []
+        self.right_holding = []
 
         self.left_handToucher = None
         self.right_handToucher = None
@@ -59,25 +60,31 @@ class Hands(Actuator):
         self.left_hand.localPosition = mathutils.Vector([self.local_data['lx'], self.local_data['ly'], self.local_data['lz']])
         self.right_hand.localPosition = mathutils.Vector([self.local_data['rx'], self.local_data['ry'], self.local_data['rz']])
         if self.local_data['lrelease']:
-            if self.left_holding:
-                if self.left_holding.parent == self.left_hand:
-                    self.left_holding.removeParent()
-                    self.left_holding.restoreDynamics()
-                self.left_holding = None
-        elif ('' != self.local_data['lgrab']) and (None == self.left_holding) and (self.local_data['lgrab'] in self.left_hand.scene.objects):
-            ## TODO: add some distance based sanity check here
-            self.left_holding = self.left_hand.scene.objects[self.local_data['lgrab']]
-            self.left_holding.setParent(self.left_hand)
-            self.left_holding.suspendDynamics()
+            for o in self.left_holding:
+                if o.parent == self.left_hand:
+                    o.removeParent()
+                    o.restoreDynamics()
+            self.left_holding = []
+        elif ('' != self.local_data['lgrab']) and ([] == self.left_holding):
+            for oName in self.local_data['lgrab'].split(';'):
+                if (oName in self.left_hand.scene.objects):
+                    ## TODO: add some distance based sanity check here
+                    o = self.left_hand.scene.objects[oName]
+                    self.left_holding.append(o)
+                    o.setParent(self.left_hand)
+                    o.suspendDynamics()
         if self.local_data['rrelease']:
-            if self.right_holding:
-                if self.right_holding.parent == self.right_hand:
-                    self.right_holding.removeParent()
-                    self.right_holding.restoreDynamics()
-                self.right_holding = None
-        elif ('' != self.local_data['rgrab']) and (None == self.right_holding) and (self.local_data['rgrab'] in self.right_hand.scene.objects):
-            ## TODO: add some distance based sanity check here
-            self.right_holding = self.right_hand.scene.objects[self.local_data['rgrab']]
-            self.right_holding.setParent(self.right_hand)
-            self.right_holding.suspendDynamics()
+            for o in self.right_holding:
+                if o.parent == self.right_hand:
+                    o.removeParent()
+                    o.restoreDynamics()
+            self.right_holding = []
+        elif ('' != self.local_data['rgrab']) and ([] == self.right_holding):
+            for oName in self.local_data['rgrab'].split(';'):
+                if (oName in self.right_hand.scene.objects):
+                    o = self.right_hand.scene.objects[oName]
+                    ## TODO: add some distance based sanity check here
+                    self.right_holding.append(o)
+                    o.setParent(self.right_hand)
+                    o.suspendDynamics()
 

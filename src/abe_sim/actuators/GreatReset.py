@@ -31,13 +31,32 @@ class GreatReset(Actuator):
         logger.info("%s initialization" % obj.name)
         self._raw = ""
         self._pkg = 0
+        self._whitelist = {}
+        self._blacklist = {"aggregate"}
         # Call the constructor of the parent class
         Actuator.__init__(self, obj, parent)
-
         logger.info('Component initialized')
+    def _getObjectVector(self, obj, entry, key, defVec):
+        retq = mathutils.Vector(defVec)
+        if key in entry:
+            for i,k in [(0, 'x'), (1, 'y'), (2, 'z')]:
+                if k in entry[key]:
+                    retq[i] = entry[key][k]
+        return retq
     def setObject(self, obj, entry, oMap):
+        furniture = False
+        active = False
         for propName in entry["props"].keys():
+            if propName in self._blacklist:
+                continue
+            opropName = propName.capitalize()
+            if "meshfile" == propName:
+                opropName = "MeshFile"
             obj[propName.capitalize()] = entry["props"][propName]
+            if "furniture" == propName:
+                furniture = entry["props"][propName]
+            if "active" == propName:
+                active = entry["props"][propName]
         parent = ""
         if 'parent' in entry:
             parent = entry['parent']
@@ -48,10 +67,15 @@ class GreatReset(Actuator):
             obj.suspendDynamics()
         else:
             obj.removeParent()
-            obj.restoreDynamics()
-        obj.setLinearVelocity(mathutils.Vector([entry["velocity"]["x"], entry["velocity"]["y"], entry["velocity"]["z"]]))
-        obj.setAngularVelocity(mathutils.Vector([entry["angular_velocity"]["x"], entry["angular_velocity"]["y"], entry["angular_velocity"]["z"]]))
-        obj.worldPosition = mathutils.Vector([entry["position"]["x"], entry["position"]["y"], entry["position"]["z"]])
+            if (not furniture) and active:
+                obj.restoreDynamics()
+        #obj.setLinearVelocity(mathutils.Vector([entry["velocity"]["x"], entry["velocity"]["y"], entry["velocity"]["z"]]))
+        #obj.setAngularVelocity(mathutils.Vector([entry["angular_velocity"]["x"], entry["angular_velocity"]["y"], entry["angular_velocity"]["z"]]))
+        #obj.worldPosition = mathutils.Vector([entry["position"]["x"], entry["position"]["y"], entry["position"]["z"]])
+        if obj.getPhysicsId():
+            obj.setLinearVelocity(self._getObjectVector(obj, entry, "velocity", obj.worldLinearVelocity))
+            obj.setAngularVelocity(self._getObjectVector(obj, entry, "angular_velocity", obj.worldAngularVelocity))
+        obj.worldPosition = self._getObjectVector(obj, entry, "position", obj.worldPosition)
         obj.worldOrientation = mathutils.Quaternion([entry["orientation"]["w"], entry["orientation"]["x"], entry["orientation"]["y"], entry["orientation"]["z"]])
 
     def default_action(self):

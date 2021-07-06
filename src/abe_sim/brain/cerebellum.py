@@ -1,6 +1,7 @@
 import os
 import sys
 
+import copy
 import json
 
 from threading import Lock
@@ -9,7 +10,11 @@ from abe_sim.brain.geom import angle_diff, euler_to_quaternion, euler_diff_to_an
 
 import math
 import time
+import random
 import numpy as np
+
+import schemasim.simulators.physics_simulator_2D as ps2D
+import schemasim.simulators.physics_simulator_3D as ps3D
 
 import _thread
 
@@ -207,10 +212,12 @@ class Pos3D:
                 qC = euler_to_quaternion([current['yaw'], current['pitch'], current['roll']])
                 qT = euler_to_quaternion([target['yaw'], target['pitch'], target['roll']])
                 qD = quaternion_product(qT, invert_quaternion(qC))
+                if 0 > qD[3]:
+                    qD = [-qD[0], -qD[1], -qD[2], -qD[3]]
                 halfAlpha = math.acos(qD[3])
                 u = [0,0,0]
-                if 0.005 < halfAlpha:
-                    s = math.sin(halfAlpha)
+                s = math.sin(halfAlpha)
+                if 1e-6 < s:
                     u = [qD[0]/s, qD[1]/s, qD[2]/s]
                 else:
                     halfAlpha = 0
@@ -252,14 +259,20 @@ class Cerebellum:
         self._handItems = {"hands/left": None, "hands/right": None}
         self._objectInHandTransforms = {"hands/left": None, "hands/right": None}
         self._objectInHandMesh = {"hands/left": None, "hands/right": None}
+        self._HAXX_at = {}
         self._tasks = TaskList()
         self._objects = {}
         self._volumes = {}
-        self._interiors = {}
-        self._sortedInteriors = []
+        self._locations = {}
+        self._preferredLocations = {}
+        self._sortedLocations = []
+        self._sortedPreferredLocations = []
+        self._transformedPreferredLocations = {}
         self._dt = 0.001
         self._previousT = None
         self._simu = simu
+        self._sim2D = ps2D.PhysicsSimulator2D(particleSamplingResolution=0.1, translationSamplingResolution=1.0, rotationSamplingResolution=math.pi/4, speedSamplingResolution=1.0)
+        self._sim3D = ps3D.PhysicsSimulator3D(particleSamplingResolution=0.01, translationSamplingResolution=0.1, rotationSamplingResolution=0.1, speedSamplingResolution=0.1, sampleValidationStrictness=0.005, collisionPadding=0.005)
         self._worldDump = worldDump
         self._headActuator = headActuator
         self._handsActuator = handsActuator
@@ -274,15 +287,22 @@ class Cerebellum:
         pathPrefix = os.path.join(os.path.dirname(__file__), "../meshes")
         noext = path[:path.rfind('.')]
         volumePath = os.path.join(pathPrefix, noext + ".stl")
-        interiorPath = os.path.join(pathPrefix, noext + "_interior.stl")
+        locationPath = os.path.join(pathPrefix, noext + "_location.stl")
+        preferredLocationPath = os.path.join(pathPrefix, noext + "_preferredLocation.stl")
         if os.path.isfile(volumePath):
             self._volumes[name] = trimesh.load(volumePath)
         else:
             self._volumes[name] = None
-        if os.path.isfile(interiorPath):
-            self._interiors[name] = trimesh.load(interiorPath)
+        if os.path.isfile(locationPath):
+            self._locations[name] = trimesh.load(locationPath)
         else:
-            self._interiors[name] = None
+            self._locations[name] = None
+        if os.path.isfile(preferredLocationPath):
+            self._preferredLocations[name] = trimesh.load(preferredLocationPath)
+        elif os.path.isfile(locationPath):
+            self._preferredLocations[name] = trimesh.load(locationPath)
+        else:
+            self._preferredLocations[name] = None
     def _transformVolume(self, vol, name, objs):
         if None == vol:
             return None
@@ -299,25 +319,189 @@ class Cerebellum:
                         if n not in self._volumes:
                             if 'meshfile' in self._objects[n]['props']:
                                 self._loadVolume(n, self._objects[n]['props']['meshfile'])
-                    if not self._sortedInteriors:
-                        self._sortedInteriors = sorted([(self._interiors[n].volume, n) for n in self._interiors.keys() if None != self._interiors[n]])
-                    ## TODO: add transforms for the volumes and interiors
-                    transformedInteriors = {n: self._transformVolume(v, n, self._objects) for n, v in self._interiors.items()}
+                    if not self._sortedLocations:
+                        self._sortedLocations = sorted([(self._locations[n].volume, n) for n in self._locations.keys() if None != self._locations[n]])
+                    if not self._sortedPreferredLocations:
+                        self._sortedPreferredLocations = sorted([(self._preferredLocations[n].volume, n) for n in self._preferredLocations.keys() if None != self._preferredLocations[n]])
+                    self._transformedPreferredLocations = {n: self._transformVolume(v, n, self._objects) for n, v in self._preferredLocations.items()}
+                    transformedLocations = {n: self._transformVolume(v, n, self._objects) for n, v in self._locations.items()}
                     transformedVolumes = {n: self._transformVolume(v, n, self._objects) for n, v in self._volumes.items()}
                     for n in transformedVolumes.keys():
-                        self._objects[n]['inside'] = None
-                        for v, c in self._sortedInteriors:
-                            if transformedInteriors[c].contains(transformedVolumes[n].vertices).all():
-                                self._objects[n]['inside'] = c
+                        self._objects[n]['at'] = None
+                        for v, c in self._sortedLocations:
+                            if transformedLocations[c].contains(transformedVolumes[n].vertices).all():
+                                self._objects[n]['at'] = c
                                 break
                 haveObjs = True
             except OSError:
                 continue
         return self._objects
+    def _getReqLocation(self, objName, reqLocations, currentLocations):
+        retq = {}
+        if (objName in reqLocations) and ("position" in reqLocations[objName]): 
+            retq["position"] = reqLocations[objName]["position"]
+        else:
+            retq["position"] = currentLocations[objName]["position"]
+        if (objName in reqLocations) and ("orientation" in reqLocations[objName]): 
+            retq["orientation"] = reqLocations[objName]["orientation"]
+        else:
+            retq["orientation"] = currentLocations[objName]["orientation"]
+        return retq
+    def _setObjectLocations(self, data):
+        data = copy.deepcopy(data)
+        sceneObjects = self._retrieveObjects(fullDump=True)
+        ## TODO: this method of targetting objects will not notice aggregates; for those we may need special handling
+        objectsToSet = {k: True for k in data.keys() if k in sceneObjects.keys()}
+        ## build a dependency graph for object placements
+        ## objects with specified coordinates or placed at "", or at "kitchen[State_]", or an object in objectIsSet, or without an at key, do not depend on anyone else
+        for k in objectsToSet.keys():
+            if (("position" in data[k]) and ("orientation" in data[k])) or ("at" not in data[k]):
+                objectsToSet[k] = False
+        objectsToSet = {k: True for k in objectsToSet.keys() if objectsToSet[k]}
+        objectIsSet = {k: True for k in sceneObjects.keys() if (k not in objectsToSet.keys())}
+        objectLocations = {k: self._getReqLocation(k, data, sceneObjects) for k in objectIsSet}
+        collisionManager = self._sim3D.space().makeCollisionManager()
+        for k, v in objectLocations.items():
+            pose = self._sim3D.space().poseFromTR([objectLocations[k]["position"]["x"], objectLocations[k]["position"]["y"], objectLocations[k]["position"]["z"]], [objectLocations[k]["orientation"]["x"], objectLocations[k]["orientation"]["y"], objectLocations[k]["orientation"]["z"], objectLocations[k]["orientation"]["w"]])
+            if k in self._volumes.keys():
+                collisionManager.add_object(k, self._volumes[k], np.array(pose,dtype=np.double))
+        dependents = {"floor": []}
+        topoSortTiers = {0: list(set([k for k in objectIsSet.keys() if objectIsSet[k]] + ["floor"])), 1: []}
+        self._HAXX_at = {}
+        for k in objectsToSet.keys():
+            if (data[k]["at"] in ["", "floor", "kitchen"]) or ("kitchenState" == data[k]["at"][:len("kitchenState")]):
+                if ('furniture' in sceneObjects[k]['props']) and (sceneObjects[k]['props']['furniture']):
+                    objectsToSet[k] = False
+                    data[k]['position'] = sceneObjects[k]['position']
+                    data[k]['orientation'] = sceneObjects[k]['orientation']
+                    objectLocations[k] = {'position': sceneObjects[k]['position'], 'orientation': sceneObjects[k]['orientation']}
+                    topoSortTiers[0].append(k)
+                else:
+                    data[k]["at"] = "floor"
+                    topoSortTiers[1].append(k)
+                    dependents["floor"].append(k)
+            elif (data[k]["at"] in objectIsSet) and (objectIsSet[data[k]["at"]]):
+                topoSortTiers[1].append(k)
+                if ('furniture' not in sceneObjects[data[k]["at"]]['props']) or (not sceneObjects[data[k]["at"]]['props']['furniture']):
+                    if data[k]["at"] not in self._HAXX_at:
+                        self._HAXX_at[data[k]["at"]] = []
+                    self._HAXX_at[data[k]["at"]].append(k)
+            else:
+                if data[k]["at"] not in dependents:
+                    dependents[data[k]["at"]] = []
+                dependents[data[k]["at"]].append(k)
+                if ('furniture' not in sceneObjects[data[k]["at"]]['props']) or (not sceneObjects[data[k]["at"]]['props']['furniture']):
+                    if data[k]["at"] not in self._HAXX_at:
+                        self._HAXX_at[data[k]["at"]] = []
+                    self._HAXX_at[data[k]["at"]].append(k)
+        objectsToSet = {k:True for k in objectsToSet.keys() if objectsToSet[k]}
+        ## toposort it (yay...)
+        cTL = 0
+        k = 0
+        while k < len(objectsToSet):
+            nTL = cTL + 1
+            topoSortTiers[nTL] = []
+            for j in topoSortTiers[cTL]:
+                if j not in dependents:
+                    continue
+                for d in dependents[j]:
+                    topoSortTiers[nTL].append(d)
+                    k = k + 1
+            cTL = nTL
+        ## in toposorted order, place each object
+        for tl in sorted(topoSortTiers.keys())[1:]:
+            for name in topoSortTiers[tl]:
+                dp = objectLocations[data[name]['at']]['position']
+                dr = objectLocations[data[name]['at']]['orientation']
+                arrangment = 'unorderedHeap'
+                if (data[name]['at'] in sceneObjects) and ('arrangement' in sceneObjects[data[name]['at']]['props']):
+                    arrangement = sceneObjects[data[name]['at']]['props']['arrangement']
+                elif (data[name]['at'] in data) and ('arrangement' in data[data[name]['at']]['props']):
+                    arrangement = data[data[name]['at']]['props']['arrangement']
+                if arrangement not in ['shelved']:
+                    arrangement = 'unorderedHeap'
+                targetRegion = self._preferredLocations[data[name]['at']].copy().apply_transform(poseFromTQ([dp['x'], dp['y'], dp['z']], [dr['x'], dr['y'], dr['z'], dr['w']]))
+                trajector = self._volumes[name]
+                tBox = self._sim3D.space().volumeBounds(trajector)
+                if 'shelved' == arrangement:
+                    shelves = trimesh.graph.split(targetRegion)
+                    found = False
+                    for k in range(35):
+                        shelf = shelves[random.randrange(len(shelves))]
+                        bBox = self._sim3D.space().volumeBounds(shelf)
+                        tv = [random.uniform(bBox[i][0] - tBox[i][0], bBox[i][1] - tBox[i][1]) for i in range(2)] + [bBox[2][0] + 0.005-tBox[2][0]]
+                        tTrajector = trajector.copy().apply_transform(poseFromTQ(tv, [dr['x'], dr['y'], dr['z'], dr['w']]))
+                        if (not collisionManager.in_collision_single(tTrajector, poseFromTQ([0,0,0], [0,0,0,1]))) and (all(targetRegion.contains(tTrajector.vertices))):
+                            data[name]["position"] = {"x": tv[0], "y": tv[1], "z": tv[2]}
+                            data[name]["orientation"] = {"x": dr['x'], "y": dr['y'], "z": dr['z'], "w": dr['w']}
+                            found = True
+                            break
+                elif 'unorderedHeap' == arrangement:
+                    bBox = self._sim3D.space().volumeBounds(targetRegion)
+                    found = False
+                    for k in range(35):
+                        tv = [random.uniform(bBox[i][0] - tBox[i][0], bBox[i][1] - tBox[i][1]) for i in range(3)]
+                        tTrajector = trajector.copy().apply_transform(poseFromTQ(tv, [dr['x'], dr['y'], dr['z'], dr['w']]))
+                        if (not collisionManager.in_collision_single(tTrajector, poseFromTQ([0,0,0], [0,0,0,1]))) and (all(targetRegion.contains(tTrajector.vertices))):
+                            data[name]["position"] = {"x": tv[0], "y": tv[1], "z": tv[2]}
+                            data[name]["orientation"] = {"x": dr['x'], "y": dr['y'], "z": dr['z'], "w": dr['w']}
+                            found = True
+                            break
+                if (not found):
+                    if name in sceneObjects:
+                        data[name]["position"] = sceneObjects[name]["position"]
+                        data[name]["orientation"] = sceneObjects[name]["orientation"]
+                    else:
+                        data[name]["position"] = {"x": 0, "y": 0, "z": -5}
+                        data[name]["orientation"] = {"x": 0, "y": 0, "z": 0, "w": 1}
+                objectLocations[name] = {"position": data[name]["position"], "orientation": data[name]["orientation"]}
+                pose = self._sim3D.space().poseFromTR([data[name]["position"]["x"], data[name]["position"]["y"], data[name]["position"]["z"]], [data[name]["orientation"]["x"], data[name]["orientation"]["y"], data[name]["orientation"]["z"], data[name]["orientation"]["w"]])
+                collisionManager.add_object(name, trajector, np.array(pose,dtype=np.double))
+        return data
+        ## TODO: fix the code below
+#        retq = {}
+#        clumps = {}
+#        for k in data.keys():
+#            if (not (("props" in retq[k]) and ("aggregate" in retq[k]['props']) and (retq[k]['props']['aggregate']))) or ("particles" in retq[k]):
+#                retq[k] = data[k]
+#            else:
+#                location = "floor"
+#                if "at" in data[k]:
+#                    location = data[k]['at']
+#                substance = "Ether"
+#                if ("props" in data[k]) and ("substance" in data[k]['props']):
+#                    substance = data[k]['props']['substance']
+#                amount = 10
+#                ## TODO: get amount from props
+#                if substance not in clumps:
+#                    clumps[substance] = {"": 0}
+#                clumps[substance][k] = {"amount": amount, "location": location}
+#                clumps[substance][""] = clumps[substance][""] + amount
+#        if clumps:
+#            objs = self._retrieveObjects(fullDump=True)
+#            availables = {}
+#            for k in objs.keys():
+#                if ("props" in objs[k]) and ("particle" in objs[k]['props']) and (objs[k]['props']['particle']) and ("active" in objs[k]['props']) and (not objs[k]['props']['active']):
+#                    substance = "Ether"
+#                    if ("substance" in objs[k]['props']):
+#                        substance = objs[k]['props']['substance']
+#                    if substance not in availables:
+#                        availables[substance] = {}
+#                    availables[substance][k] = True
+#            for subst in availables.keys():
+#                totalNeeded = clumps[subst][""]
+#                totalAvailable = len(availables[subst])
+#                if totalAvailable < totalNeeded:
+#                    fac = totalAvailable/(1.0*totalNeeded)
+#                    for k in clumps[subst].keys():
+#                        if "" != k:
+#                            clumps[subst][k]['amount'] = int(fac*clumps[subst][k]['amount'])
+#            ## TODO: for each clump, sample positions
+#        return retq
     def _setObjects(self, data):
         tfile = '/tmp/.tmp_abe_sim'
         with open(tfile, 'w') as outfile:
-            outfile.write(json.dumps(data))
+            outfile.write(json.dumps(self._setObjectLocations(data)))
         haveObjs = False
         while not haveObjs:
             try:
@@ -351,10 +535,20 @@ class Cerebellum:
         return self.getItemHand(None)
     def grabObject(self, hand, objectName, mesh, space, objInWorldTransform, robInWorldTransform):
         handActuation = {"lx": self._positions["hands/left"]["x"], "rx": self._positions["hands/right"]["x"], "ly": self._positions["hands/left"]["y"], "ry": self._positions["hands/right"]["y"], "lz": self._positions["hands/left"]["z"], "rz": self._positions["hands/right"]["z"], "lrx": self._positions["hands/left"]["roll"], "rrx": self._positions["hands/right"]["roll"], "lry": self._positions["hands/left"]["pitch"], "rry": self._positions["hands/right"]["pitch"], "lrz": self._positions["hands/left"]["yaw"], "rrz": self._positions["hands/right"]["yaw"], "lgrab": "", "rgrab": "", "lrelease": False, "rrelease": False}
+        grabbedObjects = ""
+        toHAXX = [objectName]
+        while toHAXX:
+            oName = toHAXX.pop()
+            sep = ""
+            if "" != grabbedObjects:
+                sep = ";"
+            grabbedObjects = grabbedObjects + sep + oName
+            if oName in self._HAXX_at:
+                toHAXX = toHAXX + self._HAXX_at[oName]
         if "hands/left" == hand:
-            handActuation["lgrab"] = objectName
+            handActuation["lgrab"] = grabbedObjects
         elif "hands/right" == hand:
-            handActuation["rgrab"] = objectName
+            handActuation["rgrab"] = grabbedObjects
         parent = {"hands/left": "LeftHand", "hands/right": "RightHand"}[hand]
         while True:
             self._handsActuator.publish(handActuation)
