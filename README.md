@@ -76,13 +76,13 @@ def placeTrajectorOnSupport(trajector, supporter):
     destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
     mb.carryObject(trajector, destspec)
 
-placeTrajectorOnSupport('bottleOil', 'table.000')
+placeTrajectorOnSupport('whisk3', 'counterTop1')
 ```
 
-What you should see is that, after some time to start up its "brain", the agent is going to move towards the oil bottle near the top of the screen, pick it up, and deliver it to the table on the left of the screen. We can also place some other object, for example the potted herb, on a table. To place it on the table on the right of the screen, you would run (but ONLY AFTER the agent is finished with moving the bottle!):
+What you should see is that, after some time to start up its "brain", the agent is going to move towards one of the cupboards, pick up a whisk, and deliver it to the large counter to one side of the kitchen. We can also place some other object, for example mediumBowl3, on the counterTop1 (but ONLY AFTER the agent is finished with the whisk!):
 
 ```
-placeTrajectorOnSupport('plantSmall1', 'table.002')
+placeTrajectorOnSupport('mediumBowl3', 'counterTop1')
 ```
 
 We could also have a look at some other auxiliary structures the agent maintains about the world. One such structure is the navigation map, which the agent uses to navigate around obstacles. We can have a look at how this map looks like:
@@ -147,7 +147,7 @@ worldState = json.loads(r.text)['response']
 
 'rws' (or 'retrieveworldstate') is a command that takes no arguments but returns a lot of data. You can try printing the worldState -- that's a lot of lines!
 
-Another interesting command is to tell the robot to put an object on another. We'll try to do this with one of the "butter" clumps in the scene. These are made of particles which will try to stick to each other, stronger if they are cold, less so if they are hot. You can see what happens when you try to manipulate the clumps with the robot. But first we need to figure out what names these clumps have (because of how they are made up, i.e., because which particles are in which clump may change, these names will change):
+<!-- Another interesting command is to tell the robot to put an object on another. We'll try to do this with one of the "butter" clumps in the scene. These are made of particles which will try to stick to each other, stronger if they are cold, less so if they are hot. You can see what happens when you try to manipulate the clumps with the robot. But first we need to figure out what names these clumps have (because of how they are made up, i.e., because which particles are in which clump may change, these names will change):
 
 ```
 objs = worldState['worldState']
@@ -163,7 +163,7 @@ dpo = {'op': 'placeon', 'args': {'object': 'ButterParticle.007', 'destination': 
 r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dpo), "utf-8"))
 ```
 
-to have the robot place the butter on one of the tables. Try this on both clumps -- they will behave very differently!
+to have the robot place the butter on one of the tables. Try this on both clumps -- they will behave very differently! -->
 
 Finally, we can try to reset the simulated world to some state it had in the past. We have such a stored state -- the one we queried way at the beginning of this section -- so let's try this:
 
