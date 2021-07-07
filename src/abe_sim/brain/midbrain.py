@@ -230,6 +230,48 @@ class Midbrain:
                 except SyntaxError:
                     retq = json.dumps({'status': 'ill-formed json for command'})
                 return retq
+            @self._flask.route("/abe-sim-command/to-get-kitchen", methods = ['POST'])
+            def to_get_kitchen():
+                retq = {'status': 'command not recognized', 'response': ''}
+                try:
+                    request_data = request.get_json(force=True)
+                    varName = request_data['kitchen']
+                    retq['status'] = 'ok'
+                    retq['response'] = {varName: self.cerebellum._retrieveWorldState()}
+                except SyntaxError:
+                    retq = {'status': 'ill-formed json for command'}
+                return json.dumps(retq)
+            @self._flask.route("/abe-sim-command/to-get-oven", methods = ['POST'])
+            def to_get_oven():
+                retq = {'status': 'ok', 'response': ''}
+                try:
+                    request_data = request.get_json(force=True)
+                    ovenVarName = request_data['available-oven']
+                    kitchenState = request_data['kitchen']
+                    setWorldState = False
+                    if 'set-world-state' in request_data:
+                        setWorldState = request_data['set-world-state']
+                    if setWorldState:
+                        #### TODO ADD robot_state to default_scene.json
+                        self.cerebellum._setObjects(kitchenState)
+                    ovenName = ''
+                    data = self.cerebellum._retrieveWorldState()
+                    for o in data['worldState'].keys():
+                        if ('props' in data['worldState'][o]) and ('type' in data['worldState'][o]['props']) and ('Oven' == data['worldState'][o]['props']['type']):
+                            ovenName = o
+                            break
+                    retq['response'] = {ovenVarName: ovenName}
+                except SyntaxError:
+                    retq = {'status': 'ill-formed json for command'}
+                return json.dumps(retq)
+            @self._flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
+            def to_set_kitchen():
+                retq = {'status': 'ok', 'response': ''}
+                try:
+                    self.cerebellum._setWorldState(data)
+                except KeyError:
+                    retq['status'] = 'missing entries from state data'
+                return json.dumps(retq)
             self._flask.run(port=PORTF, debug=True, use_reloader=False)
         self._socketThread = threading.Thread(target=thread_function_socket, args=())
         self._socketThread.start()
