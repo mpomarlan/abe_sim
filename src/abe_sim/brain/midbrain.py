@@ -87,6 +87,8 @@ class Midbrain:
         self._socketThread = None
         self._flaskThread = None
         self._flask = Flask(__name__)
+        self._robotActionCondition = threading.Condition()
+        self._lastRequestedAction = False
     def _simplifyWaypoints(self, waypoints):
         retq = []
         if waypoints:
@@ -241,28 +243,56 @@ class Midbrain:
                 except SyntaxError:
                     retq = {'status': 'ill-formed json for command'}
                 return json.dumps(retq)
-            @self._flask.route("/abe-sim-command/to-get-oven", methods = ['POST'])
-            def to_get_oven():
+            @self._flask.route("/abe-sim-command/to-get-location", methods = ['POST'])
+            def to_get_location():
                 retq = {'status': 'ok', 'response': ''}
                 try:
                     request_data = request.get_json(force=True)
-                    ovenVarName = request_data['available-oven']
+                    locationType = request_data['type']
+                    locationVarName = request_data['available-location']
                     kitchenState = request_data['kitchen']
                     setWorldState = False
                     if 'set-world-state' in request_data:
                         setWorldState = request_data['set-world-state']
                     if setWorldState:
-                        #### TODO ADD robot_state to default_scene.json
-                        self.cerebellum._setObjects(kitchenState)
-                    ovenName = ''
+                        self.cerebellum._setWorldState(kitchenState)
+                    locationName = ''
                     data = self.cerebellum._retrieveWorldState()
                     for o in data['worldState'].keys():
-                        if ('props' in data['worldState'][o]) and ('type' in data['worldState'][o]['props']) and ('Oven' == data['worldState'][o]['props']['type']):
-                            ovenName = o
+                        if ('props' in data['worldState'][o]) and ('type' in data['worldState'][o]['props']) and (locationType == data['worldState'][o]['props']['type']):
+                            locationName = o
                             break
-                    retq['response'] = {ovenVarName: ovenName}
+                    retq['response'] = {locationVarName: locationName}
                 except SyntaxError:
                     retq = {'status': 'ill-formed json for command'}
+                return json.dumps(retq)
+            @self._flask.route("/abe-sim-command/to-fetch", methods = ['POST'])
+            def to_fetch():
+                retq = {'status': 'ok', 'response': ''}
+                try:
+                    request_data = request.get_json(force=True)
+                    kitchenState = request_data['kitchen-input-state']
+                    trajector = request_data['object']
+                    supporter = "counterTop1"
+                    setWorldState = False
+                    if 'set-world-state' in request_data:
+                        setWorldState = request_data['set-world-state']
+                    if setWorldState:
+                        self.cerebellum._setWorldState(kitchenState)
+                    objSchemas = self.getObjectSchemas()
+                    trajSchema = objSchemas[trajector].unplace(self.sim3D)
+                    destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
+                    self._lastRequestedAction = False
+                    self.carryObject(trajector, destspec)
+                    with self._robotActionCondition:
+                        self._robotActionCondition.wait()
+                    objectName = trajector
+                    if not self._lastRequestedAction:
+                        objectName = None
+                    worldState = self.cerebellum._retrieveWorldState()
+                    retq['response'] = {'fetched-object': objectName, 'kitchen-output-state': worldState}
+                except KeyError:
+                    retq['status'] = 'missing entries from state data'
                 return json.dumps(retq)
             @self._flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
             def to_set_kitchen():
@@ -509,7 +539,12 @@ class Midbrain:
                         break
                     time.sleep(0.05)
                 print("DONE RETRACT")
+                self._lastRequestedAction = True
+                with self._robotActionCondition:
+                    self._robotActionCondition.notify_all()
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         def releaseFn():
             if self.bringHandToPosition(hand, x, y, z, roll, pitch, yaw, objects=objects):
@@ -520,6 +555,8 @@ class Midbrain:
                 self.cerebellum.releaseObject(hand)
                 print("DONE RELEASE")
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         tasks = self.cerebellum._tasks
         tasks.pushTask(retractFn)
@@ -535,6 +572,8 @@ class Midbrain:
                         break
                     time.sleep(0.05)
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         def graspFn():
             hand = self.pickObject(trajectorName)
@@ -544,6 +583,8 @@ class Midbrain:
                         break
                     time.sleep(0.05)
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         def nav2Fn():
             if self.navigateToDestSpec(trajectorName, destinationSpec):
@@ -552,6 +593,8 @@ class Midbrain:
                         break
                     time.sleep(0.05)
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         def placeFn():
             hand = self.cerebellum.getItemHand(trajectorName)
@@ -561,6 +604,8 @@ class Midbrain:
                         break
                     time.sleep(0.05)
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         tasks.appendTask(navFn)
         tasks.appendTask(graspFn)
