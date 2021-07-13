@@ -294,6 +294,34 @@ class Midbrain:
                 except KeyError:
                     retq['status'] = 'missing entries from state data'
                 return json.dumps(retq)
+            @self._flask.route("/abe-sim-command/to-transfer", methods = ['POST'])
+            def to_transfer():
+                retq = {'status': 'ok', 'response': ''}
+                try:
+                    request_data = request.get_json(force=True)
+                    kitchenState = request_data['kitchen-input-state']
+                    trajector = request_data['input']
+                    supporter = request_data['container']
+                    setWorldState = False
+                    if 'set-world-state' in request_data:
+                        setWorldState = request_data['set-world-state']
+                    if setWorldState:
+                        self.cerebellum._setWorldState(kitchenState)
+                    objSchemas = self.getObjectSchemas()
+                    trajSchema = objSchemas[trajector].unplace(self.sim3D)
+                    destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
+                    self._lastRequestedAction = False
+                    self.carryObject(trajector, destspec)
+                    with self._robotActionCondition:
+                        self._robotActionCondition.wait()
+                    objectName = trajector
+                    if not self._lastRequestedAction:
+                        objectName = None
+                    worldState = self.cerebellum._retrieveWorldState()
+                    retq['response'] = {'inner-container': objectName, 'outer-container': supporter, 'kitchen-output-state': worldState}
+                except KeyError:
+                    retq['status'] = 'missing entries from state data'
+                return json.dumps(retq)
             @self._flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
             def to_set_kitchen():
                 retq = {'status': 'ok', 'response': ''}
