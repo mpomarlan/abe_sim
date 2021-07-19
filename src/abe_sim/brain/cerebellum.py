@@ -510,7 +510,9 @@ class Cerebellum:
             except OSError:
                 continue
         os.remove(tfile)
-    def _retrieveWorldState(self):
+    def _retrieveWorldState(self, forJSON=False):
+        if forJSON:
+            return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms}, "worldState": self._retrieveObjects(fullDump=True)}
         return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms, "objectInHandMesh": self._objectInHandMesh}, "worldState": self._retrieveObjects(fullDump=True)}
     def _setWorldState(self, state):
         self._handItems = state["robotState"]["handItems"]
@@ -552,7 +554,9 @@ class Cerebellum:
         parent = {"hands/left": "LeftHand", "hands/right": "RightHand"}[hand]
         while True:
             self._handsActuator.publish(handActuation)
-            if parent != self._retrieveObjects()[objectName]["parent"]:
+            sc = self._retrieveObjects()[objectName]["parent"]
+            if parent != sc:
+                print(parent, sc, "...")
                 time.sleep(0.01)
             else:
                 break

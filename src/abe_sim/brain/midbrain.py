@@ -6,6 +6,9 @@ import numpy as np
 
 import abe_sim.brain.geom as geom
 from abe_sim.brain.cerebellum import Cerebellum
+from abe_sim.brain.geom import angle_diff, euler_to_quaternion, euler_diff_to_angvel, invert_quaternion, quaternion_product, quaternion_to_euler, poseFromTQ
+
+import random
 
 import math
 import heapq
@@ -194,7 +197,7 @@ class Midbrain:
             retq['response'] = self.cerebellum._retrieveObjects()
         elif opcode in ['retrieveworldstate', 'rws']:
             retq['status'] = 'ok'
-            retq['response'] = self.cerebellum._retrieveWorldState()
+            retq['response'] = self.cerebellum._retrieveWorldState(forJSON=True)
         elif opcode in ['setworldstate', 'sws']:
             retq['status'] = 'ok'
             retq['response'] = ''
@@ -239,7 +242,7 @@ class Midbrain:
                     request_data = request.get_json(force=True)
                     varName = request_data['kitchen']
                     retq['status'] = 'ok'
-                    retq['response'] = {varName: self.cerebellum._retrieveWorldState()}
+                    retq['response'] = {varName: self.cerebellum._retrieveWorldState(forJSON=True)}
                 except SyntaxError:
                     retq = {'status': 'ill-formed json for command'}
                 return json.dumps(retq)
@@ -257,7 +260,7 @@ class Midbrain:
                     if setWorldState:
                         self.cerebellum._setWorldState(kitchenState)
                     locationName = ''
-                    data = self.cerebellum._retrieveWorldState()
+                    data = self.cerebellum._retrieveWorldState(forJSON=True)
                     for o in data['worldState'].keys():
                         if ('props' in data['worldState'][o]) and ('type' in data['worldState'][o]['props']) and (locationType == data['worldState'][o]['props']['type']):
                             locationName = o
@@ -289,7 +292,7 @@ class Midbrain:
                     objectName = trajector
                     if not self._lastRequestedAction:
                         objectName = None
-                    worldState = self.cerebellum._retrieveWorldState()
+                    worldState = self.cerebellum._retrieveWorldState(forJSON=True)
                     retq['response'] = {'fetched-object': objectName, 'kitchen-output-state': worldState}
                 except KeyError:
                     retq['status'] = 'missing entries from state data'
@@ -307,9 +310,72 @@ class Midbrain:
                         setWorldState = request_data['set-world-state']
                     if setWorldState:
                         self.cerebellum._setWorldState(kitchenState)
+                    scene = self.cerebellum._retrieveObjects(fullDump=True)
+                    collisionManager = self.cerebellum._sim3D.space().makeCollisionManager()
+                    for k, v in scene.items():
+                        pose = self.cerebellum._sim3D.space().poseFromTR([scene[k]["position"]["x"], scene[k]["position"]["y"], scene[k]["position"]["z"]], [scene[k]["orientation"]["x"], scene[k]["orientation"]["y"], scene[k]["orientation"]["z"], scene[k]["orientation"]["w"]])
+                        if (k != trajector) and (k in self.cerebellum._volumes.keys()):
+                            collisionManager.add_object(k, self.cerebellum._volumes[k], np.array(pose,dtype=np.double))
                     objSchemas = self.getObjectSchemas()
                     trajSchema = objSchemas[trajector].unplace(self.sim3D)
-                    destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
+                    dp = scene[supporter]['position']
+                    dr = scene[supporter]['orientation']
+                    arrangment = 'unorderedHeap'
+                    if (supporter in scene) and ('arrangement' in scene[supporter]['props']):
+                        arrangement = scene[supporter]['props']['arrangement']
+                    if arrangement not in ['shelved']:
+                        arrangement = 'unorderedHeap'
+                    targetRegion = self.cerebellum._preferredLocations[supporter].copy().apply_transform(poseFromTQ([dp['x'], dp['y'], dp['z']], [dr['x'], dr['y'], dr['z'], dr['w']]))
+                    trajectorVolume = self.cerebellum._volumes[trajector]
+                    tBox = self.cerebellum._sim3D.space().volumeBounds(trajectorVolume)
+                    if 'shelved' == arrangement:
+                        shelves = trimesh.graph.split(targetRegion)
+                        found = False
+                        for k in range(35):
+                            shelf = shelves[random.randrange(len(shelves))]
+                            bBox = self.cerebellum._sim3D.space().volumeBounds(shelf)
+                            tv = [random.uniform(bBox[i][0] - tBox[i][0], bBox[i][1] - tBox[i][1]) for i in range(2)] + [bBox[2][0] + 0.005-tBox[2][0]]
+                            tTrajector = trajectorVolume.copy().apply_transform(poseFromTQ(tv, [dr['x'], dr['y'], dr['z'], dr['w']]))
+                            if (not collisionManager.in_collision_single(tTrajector, poseFromTQ([0,0,0], [0,0,0,1]))) and (all(targetRegion.contains(tTrajector.vertices))):
+                                trajSchema._parameters["tx"] = tv[0]
+                                trajSchema._parameters["ty"] = tv[1]
+                                trajSchema._parameters["tz"] = tv[2]
+                                trajSchema._parameters["rx"] = dr['x']
+                                trajSchema._parameters["ry"] = dr['y']
+                                trajSchema._parameters["rz"] = dr['z']
+                                trajSchema._parameters["rw"] = dr['w']
+                                trajSchema._parameters["vx"] = 0.0
+                                trajSchema._parameters["vy"] = 0.0
+                                trajSchema._parameters["vz"] = 0.0
+                                trajSchema._parameters["wx"] = 0.0
+                                trajSchema._parameters["wy"] = 0.0
+                                trajSchema._parameters["wz"] = 0.0
+                                found = True
+                                break
+                    elif 'unorderedHeap' == arrangement:
+                        bBox = self.cerebellum._sim3D.space().volumeBounds(targetRegion)
+                        found = False
+                        for k in range(35):
+                            tv = [random.uniform(bBox[i][0] - tBox[i][0], bBox[i][1] - tBox[i][1]) for i in range(3)]
+                            tTrajector = trajectorVolume.copy().apply_transform(poseFromTQ(tv, [dr['x'], dr['y'], dr['z'], dr['w']]))
+                            if (not collisionManager.in_collision_single(tTrajector, poseFromTQ([0,0,0], [0,0,0,1]))) and (all(targetRegion.contains(tTrajector.vertices))):
+                                trajSchema._parameters["tx"] = tv[0]
+                                trajSchema._parameters["ty"] = tv[1]
+                                trajSchema._parameters["tz"] = tv[2]
+                                trajSchema._parameters["rx"] = dr['x']
+                                trajSchema._parameters["ry"] = dr['y']
+                                trajSchema._parameters["rz"] = dr['z']
+                                trajSchema._parameters["rw"] = dr['w']
+                                trajSchema._parameters["vx"] = 0.0
+                                trajSchema._parameters["vy"] = 0.0
+                                trajSchema._parameters["vz"] = 0.0
+                                trajSchema._parameters["wx"] = 0.0
+                                trajSchema._parameters["wy"] = 0.0
+                                trajSchema._parameters["wz"] = 0.0
+                                found = True
+                                break
+                    #destspec = [Support(supporter=objSchemas[supporter],supportee=trajSchema), trajSchema]
+                    destspec = [trajSchema]
                     self._lastRequestedAction = False
                     self.carryObject(trajector, destspec)
                     with self._robotActionCondition:
@@ -317,7 +383,7 @@ class Midbrain:
                     objectName = trajector
                     if not self._lastRequestedAction:
                         objectName = None
-                    worldState = self.cerebellum._retrieveWorldState()
+                    worldState = self.cerebellum._retrieveWorldState(forJSON=True)
                     retq['response'] = {'inner-container': objectName, 'outer-container': supporter, 'kitchen-output-state': worldState}
                 except KeyError:
                     retq['status'] = 'missing entries from state data'
@@ -531,6 +597,8 @@ class Midbrain:
                         break
                     time.sleep(0.05)
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         def graspFn():
             if self.bringHandToPosition(hand, x, y, z, 0, 0, 0, objects=objects):
@@ -540,6 +608,8 @@ class Midbrain:
                     time.sleep(0.05)
                 self.cerebellum.grabObject(hand, objectName, volume, self.sim3D.space(), [oPW, oQW], [rP, rQ])
                 return True
+            with self._robotActionCondition:
+                self._robotActionCondition.notify_all()
             return False
         tasks = self.cerebellum._tasks
         tasks.pushTask(retractFn)
