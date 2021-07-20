@@ -252,11 +252,11 @@ class Midbrain:
                 try:
                     request_data = request.get_json(force=True)
                     locationType = request_data['type']
-                    locationVarName = request_data['available-location']
+                    locationVarName = request_data['availableLocation']
                     kitchenState = request_data['kitchen']
                     setWorldState = False
-                    if 'set-world-state' in request_data:
-                        setWorldState = request_data['set-world-state']
+                    if 'setWorldState' in request_data:
+                        setWorldState = request_data['setWorldState']
                     if setWorldState:
                         self.cerebellum._setWorldState(kitchenState)
                     locationName = None
@@ -274,12 +274,12 @@ class Midbrain:
                 retq = {'status': 'ok', 'response': ''}
                 try:
                     request_data = request.get_json(force=True)
-                    kitchenState = request_data['kitchen-input-state']
+                    kitchenState = request_data['kitchenInputState']
                     trajector = request_data['object']
                     supporter = "counterTop1"
                     setWorldState = False
-                    if 'set-world-state' in request_data:
-                        setWorldState = request_data['set-world-state']
+                    if 'setWorldState' in request_data:
+                        setWorldState = request_data['setWorldState']
                     if setWorldState:
                         self.cerebellum._setWorldState(kitchenState)
                     objSchemas = self.getObjectSchemas()
@@ -293,7 +293,7 @@ class Midbrain:
                     if not self._lastRequestedAction:
                         objectName = None
                     worldState = self.cerebellum._retrieveWorldState(forJSON=True)
-                    retq['response'] = {'fetched-object': objectName, 'kitchen-output-state': worldState}
+                    retq['response'] = {'fetchedObject': objectName, 'kitchenOutputState': worldState}
                 except KeyError:
                     retq['status'] = 'missing entries from state data'
                 return json.dumps(retq)
@@ -302,12 +302,12 @@ class Midbrain:
                 retq = {'status': 'ok', 'response': ''}
                 try:
                     request_data = request.get_json(force=True)
-                    kitchenState = request_data['kitchen-input-state']
+                    kitchenState = request_data['kitchenInputState']
                     trajector = request_data['input']
                     supporter = request_data['container']
                     setWorldState = False
-                    if 'set-world-state' in request_data:
-                        setWorldState = request_data['set-world-state']
+                    if 'setWorldState' in request_data:
+                        setWorldState = request_data['setWorldState']
                     if setWorldState:
                         self.cerebellum._setWorldState(kitchenState)
                     scene = self.cerebellum._retrieveObjects(fullDump=True)
@@ -384,7 +384,7 @@ class Midbrain:
                     if not self._lastRequestedAction:
                         objectName = None
                     worldState = self.cerebellum._retrieveWorldState(forJSON=True)
-                    retq['response'] = {'inner-container': objectName, 'outer-container': supporter, 'kitchen-output-state': worldState}
+                    retq['response'] = {'innerContainer': objectName, 'outerContainer': supporter, 'kitchenOutputState': worldState}
                 except KeyError:
                     retq['status'] = 'missing entries from state data'
                 return json.dumps(retq)

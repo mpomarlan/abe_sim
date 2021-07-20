@@ -21,7 +21,7 @@ worldState.keys()
 
 ##Command 2 end
 
-go = {'available-location': '?available-oven', 'kitchen': None, 'type': 'Oven', 'set-world-state': False}
+go = {'availableLocation': '?available-oven', 'kitchen': None, 'type': 'Oven', 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-get-location", data=bytes(json.dumps(go), "utf-8"))
 response = json.loads(r.text)
 response
@@ -31,7 +31,7 @@ dpo = {'op': 'placeon', 'args': {'object': 'bakingTray1', 'destination': 'counte
 r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dpo), "utf-8"))
 
 
-dpo = {'object': 'bakingTray1', 'kitchen-input-state': None, 'set-world-state': False}
+dpo = {'object': 'bakingTray1', 'kitchenInputState': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(json.dumps(dpo), "utf-8"))
 
 ##Command 3 end
