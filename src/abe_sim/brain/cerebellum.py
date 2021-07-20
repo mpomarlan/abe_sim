@@ -512,17 +512,17 @@ class Cerebellum:
         os.remove(tfile)
     def _retrieveWorldState(self, forJSON=False):
         if forJSON:
-            return {"robot-state": {"hand-items": self._handItems, "object-in-hand-transforms": self._objectInHandTransforms}, "world-state": self._retrieveObjects(fullDump=True)}
-        return {"robot-state": {"hand-items": self._handItems, "object-in-hand-transforms": self._objectInHandTransforms, "object-in-hand-mesh": self._objectInHandMesh}, "world-state": self._retrieveObjects(fullDump=True)}
+            return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms}, "worldState": self._retrieveObjects(fullDump=True)}
+        return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms, "objectInHandMesh": self._objectInHandMesh}, "worldState": self._retrieveObjects(fullDump=True)}
     def _setWorldState(self, state):
-        if 'robot-state' in state:
-            if "hand-items" in state["robot-state"]:
-                self._handItems = state["robot-state"]["hand-items"]
-            if "object-in-hand-transforms" in state["robot-state"]:
-                self._objectInHandTransforms = state["robot-state"]["object-in-hand-transforms"]
-            if "object-in-hand-mesh" in state["robot-state"]:
-                self._objectInHandMesh = state["robot-state"]["object-in-hand-mesh"]
-        self._setObjects(state["world-state"])
+        if 'robotState' in state:
+            if "handItems" in state["robotState"]:
+                self._handItems = state["robotState"]["handItems"]
+            if "objectInHandTransforms" in state["robotState"]:
+                self._objectInHandTransforms = state["robotState"]["objectInHandTransforms"]
+            if "objectInHandMesh" in state["robotState"]:
+                self._objectInHandMesh = state["robotState"]["objectInHandMesh"]
+        self._setObjects(state["worldState"])
     def robotTransform(self):
         x = self._positions["base"]["x"]
         y = self._positions["base"]["y"]

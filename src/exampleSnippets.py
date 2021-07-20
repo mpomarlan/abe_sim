@@ -39,7 +39,7 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(
 ##Command 4 start
 r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dws), "utf-8"))
 worldState1 = json.loads(r.text)['response']
-objs = worldState1['world-state']
+objs = worldState1['worldState']
 butterNames = [x for x in objs.keys() if ('props' in objs[x]) and ('type' in objs[x]['props']) and ("['Butter']" == objs[x]['props']['type'])]
 tempMap = {'hot': [], 'cold': []}
 for n in butterNames:
@@ -58,7 +58,7 @@ dws = {'op': 'rws'}
 r = requests.post("http://localhost:54321/abe-sim-command", data=bytes(json.dumps(dws), "utf-8"))
 worldState2 = json.loads(r.text)['response']
 worldState2.keys()
-objs = worldState2['world-state']
+objs = worldState2['worldState']
 butterNames = [x for x in objs.keys() if ('props' in objs[x]) and ('type' in objs[x]['props']) and ("['Butter']" == objs[x]['props']['type'])]
 tempMap = {'hot': [], 'cold': []}
 for n in butterNames:

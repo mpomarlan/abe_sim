@@ -261,8 +261,8 @@ class Midbrain:
                         self.cerebellum._setWorldState(kitchenState)
                     locationName = None
                     data = self.cerebellum._retrieveWorldState(forJSON=True)
-                    for o in data['world-state'].keys():
-                        if ('props' in data['world-state'][o]) and ('type' in data['world-state'][o]['props']) and (locationType == data['world-state'][o]['props']['type']):
+                    for o in data['worldState'].keys():
+                        if ('props' in data['worldState'][o]) and ('type' in data['worldState'][o]['props']) and (locationType == data['worldState'][o]['props']['type']):
                             locationName = o
                             break
                     retq['response'] = {locationVarName: locationName}
