@@ -512,13 +512,13 @@ class Cerebellum:
         os.remove(tfile)
     def _retrieveWorldState(self, forJSON=False):
         if forJSON:
-            return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms}, "worldState": self._retrieveObjects(fullDump=True)}
-        return {"robotState": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms, "objectInHandMesh": self._objectInHandMesh}, "worldState": self._retrieveObjects(fullDump=True)}
+            return {"robot-state": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms}, "world-state": self._retrieveObjects(fullDump=True)}
+        return {"robot-state": {"handItems": self._handItems, "objectInHandTransforms": self._objectInHandTransforms, "objectInHandMesh": self._objectInHandMesh}, "world-state": self._retrieveObjects(fullDump=True)}
     def _setWorldState(self, state):
-        self._handItems = state["robotState"]["handItems"]
-        self._objectInHandTransforms = state["robotState"]["objectInHandTransforms"]
-        self._objectInHandMesh = state["robotState"]["objectInHandMesh"]
-        self._setObjects(state["worldState"])
+        self._handItems = state["robot-state"]["handItems"]
+        self._objectInHandTransforms = state["robot-state"]["objectInHandTransforms"]
+        self._objectInHandMesh = state["robot-state"]["objectInHandMesh"]
+        self._setObjects(state["world-state"])
     def robotTransform(self):
         x = self._positions["base"]["x"]
         y = self._positions["base"]["y"]

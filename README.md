@@ -150,7 +150,7 @@ worldState = json.loads(r.text)['response']
 <!-- Another interesting command is to tell the robot to put an object on another. We'll try to do this with one of the "butter" clumps in the scene. These are made of particles which will try to stick to each other, stronger if they are cold, less so if they are hot. You can see what happens when you try to manipulate the clumps with the robot. But first we need to figure out what names these clumps have (because of how they are made up, i.e., because which particles are in which clump may change, these names will change):
 
 ```
-objs = worldState['worldState']
+objs = worldState['world-state']
 butterNames = [x for x in objs.keys() if ('props' in objs[x]) and ('type' in objs[x]['props']) and ("['Butter']" == objs[x]['props']['type'])]
 for n in butterNames:
     print(n, objs[n]["props"]["temperature"])
