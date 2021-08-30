@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="cookingknife">
+  <link name="knife">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="1.2e-4" ixy="0" ixz="0" iyy="0.0044" iyz="0" izz="0.0043"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./cookingknife.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./cookingknife.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+

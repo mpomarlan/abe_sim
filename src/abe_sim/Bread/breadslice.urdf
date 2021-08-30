@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot name="breadslice">
+  <link name="breadslice">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.46e-5" ixy="0" ixz="0" iyy="6.12e-5" iyz="0" izz="1e-4"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="breadslice_visual.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="breadslice_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+<!--
+  <link name="cutting_radar">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="4e-8" ixy="0" ixz="0" iyy="4e-8" iyz="0" izz="4e-8"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="cutting_radar" type="fixed">
+    <parent link="breadslice"/>
+    <child link="cuttingradar"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+-->
+</robot>
+

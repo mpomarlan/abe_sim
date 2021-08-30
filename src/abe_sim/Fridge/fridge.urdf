@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<robot name="fridge">
+  <link name="world"/>
+  <link name="fridge">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="30.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="fridge_visual.obj"/>
+        <!--<mesh filename="fridge_collision.obj"/>-->
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="fridge_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base" type="fixed">
+    <parent link="world"/>
+    <child link="fridge"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="freezer_door">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="2.0"/>
+        <inertia ixx="0.013" ixy="0" ixz="0" iyy="0.419" iyz="0" izz="0.406"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.2347 0.00977 0.26239" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="freezer_door_visual.obj"/>
+        <!--<mesh filename="freezer_door_collision.obj"/>-->
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.2347 0.00977 0.26239" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="freezer_door_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="freezer_hinge" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="fridge"/>
+    <child link="freezer_door"/>
+    <limit effort="1000.0" lower="1.57" upper="0" velocity="3."/>
+    <origin rpy="0 0 0" xyz="-0.47833 0.88 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="fridge_door">
+    <inertial>
+        <origin rpy="-0.43268 0.0548 0.26239" xyz="0 0 0"/>
+        <mass value="2.0"/>
+        <inertia ixx="0.013" ixy="0" ixz="0" iyy="0.419" iyz="0" izz="0.406"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.43268 0.0548 0.26239" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="fridge_door_visual.obj"/>
+        <!--<mesh filename="fridge_door_collision.obj"/>-->
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.43268 0.0548 0.26239" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="fridge_door_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="fridge_hinge" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="fridge"/>
+    <child link="fridge_door"/>
+    <limit effort="1000.0" lower="-1.57" upper="0" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0.97704 0.88 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+</robot>
+

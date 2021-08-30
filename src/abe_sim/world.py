@@ -1,0 +1,84 @@
+# Source code for the procedures to maintain a simulated world of pobjects.
+# These objects all have rigid body physics simulated by pybullet, and may have other physics attached with custom models (e.g. approximations of heating/cooling).
+
+import pybullet as p
+
+class World():
+    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld"):
+        self._name = name
+        self._pobjects = {}
+        self._id2PObjects = {}
+        if useGUI:
+            self._pybulletConnection = p.connect(p.GUI, options=pybulletOptions)
+        else:
+            self._pybulletConnection = p.connect(p.DIRECT, options=pybulletOptions)
+    def getPObjectById(self, idx):
+        return self._id2PObjects[idx]
+    def getSimConnection(self):
+        return self._pybulletConnection
+    def _testPObjectPresence(self, name, command):
+        if name not in self._pobjects:
+            print("WARNING: attempting to %s pobject %s from world %s, when such pobject does not exist there." % (command, name, self._name))
+            return False
+        return True
+    def getName(self):
+        return str(self._name)
+    # A PObject only exists embedded in exactly one world; names of PObjects are unique within a world.
+    def addPObjectOfType(self, name, pobType, *args, **kwargs):
+        if name in self._pobjects:
+            self._pobjects[name].remove()
+        # TODO: a bit of redundancy here as also the pobject init code will ensure uniqueness of name and registration in the world.
+        self._pobjects[name] = pobType(self, name, *args, **kwargs)
+        self._id2PObjects[self._pobjects[name].getId()] = self._pobjects[name]
+        return self._pobjects[name]
+    def getPObject(self, name):
+        if self._testPObjectPresence(name, "get"):
+            return self._pobjects[name]
+    def getPObjectNum(self):
+        return len(self._pobjects)
+    def getPObjectNames(self):
+        return sorted([str(x) for x in self._pobjects.keys()])
+    def getBodyIdentifiers(self):
+        retq = []
+        for k, v in self._pobjects.items():
+            aux = [k]
+            for b in v.getBodyIdentifiers():
+                retq.append(tuple(aux + list(b)))
+        return tuple(retq)
+    def getBodyProperty(identifier, propertyId):
+        if self._testPObjectPresence(identifier[0], "getBodyProperty"):
+            return self._pobjects[identifier[0]].getBodyProperty(identifier[1:], propertyId)
+    def setBodyProperty(identifier, propertyId, value):
+        if self._testPObjectPresence(identifier[0], "setBodyProperty"):
+            return self._pobjects[identifier[0]].setBodyProperty(identifier[1:], propertyId, value)
+    def removePObject(self, name):
+        if self._testPObjectPresence(name, "remove"):
+            pobject = self._pobjects[name]
+            for linkName, parentName, parentLinkName in pobject._childOfConstraints:
+                self._pobjects[parentName]._parentOfConstraints.pop((linkName, name, parentLinkName))
+            for linkName, childName, parentLinkName in pobject._parentOfConstraints:
+                self._pobjects[childName]._childOfConstraints.pop((linkName, name, parentLinkName))
+            p.removeBody(pobject._id, self._pybulletConnection)
+            self._id2PObjects.pop(pobject.getId())
+            self._pobjects.pop(name)
+    def update(self):
+        # A correct update transforms state variable values for step k, and produces values for step k+1.
+        # We have several physics models for each object. Different models have disjoint output variables but may overlap in inputs.
+        # Results from physics models must be cached and applied to the pobjects only after all results are known. 
+        # But, pybullet is a black box we have to work around -- it immediately applies its updates. Hence, the seq. below.
+        # First update all models *except rigid_body* associated to every pobject. These are the custom dynamic models.
+        #     a custom dynamic model will not change the state variables associated to a pobject. Instead, it computes new values for the variables and returns a function that will set the variables to these values when called.
+        #     it also computes "control" values to feed into the rigid body simulation. These control values are constraints and joint controls.
+        updateFunctions = []
+        for k, pob in self._pobjects.items():
+            rigidBodyControls = []
+            for dynamicModel in pob.getCustomDynamicModels():
+                updateFn, controls = dynamicModel()
+                updateFunctions.append(updateFn)
+                rigidBodyControls = rigidBodyControls + controls
+            pob.applyRigidBodyControls(rigidBodyControls)
+        # Now update "rigid_body" physics using pybullet
+        p.stepSimulation(self._pybulletConnection)
+        # Finally, for every pobject in the world, update the other physics using the update functions generated by the respective simulators.
+        for fn in updateFunctions:
+            fn()
