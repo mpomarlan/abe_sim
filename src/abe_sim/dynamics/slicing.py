@@ -56,18 +56,14 @@ class Slicing:
         urdfs = self._pobject.getBodyProperty((self._link,), "urdfs")
         positionAdj = [a+b for a,b in zip(position, p.rotateVector(orientation, selfBases[0]))]
         positionSlice = [a+b for a,b in zip(position, p.rotateVector(orientation, sliceBases[0]))]
-        print("Bla")
         self._pobject._urdf = urdfs[0]
         self._pobject.reloadObject(positionAdj, orientation)
-        print("Blaa")
         self._world.addPObjectOfType(self._name+("_slice_%d" % len(sliceBases)), self._sliceType, positionSlice, orientation, *self._sliceArgs, **self._sliceKWArgs)
-        print("Blaaa")
         self._pobject.setBodyProperty((self._link,), "urdfs", urdfs[1:])
         self._pobject.setBodyProperty((self._link,), "slicePoints", slicePoints[1:])
         self._pobject.setBodyProperty((self._link,), "selfBases", selfBases[1:])
         self._pobject.setBodyProperty((self._link,), "sliceBases", sliceBases[1:])
         self._pobject.setBodyProperty((self._link,), "sliceIntegrity", self._initialSliceIntegrity)
-        print("Blaaaa")
     def update(self):
         updateFn = lambda : None
         if (True != self._pobject.getBodyProperty((self._link,), "sliceable")) or (0 == len(self._pobject.getBodyProperty((self._link,), "slicePoints"))):

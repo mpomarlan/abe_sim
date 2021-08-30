@@ -55,15 +55,11 @@ class PObject():
         pcons = copy.deepcopy(self._parentOfConstraints)
         for cN, cI in self._childOfConstraints.items():
             self.removeRigidBodyConstraint(cN[0], cN[1], cN[2])
-        print("remcs")
         for cN, cI in self._parentOfConstraints.items():
             self._world._pobjects[cN[1]].removeRigidBodyConstraint(cN[0], self._name, cN[2])
-        print("remce", self._id, {k:v._id for k, v in self._world._pobjects.items()})
         if None != self._id:
             p.removeBody(self._id, self._world.getSimConnection())
-        print("remoe")
         self._id = p.loadURDF(self._urdf, position, orientation, self._useMaximalCoordinates, self._useFixedBase, self._urdfFlags, self._globalScaling, self._world.getSimConnection())
-        print("load")
         self._jointName2Id = {}
         baseLinkIdx = 0
         if self._useMaximalCoordinates:
