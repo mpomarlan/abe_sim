@@ -8,6 +8,8 @@ class World():
         self._name = name
         self._pobjects = {}
         self._id2PObjects = {}
+        self._ontoTypes = {}
+        self._typeMap = {}
         if useGUI:
             self._pybulletConnection = p.connect(p.GUI, options=pybulletOptions)
         else:
@@ -23,13 +25,33 @@ class World():
         return True
     def getName(self):
         return str(self._name)
+    def worldDump(self):
+        retq = {}
+        for name, pob in self._pobjects.items():
+            retq[name] = {"customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates()}
+        return retq
+    def greatReset(self, state):
+        names = list(self._pobjects.keys())
+        for name in names:
+            self.removePObject(name)
+        for name, data in state.items():
+            pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *data["args"], **data["kwargs"])
+            pob._customStateVariables = data["customStateVariables"]
+            pob.setJointStates(data["joints"])
+        return None
     # A PObject only exists embedded in exactly one world; names of PObjects are unique within a world.
     def addPObjectOfType(self, name, pobType, *args, **kwargs):
+        if pobType.__name__ not in self._typeMap:
+            self._typeMap[pobType.__name__] = pobType
         if name in self._pobjects:
             self._pobjects[name].remove()
         # TODO: a bit of redundancy here as also the pobject init code will ensure uniqueness of name and registration in the world.
         self._pobjects[name] = pobType(self, name, *args, **kwargs)
         self._id2PObjects[self._pobjects[name].getId()] = self._pobjects[name]
+        ontoType = self._pobjects[name].getBodyProperty("", "type")
+        if ontoType not in self._ontoTypes:
+            self._ontoTypes[ontoType] = set([])
+        self._ontoTypes[ontoType].add(name)
         return self._pobjects[name]
     def getPObject(self, name):
         if self._testPObjectPresence(name, "get"):
@@ -54,6 +76,9 @@ class World():
     def removePObject(self, name):
         if self._testPObjectPresence(name, "remove"):
             pobject = self._pobjects[name]
+            ontoType = pobject.getBodyProperty("", "type")
+            if ontoType in self._ontoTypes:
+                self._ontoTypes[ontoType].remove(name)
             for linkName, parentName, parentLinkName in pobject._childOfConstraints:
                 self._pobjects[parentName]._parentOfConstraints.pop((linkName, name, parentLinkName))
             for linkName, childName, parentLinkName in pobject._parentOfConstraints:

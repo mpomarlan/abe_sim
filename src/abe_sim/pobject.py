@@ -1,13 +1,49 @@
 import pybullet as p
 import copy
 
+class PObjectWrapper:
+    def __init__(self, pobject, bodyName, parentJointName):
+        self._pobject = pobject
+        self._bodyName = bodyName
+        self._parentJointName = parentJointName
+    def __str__(self):
+        return str(self._pobject) + ":" + str(self._bodyName)
+    def getJointId(self, name):
+        return self._pobject._jointName2Id[name]
+    def getLinkId(self, name):
+        return self._pobject._linkName2Id[name]
+    def getId(self):
+        return self._pobject._id
+    def getBodyIdentifiers(self):
+        return tuple((x,) for x in [self._bodyName])
+    def getBodyProperty(self, identifier, propertyId):
+        if (None == identifier) or (() == identifier):
+            return self._pobject.getBodyProperty((self._bodyName,), propertyId)
+        return self._pobject.getBodyProperty(identifier, propertyId)
+    def setBodyProperty(self, identifier, propertyId, value):
+        if (None == identifier) or (() == identifier):
+            return self._pobject.setBodyProperty((self._bodyName,), propertyId, value)
+        return self._pobject.setBodyProperty(identifier, propertyId, value)
+    def getName(self):
+        return str(self._pobject) + ":" + str(self._bodyName)
+    def getAABB(self, identifier):
+        if isinstance(identifier, tuple) and (() != identifier):
+            linkId = self._pobject._linkName2Id[identifier[0]]
+        else:
+            linkId = self._pobject._linkName2Id[self._bodyName]
+        return p.getAABB(self._pobject._id, linkId, self._pobject._world.getSimConnection())
+
 class PObject():
     def _customInitPreLoad(self, *args, **kwargs):
         return
     def _customInitDynamicModels(self):
         return
+    def __str__(self):
+        return self._name
     def __init__(self, world, name, initialBasePosition, initialBaseOrientation, *args, **kwargs):
         super().__init__()
+        self._args = args
+        self._kwargs = kwargs
         # Prepare some member variables, and put some defaults in them. These defaults can, and in some cases must, be overwritten by more specialized classes of pobject.
         #     _urdf: path to a urdf file which describes how the object is constructed out of joints and links; see the URDF documentation for more details
         self._urdf = None
@@ -50,6 +86,13 @@ class PObject():
         self._childOfConstraints = {}
         self._parentOfConstraints = {}
         self.reloadObject(self._initialBasePosition, self._initialBaseOrientation)
+        self._lastAppliedJointControls={}
+    def getAABB(self, identifier):
+        linkId = -1
+        if isinstance(identifier, tuple) and (() != identifier):
+            linkId = self._linkName2Id[identifier[0]]
+        ### TODO: if identifier is None, get an AABB around the entire obj, not just the base
+        return p.getAABB(self._id, linkId, self._world.getSimConnection())
     def reloadObject(self, position, orientation):
         ccons = copy.deepcopy(self._childOfConstraints)
         pcons = copy.deepcopy(self._parentOfConstraints)
@@ -76,6 +119,15 @@ class PObject():
             self.addRigidBodyConstraint(cN[0], cN[1], cN[2])
         for cN, cI in pcons.items():
             self._world._pobjects[cN[1]].addRigidBodyConstraint(cN[0], self._name, cN[2])
+    def getJointStates(self):
+        retq = {}
+        for n,k in self._jointName2Id.items():
+            retq[n] = p.getJointState(self._id, k, self._world.getSimConnection())[0:2]
+        return retq
+    def setJointStates(self, states):
+        for n,s in states.items():
+            p.resetJointState(self._id, self._jointName2Id[n], s[0], 0, self._world.getSimConnection())
+        return
     def getJointId(self, name):
         return self._jointName2Id[name]
     def getLinkId(self, name):
@@ -86,13 +138,17 @@ class PObject():
         return tuple((x,) for x in self._linkName2Id.keys())
     def getBodyProperty(self, identifier, propertyId):
         if propertyId in ["position", "orientation", "linearVelocity", "angularVelocity"]:
-            linkId = self._linkName2Id[identifier[0]]
+            linkId = -1
+            if isinstance(identifier, tuple) and (() != identifier):
+                linkId = self._linkName2Id[identifier[0]]
             if 0 <= linkId:
                 _, _, _, _, position, orientation, linearVelocity, angularVelocity = p.getLinkState(self._id, linkId, 1, False, self._world.getSimConnection())
             else:
                 position, orientation = p.getBasePositionAndOrientation(self._id, self._world.getSimConnection())
                 linearVelocity, angularVelocity = p.getBaseVelocity(self._id, self._world.getSimConnection())
             return {"position": position, "orientation": orientation, "linearVelocity": linearVelocity, "angularVelocity": angularVelocity}[propertyId]
+        if not (isinstance(identifier, tuple) and (() != identifier)):
+            identifier = [identifier]
         if identifier[0] not in self._customStateVariables:
             return None
         if propertyId not in self._customStateVariables[identifier[0]]:
@@ -100,7 +156,10 @@ class PObject():
         return self._customStateVariables[identifier[0]][propertyId]
     def setBodyProperty(self, identifier, propertyId, value):
         if propertyId in ["position", "orientation", "linearVelocity", "angularVelocity"]:
-            if -1 == self._linkName2Id[identifier[0]]:
+            linkId = -1
+            if isinstance(identifier, tuple) and (() != identifier):
+                linkId = self._linkName2Id[identifier[0]]
+            if -1 == linkId:
                 position, orientation = p.getBasePositionAndOrientation(self._id, self._world.getSimConnection())
                 linearVelocity, angularVelocity = p.getBaseVelocity(self._id, self._world.getSimConnection())
                 aux = {"position": position, "orientation": orientation, "linearVelocity": linearVelocity, "angularVelocity": angularVelocity}
@@ -109,6 +168,8 @@ class PObject():
                 p.resetBaseVelocity(self._id, aux["linearVelocity"], aux["angularVelocity"], self._world.getSimConnection())
                 return True
             return False
+        if not (isinstance(identifier, tuple) and (() != identifier)):
+            identifier = [identifier]
         self._customStateVariables[identifier[0]][propertyId] = value
         return True
     def getName(self):
@@ -200,6 +261,7 @@ class PObject():
         for jointName, jointTarget in jointTargets.items():
             targetPosition = jointTarget[0]/jointTarget[2]
             targetVelocity = jointTarget[1]/jointTarget[2]
+            self._lastAppliedJointControls[jointName] = [targetPosition,targetVelocity]
             p.setJointMotorControl2(self._id, self._jointName2Id[jointName], p.POSITION_CONTROL, targetPosition=targetPosition, targetVelocity=targetVelocity,force=self._getMaxForce(jointName), positionGain=self._getPositionGain(jointName), maxVelocity=self._getMaxVelocity(jointName), physicsClientId=self._world.getSimConnection())
         for linkName, parentName, parentLinkName in constraintsWillDelete:
             self.removeRigidBodyConstraint(linkName, parentName, parentLinkName)

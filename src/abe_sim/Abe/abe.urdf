@@ -43,7 +43,7 @@
     <parent link="base_y"/>
     <child link="base_yaw"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
-    <limit effort="1000" velocity="100"/>
+    <limit effort="1000" velocity="6."/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
   <link name="head">
