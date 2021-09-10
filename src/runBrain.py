@@ -68,6 +68,31 @@ def thread_function_flask():
         except SyntaxError:
             retq['status'] = 'ill-formed json for command'
         return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-get-location", methods = ['POST'])
+    def to_get_location():
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            request_data = request.get_json(force=True)
+            varName = request_data['available-location']
+            locType = request_data['type'].lower()
+            with updating:
+                inputState = None
+                if "kitchen" in request_data:
+                    inputState = request_data["kitchen"]
+                sws = False
+                if "setWorldState" in request_data:
+                    sws = request_data["setWorldState"]
+                if sws and (None != inputState):
+                    w.greatReset(inputState)
+                objName = None
+                if (locType in w._ontoTypes) and (0 < len(w._ontoTypes[locType])):
+                    objName = list(w._ontoTypes[locType])[0]
+                retq["response"] = {varName: objName}
+        except KeyError:
+            retq['status'] = 'missing entries from state data'
+        except SyntaxError:
+            retq['status'] = 'ill-formed json for command'
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-fetch", methods = ['POST'])
     def to_fetch():
         retq = {'status': 'ok', 'response': ''}

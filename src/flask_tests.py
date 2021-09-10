@@ -13,7 +13,13 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=
 response = json.loads(r.text)
 print(response)
 
-### Command 3: fetch bowl to countertop
+### Command 3: get location
+gc = {'available-location': '?available-countertop', 'type': 'CounterTop', 'kitchen': None, 'setWorldState': False}
+r = requests.post("http://localhost:54321/abe-sim-command/to-get-location", data=bytes(json.dumps(gc), "utf-8"))
+response = json.loads(r.text)
+print(response)
+
+### Command 4: fetch bowl to countertop
 dpo = {'object': 'mediumBowl1', 'kitchenInputState': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(json.dumps(dpo), "utf-8"))
 response = json.loads(r.text)
