@@ -16,7 +16,9 @@ from abe_sim.world import World
 import abe_sim.garden as garden
 import abe_sim.procs as procs
 
-w = World(pybulletOptions = "--opengl2")
+## WORLD CREATION line: adjust this as needed on your system.
+w = World(pybulletOptions = "--opengl2") # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
+# w = World(pybulletOptions = "") # Hardware-accelerated rendering. Seems necessary on newer Macs.
 p.setGravity(0,0,-5, w.getSimConnection())
 
 from abe_sim.Abe.abe import Abe
