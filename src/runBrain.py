@@ -61,8 +61,8 @@ def thread_function_flask():
         try:
             with updating:
                 request_data = request.get_json(force=True)
-                if None != request_data["kitchen-input-state"]:
-                    w.greatReset(request_data["kitchen-input-state"])
+                if None != request_data["kitchenInputState"]:
+                    w.greatReset(request_data["kitchenInputState"])
         except KeyError:
             retq['status'] = 'missing entries from state data'
         except SyntaxError:
@@ -73,7 +73,7 @@ def thread_function_flask():
         retq = {'status': 'ok', 'response': ''}
         try:
             request_data = request.get_json(force=True)
-            varName = request_data['available-location']
+            varName = request_data['availableLocation']
             locType = request_data['type'].lower()
             with updating:
                 inputState = None

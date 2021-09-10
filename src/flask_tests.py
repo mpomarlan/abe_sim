@@ -8,13 +8,13 @@ worldState = json.loads(r.text)['response']
 print(worldState)
 
 ### Command 2: set the kitchen state
-dgr = {'kitchen-input-state': worldState["?kitchen-state-1"]}
+dgr = {'kitchenInputState': worldState["?kitchen-state-1"]}
 r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=bytes(json.dumps(dgr), "utf-8"))
 response = json.loads(r.text)
 print(response)
 
 ### Command 3: get location
-gc = {'available-location': '?available-countertop', 'type': 'CounterTop', 'kitchen': None, 'setWorldState': False}
+gc = {'availableLocation': '?available-countertop', 'type': 'CounterTop', 'kitchen': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-get-location", data=bytes(json.dumps(gc), "utf-8"))
 response = json.loads(r.text)
 print(response)
