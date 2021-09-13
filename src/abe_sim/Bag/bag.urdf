@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="bag">
+  <link name="bag">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="5.4e-3" ixy="0" ixz="0" iyy="4.1e-3" iyz="0" izz="2.1e-3"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="bag_visual.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="bag_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+
