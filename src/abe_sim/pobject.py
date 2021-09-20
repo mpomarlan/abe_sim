@@ -1,6 +1,11 @@
 import pybullet as p
 import copy
 
+def quaternionProduct(qa, qb):
+    b1,c1,d1,a1 = qa
+    b2,c2,d2,a2 = qb
+    return (a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2,a1*a2-b1*b2-c1*c2-d1*d2)
+
 class PObjectWrapper:
     def __init__(self, pobject, bodyName, parentJointName):
         self._pobject = pobject
@@ -217,8 +222,16 @@ class PObject():
             parent = self._world._pobjects[parentName]
             childPosition = self.getBodyProperty((linkName,), "position")
             parentPosition = parent.getBodyProperty((parentLinkName,), "position")
-            relPos = [x-y for x,y in zip(childPosition, parentPosition)]
-            self._childOfConstraints[(linkName, parentName, parentLinkName)] = p.createConstraint(parent._id, parent._linkName2Id[parentLinkName], self._id, self._linkName2Id[linkName], p.JOINT_FIXED, [1,0,0], relPos, [0,0,0], physicsClientId=self._world.getSimConnection())
+            childOrientation = self.getBodyProperty((linkName,), "orientation")
+            parentOrientation = parent.getBodyProperty((parentLinkName,), "orientation")
+            parentIOrientation = list(parentOrientation)
+            parentIOrientation[3] = -parentOrientation[3]
+            # Have obj in world, hand in world. Need obj in hand:
+            # Toiw = Thiw*Toih => Toih = inv(Thiw)*Toiw
+            # Also, iT.t = -iT.q*T.t
+            relOr = quaternionProduct(parentIOrientation, childOrientation)
+            relPos = [x-y for x,y in zip(p.rotateVector(parentIOrientation,childPosition), p.rotateVector(parentIOrientation, parentPosition))]
+            self._childOfConstraints[(linkName, parentName, parentLinkName)] = p.createConstraint(parent._id, parent._linkName2Id[parentLinkName], self._id, self._linkName2Id[linkName], p.JOINT_FIXED, [1,0,0], relPos, [0,0,0], relOr, [0,0,0,1], physicsClientId=self._world.getSimConnection())
             parent._parentOfConstraints[(linkName, self._name, parentLinkName)] = self._childOfConstraints[(linkName, parentName, parentLinkName)]
     def removeRigidBodyConstraint(self, linkName, parentName, parentLinkName):
         p.removeConstraint(self._childOfConstraints[(linkName, parentName, parentLinkName)], self._world.getSimConnection())

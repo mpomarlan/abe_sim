@@ -25,3 +25,22 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(
 response = json.loads(r.text)
 print(response)
 
+### Command 5: proportion 134g of sugarBag in mediumBowl1
+dpo = {'inputContainer': 'sugarBag', 'newContainer': 'mediumBowl1', 'amount': 134, 'kitchenInputState': None, 'setWorldState': False}
+r = requests.post("http://localhost:54321/abe-sim-command/to-portion", data=bytes(json.dumps(dpo), "utf-8"))
+response = json.loads(r.text)
+print(response)
+
+### Command 6: proportion 134g of butterBag in mediumBowl2
+dpo = {'inputContainer': 'butterBag', 'newContainer': 'mediumBowl2', 'amount': 226, 'kitchenInputState': None, 'setWorldState': False}
+r = requests.post("http://localhost:54321/abe-sim-command/to-portion", data=bytes(json.dumps(dpo), "utf-8"))
+response = json.loads(r.text)
+print(response)
+
+### Command 7: fetch bowl to countertop
+dpo = {'object': 'mediumBowl3', 'kitchenInputState': None, 'setWorldState': False}
+r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(json.dumps(dpo), "utf-8"))
+response = json.loads(r.text)
+print(response)
+
+

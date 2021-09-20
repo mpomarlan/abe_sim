@@ -9,6 +9,7 @@ class World():
         self._pobjects = {}
         self._id2PObjects = {}
         self._ontoTypes = {}
+        self._particleTypes = {}
         self._typeMap = {}
         if useGUI:
             self._pybulletConnection = p.connect(p.GUI, options=pybulletOptions)

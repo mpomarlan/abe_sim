@@ -3,16 +3,93 @@ import pybullet as p
 from abe_sim.garden import Goal, Process, BodyProcess
 import abe_sim.pobject as pobject
 
+locationKnowledge = {("countertop","mediumbowl"): [[0,4.561,0.76], [-0.55,4.561,0.76], [-1.1,4.561,0.76], [0.55,4.561,0.76]], ("countertop","sugarbag"): [[0,5.055,0.76], [-0.55,5.055,0.76], [-1.1,5.055,0.76], [0.55,5.055,0.76]], ("countertop","butterbag"): [[0,5.055,0.76], [-0.55,5.055,0.76], [-1.1,5.055,0.76], [0.55,5.055,0.76]]}
+
+def overlappingObjects(aabbMin, aabbMax, pybulletConnection):
+    retq = p.getOverlappingObjects(aabbMin, aabbMax, pybulletConnection)
+    if None == retq:
+        retq = []
+    return retq
+
 def closestPointOnCuboid(aabbMin, aabbMax, position):
     x, y, z = position
     xm, ym, zm = aabbMin
     xM, yM, zM = aabbMax
     return (min(xM, max(xm, x)), min(yM, max(ym, y)), min(zM, max(zm, z)))
 
-def closestPointOnSphere(center, radius, position):
+def pickKnownLocation(relatum, trajector):
+    position = trajector.getBodyProperty((), "position")
+    aabbMin, aabbMax = trajector.getAABB(None)
+    dims = [(a-b)/(2.0) for a,b in zip(aabbMax, aabbMin)]
+    relT = relatum.getBodyProperty("", "type")
+    trajT = trajector.getBodyProperty("", "type")
+    if (relT,trajT) in locationKnowledge:
+        candidates = locationKnowledge[(relT,trajT)]
+        minD = None
+        retq = None
+        for c in candidates:
+            aabbMinC = [a-b for a,b in zip(c,dims)]
+            aabbMaxC = [a+b for a,b in zip(c,dims)]
+            if 0 < len(set([trajector._world.getPObjectById(x[0]).getName() for x in overlappingObjects(aabbMinC, aabbMaxC, trajector._world.getSimConnection())]).difference(["abe",trajector.getName(),relatum.getName()])):
+                continue
+            d = [a-b for a,b in zip(c,position)]
+            d = math.sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2])
+            if (None == minD) or (d < minD):
+                minD = d
+                retq = list(c)
+        d = [a-b for a,b in zip(retq,position)]
+        d = math.sqrt(d[0]*d[0]+d[1]*d[1])
+        if 1.5*min(dims[0:2]) < d:
+            #print("WOOOOOO",("%.3f"%d),("[%.3f, %.3f, %.3f]"%(retq[0],retq[1],retq[2])),("[%.3f, %.3f, %.3f]"%(position[0],position[1],position[2])))
+            retq[2] = position[2]
+        #print("SELECTED",("[%.3f, %.3f, %.3f]"%(retq[0],retq[1],retq[2])),("[%.3f, %.3f, %.3f]"%(position[0],position[1],position[2])))
+        return retq
+    else:
+        aabbMinR, aabbMaxR = relatum.getAABB(None)
+        return closestPointOnCuboid(aabbMinAdj, aabbMaxAdj, position)
+    
+
+def closestFreePointOnCuboid(world, name, whitelist, suppMin, suppMax, position, dims):
+    #dims = [0.15,0.15,0.15]
+    initialPos = closestPointOnCuboid(suppMin, suppMax, position)
+    auxMin = [a-b for a,b in zip(initialPos,dims)]
+    auxMax = [a+b for a,b in zip(initialPos,dims)]
+    dimsAdj = [0.15,0.15,0.15]
+    blockNames = set([world.getPObjectById(x[0]).getName() for x in overlappingObjects(auxMin, auxMax, world.getSimConnection())]).difference(whitelist)
+    if 0 == len(blockNames):
+        return initialPos
+    #else:
+    #    print("BLOCKNAMES", blockNames, whitelist)
+    kMax = [round((a - b)/(c)) for a,b,c in zip(suppMax,suppMin,dimsAdj)]
+    initialPosK = [round((a-b)/(c)) for a,b,c in zip(initialPos,suppMin,dimsAdj)]
+    cells = []
+    for kX in range(kMax[0]):
+        for kY in range(kMax[1]):
+            cells.append((abs(kX - initialPosK[0]) + abs(kY - initialPosK[1]), 0, kY, -kX))
+    for c in sorted(cells):
+        if 2>=c[0]:
+            continue
+        c = [c[0],c[1],c[3],-c[2]]
+        auxMin = [suppMin[0]+dimsAdj[0]*c[2]-dims[0], suppMin[1]+dimsAdj[1]*c[3]-dims[1], suppMax[2]-dims[2]+0.02]
+        auxMax = [suppMin[0]+dimsAdj[0]*c[2]+dims[0], suppMin[1]+dimsAdj[1]*c[3]+dims[1], suppMax[2]+dims[2]+0.02]
+        if 0 == len(set([world.getPObjectById(x[0]).getName() for x in overlappingObjects(auxMin, auxMax, world.getSimConnection())]).difference(whitelist)):
+            #print("CFPOC", initialPosK,c,[suppMin[0] + c[2]*dimsAdj[0], suppMin[1] + c[3]*dimsAdj[1], suppMin[2]],world._pobjects["mediumBowl1"].getBodyProperty((),"position"))
+            return [suppMin[0] + c[2]*dimsAdj[0], suppMin[1] + c[3]*dimsAdj[1], suppMin[2]]
+    return None
+
+def closestPointOnSphere(center, radius, position, onUpper=True):
     d = [a-b for a,b in zip(position, center)]
     nd = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
     d = [x*radius/nd for x in d]
+    if onUpper:
+        if 0 > d[2]:
+            d[2] = 0
+            nD = math.sqrt(d[0]*d[0] + d[1]*d[1])
+            if 0.001 > nD:
+                d = [0,0,1]
+            else:
+                d[0] = radius*d[0]/nD
+                d[1] = radius*d[1]/nD
     return [a+b for a,b in zip(center, d)]
 
 def velocityAdjustAABB(aabbMin, aabbMax, velocity, dt):
@@ -23,18 +100,17 @@ def velocityAdjustAABB(aabbMin, aabbMax, velocity, dt):
     aabbMax = [max(a,b) for a,b in zip(aabbMax,displacedMax)]
     return (aabbMin, aabbMax)
 
-def getImpendingCollisions(agent, handLink, handVelocity, boxes, whitelist, backupPoint):
+def getImpendingCollisions(agent, handLink, handVelocity, boxes, whitelist, backupPoint, goingDown=False):
     if agent.getName() not in whitelist:
         whitelist.append(agent.getName())
     close = []
     for box in boxes:
         aabbMin, aabbMax = box
-        close = close + [agent._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(aabbMin, aabbMax, agent._world.getSimConnection())]
+        close = close + [agent._world.getPObjectById(x[0]) for x in overlappingObjects(aabbMin, aabbMax, agent._world.getSimConnection())]
     close = list(set(close))
     close = [x for x in close if x.getName() not in whitelist]
     needAvoidance = False
     retq = [0,0,0]
-    goingDown = False
     posH = agent.getBodyProperty((handLink,), "position")
     backupDirection = [a-b for a,b in zip(backupPoint, posH)]
     nB = math.sqrt(backupDirection[0]*backupDirection[0] + backupDirection[1]*backupDirection[1] + backupDirection[2]*backupDirection[2])
@@ -55,20 +131,21 @@ def getImpendingCollisions(agent, handLink, handVelocity, boxes, whitelist, back
     for o in close:
         if not needAvoidance:
             needAvoidance = True
-            retq = handVelocity
-            nV = math.sqrt(retq[0]*retq[0] + retq[1]*retq[1] + retq[2]*retq[2])
-            if 0.001 < nV:
-                nV = [x/nV for x in retq]
-            else:
-                nV = retq
-            goingDown = (0.8 < nV[2])
+        retq = handVelocity
+        #nnV = math.sqrt(retq[0]*retq[0] + retq[1]*retq[1] + retq[2]*retq[2])
+        #if 0.001 < nnV:
+        #    nV = [x/nnV for x in retq]
+        #    goingDown = True
+        #else:
+        #    nV = retq
+        #goingDown = (-0.8 > nV[2])
+        #print("handvel", nV, retq, goingDown, backupDirection)
         exitDirection = o.getBodyProperty("fn", "exitdirection")
-        print("NEEDAVOID",exitDirection)
         if None == exitDirection:
             exitDirection = [0,0,1]
         if goingDown and (0.8 < exitDirection[2]):
             exitDirection = backupDirection
-        print("    ", exitDirection, retq)
+        print("NEEDAVOID",exitDirection, goingDown, backupDirection)
         retq = [a+b for a,b in zip(retq, exitDirection)]
     return needAvoidance, retq
 
@@ -100,7 +177,7 @@ def getHandAngularJointControls(agent, hand, controls, orHTarget, velocity=[0,0,
     controls["jointTargets"].update({joints[k]: (euler[k], velocity[k], 1.0) for k in [0,1,2]})
     return controls
 
-def graspedCollisionAvoidanceForHand(agent, hand, handLink, controls, whitelist=[], dt=1.0/240.0, backupPoint=None):
+def graspedCollisionAvoidanceForHand(agent, hand, handLink, controls, whitelist=[], dt=1.0/240.0, backupPoint=None, goingDown=False):
     posH = agent.getBodyProperty((handLink,), "position")
     velH = agent.getBodyProperty((handLink,), "linearVelocity")
     boxesH = [velocityAdjustAABB([a-b for a,b in zip(posH,[0.1]*3)], [a+b for a,b in zip(posH,[0.1]*3)], velH, dt)]
@@ -109,20 +186,30 @@ def graspedCollisionAvoidanceForHand(agent, hand, handLink, controls, whitelist=
     for g in graspedH:
         aabbMin, aabbMax = g.getAABB(None)
         boxesH.append(velocityAdjustAABB(aabbMin, aabbMax, g.getBodyProperty((), "linearVelocity"), dt))
-    needAvoid, avoidingV = getImpendingCollisions(agent, handLink, velH, boxesH, whitelist+graspedHNames, backupPoint)
+    needAvoid, avoidingV = getImpendingCollisions(agent, handLink, velH, boxesH, whitelist+graspedHNames, backupPoint, goingDown=goingDown)
     if needAvoid:
         avoidingH = [x*dt for x in avoidingV]
         posHTarget = [a+b for a,b in zip(posH, avoidingH)]
         controls = getHandLinearJointControls(agent, hand, controls, posHTarget, velocity=avoidingV)
+    joints = {"left": ("hand_left_base_to_hand_left_x", "hand_left_x_to_hand_left_y", "hand_left_y_to_hand_left_z"), "right": ("hand_right_base_to_hand_right_x", "hand_right_x_to_hand_right_y", "hand_right_y_to_hand_right_z")}
+    #for name in joints[hand]:
+    #    if name not in controls["jointTargets"]:
+    #        continue
+    #    #inc = -0.002
+    #    #if 0 > controls["jointTargets"][name][0]:
+    #    #    inc = 0.002
+    #    #aux = list(controls["jointTargets"][name])
+    #    #aux[0] = controls["jointTargets"][name][0] + inc - 0.002*controls["jointTargets"][name][0]
+    #    #controls["jointTargets"][name] = tuple(aux)
     return controls
 
-def graspedCollisionAvoidance(agent, controls, whitelist=[], backupPoint=None):
+def graspedCollisionAvoidance(agent, controls, whitelist=[], backupPoint=None, goingDownRight=False, goingDownLeft=False):
     if None == backupPoint:
         backupPoint = list(agent.getBodyProperty(("base_yaw",), "position"))
         backupPoint[2] = 0.95
     dt = 1.0/240.0
-    controls = graspedCollisionAvoidanceForHand(agent, "left", "hand_left_roll", controls, whitelist=whitelist, dt=dt, backupPoint=backupPoint)
-    controls = graspedCollisionAvoidanceForHand(agent, "right", "hand_right_roll", controls, whitelist=whitelist, dt=dt, backupPoint=backupPoint)
+    controls = graspedCollisionAvoidanceForHand(agent, "left", "hand_left_roll", controls, whitelist=whitelist, dt=dt, backupPoint=backupPoint, goingDown=goingDownLeft)
+    controls = graspedCollisionAvoidanceForHand(agent, "right", "hand_right_roll", controls, whitelist=whitelist, dt=dt, backupPoint=backupPoint, goingDown=goingDownRight)
     return controls
 
 def getContents(item):
@@ -153,7 +240,7 @@ def closeObjects(item,radius=0.25):
     aabbMin, aabbMax = item.getAABB(None)
     minC = [a - radius for a in aabbMin]
     maxC = [a + radius for a in aabbMax]
-    retq = list(set([item._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, item._world.getSimConnection())]))
+    retq = list(set([item._world.getPObjectById(x[0]) for x in overlappingObjects(minC, maxC, item._world.getSimConnection())]))
     return retq
 
 def isSubclass(cs, cS):
@@ -225,8 +312,8 @@ class LocationUpright(Location):
 class LocationAt(Location):
     def isThere(self, trajector):
         aabbMin, aabbMax = trajector.getAABB(None)
-        aabbMin = tuple([aabbMin[0], aabbMin[1], aabbMin[2]-0.05])
-        retq = list(set([trajector._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(aabbMin, aabbMax, trajector._world.getSimConnection())]))
+        aabbMin = tuple([aabbMin[0], aabbMin[1], aabbMin[2]-0.02])
+        retq = list(set([trajector._world.getPObjectById(x[0]) for x in overlappingObjects(aabbMin, aabbMax, trajector._world.getSimConnection())]))
         if isinstance(self._relatum, pobject.PObjectWrapper):
             return self._relatum._pobject in retq
         return self._relatum in retq
@@ -234,50 +321,70 @@ class LocationAt(Location):
         aabbMin, aabbMax = trajector.getAABB(None)
         dims = [(a-b)/2.0 for a,b in zip(aabbMax,aabbMin)]
         position = trajector.getBodyProperty((), "position")
-        _, orientation = LocationUpright().suggestPose(trajector)
-        supportBBs = self._relatum.getBodyProperty("fn", "supportbbs")
-        if None == supportBBs:
-            supportBBs = [self._relatum.getAABB(None)]
-        else:
-            pR = self._relatum.getBodyPosition((), "position")
-            oR = self._relatum.getBodyPosition((), "orientation")
-            aux = []
-            for s in supportBBs:
-                rm = [a+b for a,b in zip(pR, p.rotateVector(oR, s[0]))]
-                rM = [a+b for a,b in zip(pR, p.rotateVector(oR, s[1]))]
-                aux.append([[min(a,b) for a,b in zip(rm,rM)], [max(a,b) for a,b in zip(rm,rM)]])
-            supportBBs = aux
-        minD = None
-        bestPos = position
-        for supp in supportBBs:
-            suppMin = [supp[0][0]+dims[0], supp[0][1]+dims[1], supp[1][2]+dims[2]]
-            suppMax = [supp[1][0]-dims[0], supp[1][1]-dims[1], supp[1][2]+dims[2]+0.05]
-            candidate = closestPointOnCuboid(suppMin, suppMax, position)
-            d = [a-b for a,b in zip(candidate, position)]
-            nD = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
-            if (None == minD) or (d < minD):
-                minD = d
-                bestPos = candidate
+        _, orientation = LocationUpright(trajector).suggestPose(trajector)
+        velocity = trajector.getBodyProperty((), "linearVelocity")
+        #supportBBs = self._relatum.getBodyProperty("fn", "supportbbs")
+        #if None == supportBBs:
+        #    supportBBs = [self._relatum.getAABB(None)]
+        #else:
+        #    pR = self._relatum.getBodyProperty((), "position")
+        #    oR = self._relatum.getBodyProperty((), "orientation")
+        #    aux = []
+        #    for s in supportBBs:
+        #        rm = [a+b for a,b in zip(pR, p.rotateVector(oR, s[0]))]
+        #        rM = [a+b for a,b in zip(pR, p.rotateVector(oR, s[1]))]
+        #        aux.append([[min(a,b) for a,b in zip(rm,rM)], [max(a,b) for a,b in zip(rm,rM)]])
+        #    supportBBs = aux
+        #minD = None
+        #bestPos = position
+        #for supp in supportBBs:
+        #    suppMin = [supp[0][0]+dims[0], supp[0][1]+dims[1], supp[1][2]+dims[2]]
+        #    suppMax = [supp[1][0]-dims[0], supp[1][1]-dims[1], supp[1][2]+dims[2]+0.05]
+        #    #candidate = closestFreePointOnCuboid(self._relatum._world, trajector.getName(), ["abe",trajector.getName(), self._relatum.getName()], suppMin, suppMax, position, dims)
+        #    if None == candidate:
+        #        continue
+        #    d = [a-b for a,b in zip(candidate, position)]
+        #    nD = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
+        #    if (None == minD) or (d < minD):
+        #        minD = d
+        #        bestPos = candidate
+        #bestPos = list(bestPos)
+        bestPos = list(pickKnownLocation(self._relatum, trajector))
+        targMin = [a-b for a,b in zip(bestPos,dims)]
+        targMax = [a+b for a,b in zip(bestPos,dims)]
+        wayMin = [min(a,b) for a,b in zip(targMin,aabbMin)]
+        wayMax = [max(a,b) for a,b in zip(targMax,aabbMax)]
+        d = [a-b for a,b in zip(bestPos, position)]
+        #hD = math.sqrt(d[0]*d[0]+d[1]*d[1])
+        vD = math.sqrt(velocity[0]*velocity[0] + velocity[1]*velocity[1])
+        onTheWay = set([trajector._world.getPObjectById(x[0]).getName() for x in overlappingObjects(wayMin, wayMax, trajector._world.getSimConnection())])
+        if (0 != len(onTheWay.difference([trajector.getName(),self._relatum.getName(),"abe"]))):
+            #print("BLABLABLA", onTheWay)
+            bestPos[2] = position[2]
+        #elif (0.02 < vD):
+        #    bestPos[2] = position[2]
+        print("SUGGESTED",("[%.3f,%.3f,%.3f]"%(bestPos[0],bestPos[1],bestPos[2])),("[%.3f,%.3f,%.3f]"%(position[0],position[1],position[2])))
         return bestPos, orientation
     def suggestBackup(self, trajector):
-        aabbMin, aabbMax = trajector.getAABB(None)
-        dims = [(a-b)/2.0 for a,b in zip(aabbMax,aabbMin)]
-        position = trajector.getBodyProperty((), "position")
-        supportBBs = self._relatum.getBodyProperty("fn", "supportbbs")
-        if None == supportBBs:
-            supportBBs = [self._relatum.getAABB(None)]
-        minD = None
-        bestPos = position
-        for supp in supportBBs:
-            suppMin = [supp[0][0]+dims[0], supp[0][1]+dims[1], supp[1][2]+dims[2]]
-            suppMax = [supp[1][0]-dims[0], supp[1][1]-dims[1], supp[1][2]+dims[2]+0.05]
-            candidate = [(a+b)/2 for a,b in zip(suppMin,suppMax)]
-            d = [a-b for a,b in zip(candidate, position)]
-            nD = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
-            if (None == minD) or (d < minD):
-                minD = d
-                bestPos = candidate
-        return bestPos
+        #aabbMin, aabbMax = trajector.getAABB(None)
+        #dims = [(a-b)/2.0 for a,b in zip(aabbMax,aabbMin)]
+        #position = trajector.getBodyProperty((), "position")
+        #supportBBs = self._relatum.getBodyProperty("fn", "supportbbs")
+        #if None == supportBBs:
+        #    supportBBs = [self._relatum.getAABB(None)]
+        #minD = None
+        #bestPos = position
+        #for supp in supportBBs:
+        #    suppMin = [supp[0][0]+dims[0], supp[0][1]+dims[1], supp[1][2]+dims[2]]
+        #    suppMax = [supp[1][0]-dims[0], supp[1][1]-dims[1], supp[1][2]+dims[2]+0.05]
+        #    candidate = [(a+b)/2 for a,b in zip(suppMin,suppMax)]
+        #    d = [a-b for a,b in zip(candidate, position)]
+        #    nD = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
+        #    if (None == minD) or (d < minD):
+        #        minD = d
+        #        bestPos = candidate
+        #return bestPos
+        return self.suggestPose(trajector)[0]
 
 class LocationIn(LocationAt):
     def __dummy__(self):
@@ -296,12 +403,69 @@ class LocationOver(Location):
         d = [a-b for a,b in zip(refPos, refPt)]
         d = math.sqrt(d[0]*d[0] + d[1]*d[1])
         return 0.03 > d
+    def suggestPose(self, trajector):
+        aabbMin, aabbMax = trajector.getAABB(None)
+        aabbMinR, aabbMaxR = self._relatum.getAABB(None)
+        dims = [(a-b)/2.0 for a,b in zip(aabbMax,aabbMin)]
+        dimsR = [(a-b)/2.0 for a,b in zip(aabbMaxR,aabbMinR)]
+        offset = dimsR[2]+0.4
+        positionR = self._relatum.getBodyProperty((), "position")
+        refPtTarget = list(positionR)
+        refPtTarget[2] = refPtTarget[2] + offset
+        positionT = trajector.getBodyProperty((), "position")
+        orientationT = trajector.getBodyProperty((), "orientation")
+        refPt = trajector.getBodyProperty("fn", "refpt")
+        if None == refPt:
+            refPt = [0,0,0]
+        #if not self.isThere(trajector):
+        #    _, orientation = LocationUpright(trajector).suggestPose(trajector)
+        #    dq = quaternionProduct(orientation,[orientationT[0], orientationT[1], orientationT[2], -orientationT[3]])
+        #    rT = p.rotateVector(orientationT, refPt)[2]
+        #    rO = p.rotateVector(orientation, refPt)[2]
+        #    if rT < rO:
+        #        offset = offset + rO - rT
+        #else:
+        #    orientation = orientationT
+        orientation = orientationT
+        # Have refPt in object, refPt in world; need object in world
+        # Triw = Toiw*Trio => Toiw = Triw*inv(Trio)
+        bestPos = [a-b for a,b in zip(refPtTarget, p.rotateVector(orientation, refPt))]
+        #print("SUGGESTED vs ACTUAL", bestPos, positionT)
+        return bestPos, orientation
+    def suggestBackup(self, trajector):
+        return None
 
 class LocationTippedOver(Location):
     def isThere(self, trajector):
         orientation = trajector.getBodyProperty((), "orientation")
-        tipped = 0.05 > abs(p.rotateVector(orientation, [0,0,1])[2])
+        dripAxis = trajector.getBodyProperty("fn", "dripaxis")
+        if None == dripAxis:
+            dripAxis = [0,1,0]
+        tipped = -0.95 > p.rotateVector(orientation, dripAxis)[2]
         return LocationOver(self._relatum).isThere and tipped
+    def suggestPose(self, trajector):
+        positionO, orientationO = LocationOver(self._relatum).suggestPose(trajector)
+        dripAxis = trajector.getBodyProperty("fn", "dripaxis")
+        if None == dripAxis:
+            dripAxis = [0,1,0]
+        dripAdj = p.rotateVector(orientationO, dripAxis)
+        crossP = [-dripAdj[1], dripAdj[0], 0]
+        cD = math.sqrt(crossP[0]*crossP[0] + crossP[1]*crossP[1])
+        if 0.001 > cD:
+            bestPos = positionO
+            orientation = orientationO
+        else:
+            refPt = trajector.getBodyProperty("fn", "refpt")
+            if None == refPt:
+                refPt = [0,0,0]
+            q = p.getQuaternionFromAxisAngle([x/cD for x in crossP], math.acos(-dripAdj[2]))
+            orientation = quaternionProduct(q, orientationO)
+            positionR = [a+b for a,b in zip(positionO, p.rotateVector(orientationO, refPt))]
+            bestPos = p.rotateVector(q, [a-b for a,b in zip(positionO,positionR)])
+            bestPos = [a+b for a,b in zip(bestPos,positionR)]
+        return bestPos, orientation
+    def suggestBackup(self, trajector):
+        return None
 
 class Unwill(Goal):
     def _isFulfilled(self):
@@ -355,6 +519,26 @@ class ItemOnCounter(Goal):
         if Grasped(self._item,"left").isFulfilled():
             hand = "left"
         return PlacingGraspedItem(self._item, LocationAt(self._counter), hand)
+
+class ItemOnLocation(Goal):
+    def __init__(self, item, destination):
+        super().__init__()
+        self._item = item
+        self._destination = destination
+    def _strVarPart(self):
+        return str(self._item) + "," + str(self._destination)
+    def _isFulfilled(self):
+        return LocationAt(self._destination).isThere(self._item)
+    def getThreats(self, processes):
+        grabbedLeft = SwitchingOnGrasping(self._item,"left")
+        grabbedRight = SwitchingOnGrasping(self._item,"right")
+        retq = [x for x in [grabbedLeft, grabbedRight] if str(x) in processes]
+        return retq
+    def suggestProcess(self):
+        hand = "right"
+        if Grasped(self._item,"left").isFulfilled():
+            hand = "left"
+        return PlacingGraspedItem(self._item, LocationAt(self._destination), hand)
 
 class PlacingGraspedItem(Process):
     def __init__(self,item,location,hand):
@@ -490,7 +674,48 @@ class NavigateTo(BodyProcess):
     def _markForDeletionInternal(self, replacement=None):
         self._coherence.append(Unwill())
         return None
+    def _bodyAction(self):
+        controls = {"+constraints": [], "-constraints": [], "jointTargets": {}}
+        graspL = self._agent.getBodyProperty(("hand_left_roll",), "grasping")
+        graspR = self._agent.getBodyProperty(("hand_right_roll",), "grasping")
+        handL = self._agent.getBodyProperty(("hand_left_roll",), "position")
+        handR = self._agent.getBodyProperty(("hand_right_roll",), "position")
+        retq = False
+        for hand, grasping, handPos in [("left", graspL, handL), ("right", graspR, handR)]:
+            if not grasping:
+                continue
+            exitDirections = []
+            aabbs = []
+            for g in grasping:
+                aabbMin,aabbMax = self._agent._world._pobjects[g].getAABB(None)
+                aabbs.append((aabbMin,aabbMax))
+            aabbMin = [a-b for a,b in zip(handPos,[0.2]*3)]
+            aabbMax = [a+b for a,b in zip(handPos,[0.2]*3)]
+            #aabbs.append((aabbMin,aabbMax))
+            for aabbMin,aabbMax in aabbs:
+                overlaps = [self._agent._world.getPObjectById(x[0]) for x in overlappingObjects(aabbMin, aabbMax, self._item._world.getSimConnection())]
+                exitDirections = exitDirections + [x.getBodyProperty("fn", "exitdirection") for x in overlaps]
+            exitDirections = [x for x in exitDirections if None!=x]
+            if not exitDirections:
+                if 0.95 > handPos[2]:
+                    exitDirections = [[0,0,1-handPos[2]]]
+            if not exitDirections:
+                continue
+            retq = True
+            inc = [0,0,0]
+            for e in exitDirections:
+                inc[0] = inc[0] + e[0]
+                inc[1] = inc[1] + e[1]
+                inc[2] = inc[2] + e[2]
+            pT = [0.1*x+y for x,y in zip(inc,handPos)]
+            controls = getHandLinearJointControls(self._agent, hand, controls, pT)
+        if retq:
+            #print("EXITCONTROL")
+            self._agent.applyRigidBodyControls([controls])
+        return retq
     def bodyAction(self):
+        if self._bodyAction():
+            return
         refPO = self._location
         if isinstance(refPO, Location):
             refPO = refPO._relatum
@@ -601,7 +826,7 @@ class HandReaching(BodyProcess):
         self._hand = hand
         self._handLink = {"left": "hand_left_roll", "right": "hand_right_roll"}[hand]
         self._agent = findByType(self._item._world, "agent")
-        self._radius = self._item.getBodyProperty("fn", "graspingradius")*0.9
+        self._radius = self._item.getBodyProperty("fn", "graspingradius")*0.89
     def _strVarPart(self):
         return str(self._item) + "," + str(self._hand)
     def _markForDeletionInternal(self, replacement=None):
@@ -613,7 +838,7 @@ class HandReaching(BodyProcess):
             refPO = refPO._relatum
         whitelist = [refPO.getName()] + [x.getName() for x in closeObjects(refPO)]
         positionR = refPO.getBodyProperty((), "position")
-        position = closestPointOnSphere(positionR, self._radius, self._agent.getBodyProperty((self._handLink,), "position")) 
+        position = closestPointOnSphere(positionR, self._radius, self._agent.getBodyProperty((self._handLink,), "position"))
         controls = getHandLinearJointControls(self._agent, self._hand, {"+constraints": [], "-constraints": [], "jointTargets": {}}, position, velocity=[0,0,0])
         self._agent.applyRigidBodyControls([graspedCollisionAvoidance(self._agent, controls, whitelist=whitelist, backupPoint=positionR)])
         return
@@ -656,20 +881,22 @@ class PlacingItem(BodyProcess):
             location = LocationAt(location)
         targetPos, targetOr = location.suggestPose(self._item)
         positionO = self._item.getBodyProperty((), "position")
-        v = self._item.getBodyProperty((), "linearVelocity")
-        v = math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])
+        vv = self._item.getBodyProperty((), "linearVelocity")
+        v = math.sqrt(vv[0]*vv[0]+vv[1]*vv[1]+5*vv[2]*vv[2])
         if 0.1 < v:
             if None == self._halt:
                 self._halt = list(positionO)
             targetPos = self._halt
-            print("SLOWDOWN",targetPos,positionO)
+            #print("SLOWDOWN",targetPos,positionO)
         else:
             self._halt = None
             d = [a-b for a,b in zip(targetPos,positionO)]
             nD = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
-            if 0.1 < nD:
-                d = [0.1*x/nD for x in d]
+            if 0.05 < nD:
+                d = [0.05*x/nD for x in d]
                 targetPos = [a+b for a,b in zip(d,positionO)]
+        print("TRAJECTOR",("%.3f"%v),("[%.3f,%.3f,%.3f]"%(vv[0],vv[1],vv[2])),("[%.3f,%.3f,%.3f]"%(positionO[0],positionO[1],positionO[2])))
+        print("____",("[%.3f,%.3f,%.3f]"%(targetPos[0],targetPos[1],targetPos[2])))
         orientationO = self._item.getBodyProperty((), "orientation")
         positionH = self._agent.getBodyProperty((self._handLink,), "position")
         orientationH = self._agent.getBodyProperty((self._handLink,), "orientation")
@@ -677,17 +904,32 @@ class PlacingItem(BodyProcess):
         ### Toiw = Thiw*Toih => Toih = inv(Thiw)*Toiw
         posOiH = [a-b for a,b in zip(p.rotateVector((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), positionO), p.rotateVector((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), positionH))]
         orOiH = quaternionProduct((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), orientationO)
-        print("CrW", positionH, positionO)
-        print("ObjInHand", posOiH, orOiH)
+        #print("CrW", positionH, positionO)
+        #print("ObjInHand", posOiH, orOiH)
         ### have (targ.) object in world, object in hand; need (targ.) hand in world
         ### Toiw = Thiw*Toih => Thiw = Toiw*inv(Toih)
         ### inv(T)*T has 0 translation so -iT.q*T.t = iT.t
         posOiH = p.rotateVector((orOiH[0], orOiH[1], orOiH[2], -orOiH[3]), posOiH)
         posTH = [a+b for a,b in zip(targetPos, p.rotateVector(targetOr, (-posOiH[0], -posOiH[1], -posOiH[2])))]
         orTH = quaternionProduct(targetOr, (orOiH[0], orOiH[1], orOiH[2], -orOiH[3]))
+        ##
+        #dTH = [a-b for a,b in zip(posTH,positionH)]
+        #dOS = [a-b for a,b in zip(location.suggestPose(self._item)[0],self._item.getBodyProperty((), "position"))]
+        #dST = [a-b for a,b in zip(location.suggestPose(self._item)[0],targetPos)]
+        #print("DIFFS", math.sqrt(dTH[0]*dTH[0] + dTH[1]*dTH[1] + dTH[2]*dTH[2]), math.sqrt(dOS[0]*dOS[0] + dOS[1]*dOS[1] + dOS[2]*dOS[2]), math.sqrt(dST[0]*dST[0] + dST[1]*dST[1] + dST[2]*dST[2]))
+        #print("    ", location.suggestPose(self._item)[0], targetPos, self._item.getBodyProperty((), "position"))
+        ##
         controls = getHandLinearJointControls(self._agent, self._hand, {"+constraints": [], "-constraints": [], "jointTargets": {}}, posTH, velocity=[0,0,0])
         controls = getHandAngularJointControls(self._agent, self._hand, controls, orTH, velocity=[0,0,0])
-        self._agent.applyRigidBodyControls([graspedCollisionAvoidance(self._agent, controls, whitelist=[location._relatum.getName()], backupPoint=location.suggestBackup(self._item))])
+        gDR = False
+        gDL = False
+        if ("right" == self._hand) and isinstance(self._location, LocationAt):
+            gDR = True
+        if ("left" == self._hand) and isinstance(self._location, LocationAt):
+            gDL = True
+        controls = graspedCollisionAvoidance(self._agent, controls, whitelist=[location._relatum.getName()], backupPoint=location.suggestBackup(self._item), goingDownRight=gDR, goingDownLeft=gDL)
+        #print("CONTROLS", controls["jointTargets"]["hand_right_y_to_hand_right_z"])
+        self._agent.applyRigidBodyControls([controls])
         return
 
 class Accessible(Goal):
@@ -758,13 +1000,14 @@ class ProportionedItem(Goal):
     def __init__(self, item, quantity, destination):
         super().__init__()
         self._item = item
-        self._portionType = item.getBodyProperty("fn", "portiontype")
+        self._portionTypeName = item.getBodyProperty("fn", "portiontype")
+        self._portionType = item._world._particleTypes[self._portionTypeName]
         self._quantity = quantity
         self._destination = destination
     def _strVarPart(self):
         return str(self._item) + "," + str(self._quantity) + "," + str(self._destination)
     def _isFulfilled(self):
-        portions = findByType(self._item._world, self._portionType)
+        portions = findByType(self._item._world, self._portionTypeName, listAll=True)
         required = int(self._quantity/20)
         if 0 == required:
             required = 1
@@ -774,9 +1017,11 @@ class ProportionedItem(Goal):
             tool = findByType(self._item._world, "Knife",True)
             retq = [x for x in [GraspingItem(tool,"left"), GraspingItem(tool,"right")] if str(x) in processes]
             return retq
+        #print("POURINGPROP threats", [str(x) for x in [PouringInto(self._item,self._destination)] if str(x) in processes])
+        #print("    ", processes)
         return [x for x in [PouringInto(self._item,self._destination)] if str(x) in processes]
     def suggestProcess(self):
-        if self._item.getBodyProperty("", "type") in ["butter"]:
+        if self._item.getBodyProperty("", "type") in ["butterS"]:
             tool = findByType(self._item._world, "Knife")
             retq = ProportioningByChopping(self._item, tool, self._quantity, self._destination)
         else:
@@ -797,14 +1042,15 @@ class ChoppedPortionExists(Goal):
     def __init__(self, item, tool, quantity, destination):
         super().__init__()
         self._item = item
-        self._portionType = item.getBodyProperty("fn", "portiontype")
+        self._portionTypeName = item.getBodyProperty("fn", "portiontype")
+        self._portionType = item._world._particleTypes[self._portionTypeName]
         self._tool = tool
         self._quantity = quantity
         self._destination = destination
     def _strVarPart(self):
         return str(self._item) + "," + str(self._quantity) + "," + str(self._destination)
     def _isFulfilled(self):
-        portions = findByType(self._item._world, self._portionType, listAll=True)
+        portions = findByType(self._item._world, self._portionTypeName, listAll=True)
         required = int(self._quantity/20)
         if 0 == required:
             required = 1
@@ -829,15 +1075,16 @@ class PreviousPortionAtDest(Goal):
     def __init__(self, item, destination):
         super().__init__()
         self._item = item
-        self._portionType = item.getBodyProperty("fn", "portiontype")
+        self._portionTypeName = item.getBodyProperty("fn", "portiontype")
+        self._portionType = item._world._particleTypes[self._portionTypeName]
         self._destination = destination
     def _strVarPart(self):
         return str(self._item) + "," + str(self._destination)
     def _isFulfilled(self):
-        portions = findByType(self._item._world, self._portionType, listAll=True)
+        portions = findByType(self._item._world, self._portionTypeName, listAll=True)
         return all([LocationIn(self._destination).isThere(x) for x in portions])
     def suggestProcess(self):
-        portions = [x for x in findByType(self._item._world, self._portionType, listAll=True) if not LocationIn(self._destination).isThere(x)]
+        portions = [x for x in findByType(self._item._world, self._portionTypeName, listAll=True) if not LocationIn(self._destination).isThere(x)]
         if 0 == len(portions):
             return None
         minD = None
@@ -854,40 +1101,41 @@ class PreviousPortionAtDest(Goal):
 
 class ProportioningByPouring(Process):
     def __init__(self,item, quantity, destination):
-        super().__init__(coherence=[ItemOnCounter(destination), Grasped(item), BaseNear(destination), PouredPortionExists(item,quantity,destination)])
+        super().__init__(coherence=[ItemOnCounter(destination), Grasped(item,"right"), BaseNear(destination), PouredPortionExists(item,quantity,destination)])
         self._item = item
         self._quantity = quantity
         self._destination = destination
     def _strVarPart(self):
-        return str(self._item) + "," + self._quantity + "," + self._destination
+        return str(self._item) + "," + str(self._quantity) + "," + str(self._destination)
         
 
 class PouredPortionExists(Goal):
     def __init__(self, item, quantity, destination):
         super().__init__()
         self._item = item
-        self._portionType = item.getBodyProperty("fn", "portiontype")
+        self._portionTypeName = item.getBodyProperty("fn", "portiontype")
+        self._portionType = item._world._particleTypes[self._portionTypeName]
         self._quantity = quantity
         self._destination = destination
     def _strVarPart(self):
         return str(self._item) + "," + str(self._quantity) + "," + str(self._destination)
     def _isFulfilled(self):
-        portions = findByType(self._item._world, self._portionType, listAll=True)
+        portions = findByType(self._item._world, self._portionTypeName, listAll=True)
         required = int(self._quantity/20)
         if 0 == required:
             required = 1
-        return required <= len(portions)
+        return required <= len([x for x in portions if LocationIn(self._destination).isThere(x)])
+        #return required <= len(portions)
     def suggestProcess(self):
         return PouringInto(self._item, self._destination)
 
 class PouringInto(Process):
     def __init__(self,item, destination):
-        super().__init__(coherence=[Grasped(Item,"right"),BaseNear(destination),ItemNear(item,LocationOver(destination)),ItemNear(item,LocationTippedOver(destination))])
+        super().__init__(coherence=[Grasped(item,"right"),BaseNear(destination),ItemNear(item,LocationOver(destination)),ItemNear(item,LocationTippedOver(destination))])
         self._item = item
-        self._quantity = quantity
         self._destination = destination
     def _strVarPart(self):
-        return str(self._item) + "," + self._quantity + "," + self._destination
+        return str(self._item) + "," + str(self._destination)
     def _markForDeletionInternal(self, replacement=None):
         return StoppedPouring(self._item)
 
@@ -906,7 +1154,7 @@ class StoppedPouring(Goal):
 
 class StoppingPouring(Process):
     def __init__(self, item):
-        super().__init__(coherence=[ItemNear(item, LocationUpright()), ItemOnCounter(item)])
+        super().__init__(coherence=[ItemNear(item, LocationUpright(item)), ItemOnCounter(item)])
         self._item = item
     def _strVarPart(self):
         return str(self._item)

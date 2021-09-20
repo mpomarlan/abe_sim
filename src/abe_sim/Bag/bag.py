@@ -10,7 +10,7 @@ class Bag(pob.PObject):
         self._urdf = os.path.join(cDir, self._urdfName())
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"bag": {"graspable": True, "pourPortioningDelay": 0}, "": {"type": self._ontoTypeName()}, "fn": {"dripaxis": [0,1,0], "refpt": [0, 0.089, 0.115], "graspingradius": 0.6, "portiontype": self._portionTypeName()}}
+        self._customStateVariables = {"bag": {"graspable": True, "pourPortioningDelay": 0}, "": {"type": self._ontoTypeName()}, "fn": {"dripaxis": [0,1,0], "refpt": [0, 0.089, 0.115], "graspingradius": 0.35, "portiontype": self._portionTypeName()}}
     def _portionTypeName(self):
         return "particle"
     def _ontoTypeName(self):
@@ -38,4 +38,14 @@ class SugarBag(Bag):
         return "./sugarbag.urdf"
     def _getParticleType(self):
         return prt.SugarParticle
+
+class ButterBag(Bag):
+    def _portionTypeName(self):
+        return "butterparticle"
+    def _ontoTypeName(self):
+        return "butterbag"
+    def _urdfName(self):
+        return "./butterbag.urdf"
+    def _getParticleType(self):
+        return prt.ButterParticle
 

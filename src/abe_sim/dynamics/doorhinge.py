@@ -53,5 +53,5 @@ class DoorHinge:
     def selectInputVariables(self, customStateVariables):
         return ()
     def selectOutputVariables(self, customStateVariables):
-        return ()
+return ()
 

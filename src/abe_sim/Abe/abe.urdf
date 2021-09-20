@@ -12,7 +12,7 @@
     <axis xyz="1 0 0"/>
     <parent link="world"/>
     <child link="base_x"/>
-    <limit effort="1000.0" lower="-5" upper="5" velocity="3."/>
+    <limit effort="1000.0" lower="-15" upper="15" velocity="3."/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
@@ -27,7 +27,7 @@
     <axis xyz="0 1 0"/>
     <parent link="base_x"/>
     <child link="base_y"/>
-    <limit effort="1000.0" lower="-5" upper="5" velocity="3."/>
+    <limit effort="1000.0" lower="-15" upper="15" velocity="3."/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
@@ -91,7 +91,7 @@
     <axis xyz="1 0 0"/>
     <parent link="hand_right_base"/>
     <child link="hand_right_x"/>
-    <limit effort="1000.0" lower="-0.5" upper="2" velocity="3."/>
+    <limit effort="1000.0" lower="-0.85" upper="2" velocity="3."/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
@@ -106,7 +106,7 @@
     <axis xyz="0 1 0"/>
     <parent link="hand_right_x"/>
     <child link="hand_right_y"/>
-    <limit effort="1000.0" lower="-1.5" upper="0.5" velocity="3."/>
+    <limit effort="1000.0" lower="-1.85" upper="1.4" velocity="3."/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
@@ -203,7 +203,7 @@
     <axis xyz="1 0 0"/>
     <parent link="hand_left_base"/>
     <child link="hand_left_x"/>
-    <limit effort="1000.0" lower="-0.5" upper="2" velocity="3."/>
+    <limit effort="1000.0" lower="-0.85" upper="2" velocity="3."/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
@@ -218,7 +218,7 @@
     <axis xyz="0 1 0"/>
     <parent link="hand_left_x"/>
     <child link="hand_left_y"/>
-    <limit effort="1000.0" lower="-0.5" upper="1.5" velocity="3."/>
+    <limit effort="1000.0" lower="-1.4" upper="1.85" velocity="3."/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
