@@ -57,6 +57,7 @@ flask = Flask(__name__)
 
 cgr = None
 cwd = {}
+ccd = None
 
 def placeCamera(item):
     iP = item.getBodyProperty((), "position")
@@ -67,7 +68,7 @@ def placeCamera(item):
 def thread_function_flask():
     @flask.route("/abe-sim-command/to-get-kitchen", methods = ['POST'])
     def to_get_kitchen():
-        global cwd, cgr
+        global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
             with updating:
@@ -81,7 +82,7 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
     def to_set_kitchen():
-        global cwd, cgr
+        global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
             with updating:
@@ -95,6 +96,7 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-get-location", methods = ['POST'])
     def to_get_location():
+        global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
             request_data = request.get_json(force=True)
@@ -108,7 +110,7 @@ def thread_function_flask():
                 if "setWorldState" in request_data:
                     sws = request_data["setWorldState"]
                 if sws and (None != inputState):
-                    w.greatReset(inputState)
+                    cgr = inputState
                 objName = None
                 if (locType in w._ontoTypes) and (0 < len(w._ontoTypes[locType])):
                     objName = list(w._ontoTypes[locType])[0]
@@ -120,6 +122,7 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-fetch", methods = ['POST'])
     def to_fetch():
+        global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
             doAction = False
@@ -132,23 +135,19 @@ def thread_function_flask():
                 if "setWorldState" in request_data:
                     sws = request_data["setWorldState"]
                 if sws and (None != inputState):
-                    w.greatReset(inputState)
+                    cgr = inputState
                 name = request_data["object"]
                 if name in w._pobjects:
                     doAction = True
-                    item = w._pobjects[name]
-                    agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
-                    g._processes = {}
-                    g._commandProcess = garden.Process(coherence=[procs.ItemOnCounter(item),procs.ParkedArms(agent)])
-                    placeCamera(item)
+                    ccd = {'op': 'fetch', 'item': name}
             if doAction:
                 with executingAction:
                     executingAction.wait()
                 with updating:
-                    retq["response"] = {"fetchedObject": name, "kitchenOutputState": w.worldDump()}
+                    retq["response"] = {"fetchedObject": name, "kitchenOutputState": cwd}
             else:
                 with updating:
-                    retq["response"] = {"fetchedObject": None, "kitchenOutputState": w.worldDump()}
+                    retq["response"] = {"fetchedObject": None, "kitchenOutputState": cwd}
         except KeyError:
             retq['status'] = 'missing entries from state data'
         except SyntaxError:
@@ -156,6 +155,7 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-portion", methods = ['POST'])
     def to_portion():
+        global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
             doAction = False
@@ -168,20 +168,13 @@ def thread_function_flask():
                 if "setWorldState" in request_data:
                     sws = request_data["setWorldState"]
                 if sws and (None != inputState):
-                    w.greatReset(inputState)
+                    cgr = inputState
                 name = request_data["inputContainer"]
                 storeName = request_data["newContainer"]
                 amount = request_data["amount"]
                 if (name in w._pobjects) and (storeName in w._pobjects):
                     doAction = True
-                    item = w._pobjects[name]
-                    store = w._pobjects[storeName]
-                    agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
-                    #cabinet = w._pobjects["kitchenCabinet"]
-                    counter = w._pobjects["counterTop"]
-                    g._processes = {}
-                    g._commandProcess = garden.Process(coherence=[procs.ProportionedItem(item, amount, store),procs.ItemOnLocation(item,counter),procs.ParkedArms(agent)])
-                    placeCamera(item)
+                    ccd = {'op': 'portion', 'item': name, 'destination': storeName, 'amount': amount}
             if doAction:
                 with executingAction:
                     executingAction.wait()
@@ -211,6 +204,23 @@ while True:
             w.greatReset(cgr)
             cgr = None
         cwd = w.worldDump()
+        if None != ccd:
+            if 'fetch' == ccd['op']:
+                item = w._pobjects[ccd['item']]
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                g._processes = {}
+                g._commandProcess = garden.Process(coherence=[procs.ItemOnCounter(item),procs.ParkedArms(agent)])
+                placeCamera(item)
+            elif 'portion' == ccd['op']:
+                item = w._pobjects[ccd['item']]
+                store = w._pobjects[ccd['destination']]
+                amount = ccd['amount']
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                counter = w._pobjects["counterTop"]
+                g._processes = {}
+                g._commandProcess = garden.Process(coherence=[procs.ProportionedItem(item, amount, store),procs.ItemOnLocation(item,counter),procs.ParkedArms(agent)])
+                placeCamera(item)
+            ccd = None
         if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):
             w.update()
             bodyProcs = g.updateGarden()
