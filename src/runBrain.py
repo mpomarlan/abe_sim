@@ -12,6 +12,7 @@ from flask import Flask
 from flask import request
 import json
 
+import platform
 
 import math
 import pybullet as p
@@ -20,9 +21,12 @@ from abe_sim.world import World
 import abe_sim.garden as garden
 import abe_sim.procs as procs
 
+isAMac = ('Darwin' == platform.system())
 ## WORLD CREATION line: adjust this as needed on your system.
-w = World(pybulletOptions = "--opengl2") # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
-# w = World(pybulletOptions = "") # Hardware-accelerated rendering. Seems necessary on newer Macs.
+if not isAMac:
+    w = World(pybulletOptions = "--opengl2") # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
+else:
+    w = World(pybulletOptions = "") # Hardware-accelerated rendering. Seems necessary on newer Macs.
 p.setGravity(0,0,-5, w.getSimConnection())
 p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0])
 
@@ -221,8 +225,8 @@ while True:
                 g._commandProcess = garden.Process(coherence=[procs.ProportionedItem(item, amount, store),procs.ItemOnLocation(item,counter),procs.ParkedArms(agent)])
                 placeCamera(item)
             ccd = None
+        w.update()
         if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):
-            w.update()
             bodyProcs = g.updateGarden()
             if all([x.isFulfilled() for x in g._commandProcess._coherence]):
                 if None != g._commandProcess:
@@ -231,5 +235,6 @@ while True:
                         executingAction.notify_all()
             else:
                 [x.bodyAction() for x in bodyProcs]
-    time.sleep(1.0/240.0)
+    if not isAMac:
+        time.sleep(1.0/240.0)
 
