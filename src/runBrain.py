@@ -55,6 +55,9 @@ executingAction = threading.Condition()
 updating = threading.Lock()
 flask = Flask(__name__)
 
+cgr = None
+cwd = {}
+
 def placeCamera(item):
     iP = item.getBodyProperty((), "position")
     cP = w._pobjects["counterTop"].getBodyProperty((), "position")
@@ -64,12 +67,13 @@ def placeCamera(item):
 def thread_function_flask():
     @flask.route("/abe-sim-command/to-get-kitchen", methods = ['POST'])
     def to_get_kitchen():
+        global cwd, cgr
         retq = {'status': 'ok', 'response': ''}
         try:
             with updating:
                 request_data = request.get_json(force=True)
                 varName = request_data['kitchen']
-                retq['response'] = {varName: w.worldDump()}
+                retq['response'] = {varName: cwd}
         except KeyError:
             retq['status'] = 'missing entries from state data'
         except SyntaxError:
@@ -77,12 +81,13 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
     def to_set_kitchen():
+        global cwd, cgr
         retq = {'status': 'ok', 'response': ''}
         try:
             with updating:
                 request_data = request.get_json(force=True)
                 if None != request_data["kitchenInputState"]:
-                    w.greatReset(request_data["kitchenInputState"])
+                    cgr = request_data["kitchenInputState"]
         except KeyError:
             retq['status'] = 'missing entries from state data'
         except SyntaxError:
@@ -202,6 +207,10 @@ signal.signal(signal.SIGTERM, handleINT)
 
 while True:
     with updating:
+        if None != cgr:
+            w.greatReset(cgr)
+            cgr = None
+        cwd = w.worldDump()
         if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):
             w.update()
             bodyProcs = g.updateGarden()

@@ -1,10 +1,18 @@
 import pybullet as p
 import copy
 
+import math
+
 def quaternionProduct(qa, qb):
     b1,c1,d1,a1 = qa
     b2,c2,d2,a2 = qb
     return (a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2,a1*a2-b1*b2-c1*c2-d1*d2)
+
+def overlappingObjects(aabbMin, aabbMax, pybulletConnection):
+    retq = p.getOverlappingObjects(aabbMin, aabbMax, pybulletConnection)
+    if None == retq:
+        retq = []
+    return retq
 
 class PObjectWrapper:
     def __init__(self, pobject, bodyName, parentJointName):
@@ -31,6 +39,8 @@ class PObjectWrapper:
         return self._pobject.setBodyProperty(identifier, propertyId, value)
     def getName(self):
         return str(self._pobject) + ":" + str(self._bodyName)
+    def at(self):
+        return self._pobject.at()
     def getAABB(self, identifier):
         if isinstance(identifier, tuple) and (() != identifier):
             linkId = self._pobject._linkName2Id[identifier[0]]
@@ -92,6 +102,23 @@ class PObject():
         self._parentOfConstraints = {}
         self.reloadObject(self._initialBasePosition, self._initialBaseOrientation)
         self._lastAppliedJointControls={}
+    def at(self):
+        aabbMin, aabbMax = self.getAABB(None)
+        aabbMin = list(aabbMin)
+        aabbMin[2] = aabbMin[2] - 0.05
+        closeObjects = [self._world.getPObjectById(x[0]).getName() for x in overlappingObjects(aabbMin, aabbMax, self._world.getSimConnection())]
+        retq = None
+        minD = None
+        pos = self.getBodyProperty((), "position")
+        for o in closeObjects:
+            if o == self.getName():
+                continue
+            d = [a-b for a,b in zip(pos,self._world._pobjects[o].getBodyProperty((), "position"))]
+            d = math.sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2])
+            if (None==minD) or (d < minD):
+                minD = d
+                retq = o
+        return retq
     def getAABB(self, identifier):
         linkId = -1
         if isinstance(identifier, tuple) and (() != identifier):
