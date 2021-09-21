@@ -6,7 +6,14 @@ import abe_sim.pobject as pobject
 locationKnowledge = {("countertop","mediumbowl"): [[0,4.561,0.76], [-0.55,4.561,0.76], [-1.1,4.561,0.76], [0.55,4.561,0.76]], ("countertop","sugarbag"): [[0,5.055,0.76], [-0.55,5.055,0.76], [-1.1,5.055,0.76], [0.55,5.055,0.76]], ("countertop","butterbag"): [[0,5.055,0.76], [-0.55,5.055,0.76], [-1.1,5.055,0.76], [0.55,5.055,0.76]]}
 
 def overlappingObjects(aabbMin, aabbMax, pybulletConnection):
-    retq = p.getOverlappingObjects(aabbMin, aabbMax, pybulletConnection)
+    doing = True
+    retq = None
+    while doing:
+        try:
+            retq = p.getOverlappingObjects(aabbMin, aabbMax, pybulletConnection)
+            doing = False
+        except:
+            continue
     if None == retq:
         retq = []
     return retq
@@ -258,7 +265,14 @@ def findContainerHandleAround(item):
             if fn:
                 opMin = o.getBodyProperty("fn", "openmin")
                 opMax = o.getBodyProperty("fn", "openmax")
-                a = p.getJointState(o._id, o._jointName2Id[fnj], o._world.getSimConnection())[0]
+                doing = True
+                a = None
+                while doing:
+                    try:
+                        a = p.getJointState(o._id, o._jointName2Id[fnj], o._world.getSimConnection())[0]
+                        doing = False
+                    except:
+                        continue
                 if (a < opMin) or (opMax < a):
                     retq = pobject.PObjectWrapper(o, fn, fnj)
                     break
@@ -481,7 +495,14 @@ class ParkedArms(Goal):
     def _isFulfilled(self):
         retq = []
         for j in self._joints:
-            s = p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection())
+            doing = True
+            s = None
+            while doing:
+                try:
+                    s = p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection())
+                    doing = False
+                except:
+                    conitnue
             retq.append((0.01>abs(s[0]))and(0.001>abs(s[1])))
         return all(retq)
     def suggestProcess(self):
@@ -972,7 +993,14 @@ class PulledOpen(Goal):
             if fn:
                 opMin = pob.getBodyProperty("fn", "openmin")
                 opMax = pob.getBodyProperty("fn", "openmax")
-                a = p.getJointState(pob._id, pob._jointName2Id[fnj], pob._world.getSimConnection())[0]
+                doing = True
+                a = None
+                while doing:
+                    try:
+                        a = p.getJointState(pob._id, pob._jointName2Id[fnj], pob._world.getSimConnection())[0]
+                        doing = False
+                    except:
+                        continue
                 if (a >= opMin) or (opMax >= a):
                     return True
                 return False

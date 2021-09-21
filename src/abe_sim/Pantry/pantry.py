@@ -7,5 +7,5 @@ class Pantry(pob.PObject):
         self._urdf = os.path.join(cDir, "./pantry.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"": {"type": "pantry"}, "fn": {"exitdirection": (0,1,0), "supportbbs": [[(-0.82, -0.183, 0.45), (0.82, 0.296, 0.458)], [(-0.82, -0.183, -0.206), (0.82, 0.296, -0.198)], [(-0.82, -0.183, -0.863), (0.82, 0.296, -0.855)]]}}
+        self._customStateVariables = {"": {"type": "pantry"}, "fn": {"cancontain": True, "exitdirection": (0,1,0), "supportbbs": [[(-0.82, -0.183, 0.45), (0.82, 0.296, 0.458)], [(-0.82, -0.183, -0.206), (0.82, 0.296, -0.198)], [(-0.82, -0.183, -0.863), (0.82, 0.296, -0.855)]]}}
 

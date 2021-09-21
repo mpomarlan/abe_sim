@@ -7,5 +7,5 @@ class CounterTop(pob.PObject):
         self._urdf = os.path.join(cDir, "./countertop.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"":  {"type": "countertop"}}
+        self._customStateVariables = {"":  {"type": "countertop"}, "fn": {"cancontain": True}}
 
