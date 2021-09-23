@@ -183,10 +183,10 @@ def thread_function_flask():
                 with executingAction:
                     executingAction.wait()
                 with updating:
-                    retq["response"] = {"outputContainer": storeName, "kitchenOutputState": w.worldDump()}
+                    retq["response"] = {"outputContainer": storeName, "kitchenOutputState": cwd}
             else:
                 with updating:
-                    retq["response"] = {"outputContainer": None, "kitchenOutputState": w.worldDump()}
+                    retq["response"] = {"outputContainer": None, "kitchenOutputState": cwd}
         except KeyError:
             retq['status'] = 'missing entries from state data'
         except SyntaxError:
