@@ -231,6 +231,7 @@ while True:
             if all([x.isFulfilled() for x in g._commandProcess._coherence]):
                 if None != g._commandProcess:
                     g._commandProcess = None
+                    cwd = w.worldDump()
                     with executingAction:
                         executingAction.notify_all()
             else:
