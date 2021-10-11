@@ -85,13 +85,10 @@ class Garden:
         odesc = str(oproc)
         if odesc == desc:
             return
+        if None == proc:
+            goal.setEstablishmentProc(None)
+            return
         switching = []
-        if None != oproc:
-            switching = [x for x in [oproc.markForDeletion(replacement=proc)] if None != x]
-        if [] != switching:
-            if None == proc:
-                proc = Stabilizer()
-            proc._coherence = switching + proc._coherence
         goal.setEstablishmentProc(proc)
         if (None != proc):
             desc = str(proc)
@@ -105,6 +102,7 @@ class Garden:
         visited = {}
         while procsToVisit:
             proc = procsToVisit.pop(0)
+            #print("GV", proc, proc.coherenceConditions())
             s = str(proc)
             if s in visited:
                 continue
@@ -112,7 +110,12 @@ class Garden:
             if proc.isMarkedForDeletion():
                 continue
             if proc.isBodyProcess():
-                bodyProcesses.append(proc)
+                doProc = True
+                for g in proc.coherenceConditions():
+                    if not g.isFulfilled():
+                        doProc = False
+                if doProc:
+                    bodyProcesses.append(proc)
                 continue
             stopNow = False
             for g in proc.coherenceConditions():
@@ -121,6 +124,7 @@ class Garden:
                     stabilizerGoals = [threat.markForDeletion() for threat in threats]
                     stabilizerGoals = [g for g in stabilizerGoals if None != g]
                     if [] != stabilizerGoals:
+                        #print("STABILITYYYYY", g, stabilizerGoals)
                         self.updateEstablisher(g, Stabilizer(coherence=stabilizerGoals))
                     else:
                         self.updateEstablisher(g, None)
@@ -129,6 +133,7 @@ class Garden:
                     stopNow = True
                 pa = g.getEstablishmentProc()
                 if None != pa:
+                    #print("APPENDING", g, g.getThreats(self._processes), g.isFulfilled(), pa)
                     procsToVisit.append(pa)
                 if stopNow:
                     break
@@ -142,8 +147,9 @@ class Garden:
                         found = True
                         break
                 if found:
-                    print("DELETE PROC", s)
+                    #print("DELETE PROC", s)
                     toDel.append(s)
             [self._processes.pop(s) for s in toDel]
+        #print("bps", bodyProcesses)
         return bodyProcesses
 

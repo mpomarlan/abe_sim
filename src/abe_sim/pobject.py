@@ -3,23 +3,8 @@ import copy
 
 import math
 
-def quaternionProduct(qa, qb):
-    b1,c1,d1,a1 = qa
-    b2,c2,d2,a2 = qb
-    return (a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2,a1*a2-b1*b2-c1*c2-d1*d2)
-
-def overlappingObjects(aabbMin, aabbMax, pybulletConnection):
-    retq = None
-    doing = True
-    while doing:
-        try:
-            retq = p.getOverlappingObjects(aabbMin, aabbMax, pybulletConnection)
-            doing = False
-        except:
-            continue
-    if None == retq:
-        retq = []
-    return retq
+from abe_sim.geom import quaternionProduct, overlappingObjectNames
+from abe_sim.utils import stubbornTry
 
 class PObjectWrapper:
     def __init__(self, pobject, bodyName, parentJointName):
@@ -53,15 +38,7 @@ class PObjectWrapper:
             linkId = self._pobject._linkName2Id[identifier[0]]
         else:
             linkId = self._pobject._linkName2Id[self._bodyName]
-        aabb = None
-        doing = True
-        while doing:
-            try:
-                aabb = p.getAABB(self._pobject._id, linkId, self._pobject._world.getSimConnection())
-                doing = False
-            except:
-                continue
-        return aabb
+        return stubbornTry(lambda : p.getAABB(self._pobject._id, linkId, self._pobject._world.getSimConnection()))
 
 class PObject():
     def _customInitPreLoad(self, *args, **kwargs):
@@ -123,7 +100,7 @@ class PObject():
         aabbMin = [center[0]-0.01, center[1]-0.01, aabbMin[2]-0.05]
         aabbMax = [center[0]+0.01, center[1]+0.01, aabbMin[2]+0.01]
         aabbMin[2] = aabbMin[2] - 0.04
-        closeObjects = [self._world.getPObjectById(x[0]).getName() for x in overlappingObjects(aabbMin, aabbMax, self._world.getSimConnection())]
+        closeObjects = overlappingObjectNames(aabbMin, aabbMax, self._world)
         retq = None
         minD = None
         pos = self.getBodyProperty((), "position")
@@ -141,15 +118,7 @@ class PObject():
         if isinstance(identifier, tuple) and (() != identifier):
             linkId = self._linkName2Id[identifier[0]]
         ### TODO: if identifier is None, get an AABB around the entire obj, not just the base
-        aabb = None
-        doing = True
-        while doing:
-            try:
-                aabb = p.getAABB(self._id, linkId, self._world.getSimConnection())
-                doing = False
-            except:
-                continue
-        return aabb
+        return stubbornTry(lambda : p.getAABB(self._id, linkId, self._world.getSimConnection()))
     def reloadObject(self, position, orientation):
         ccons = copy.deepcopy(self._childOfConstraints)
         pcons = copy.deepcopy(self._parentOfConstraints)
@@ -179,23 +148,11 @@ class PObject():
     def getJointStates(self):
         retq = {}
         for n,k in self._jointName2Id.items():
-            doing = True
-            while doing:
-                try:
-                    retq[n] = p.getJointState(self._id, k, self._world.getSimConnection())[0:2]
-                    doing = False
-                except:
-                    continue
+            retq[n] = stubbornTry(lambda : p.getJointState(self._id, k, self._world.getSimConnection()))[0:2]
         return retq
     def setJointStates(self, states):
         for n,s in states.items():
-            doing = True
-            while doing:
-                try:
-                    p.resetJointState(self._id, self._jointName2Id[n], s[0], 0, self._world.getSimConnection())
-                    doing = False
-                except:
-                    continue
+            stubbornTry(lambda : p.resetJointState(self._id, self._jointName2Id[n], s[0], 0, self._world.getSimConnection()))
         return
     def getJointId(self, name):
         return self._jointName2Id[name]
@@ -211,24 +168,10 @@ class PObject():
             if isinstance(identifier, tuple) and (() != identifier):
                 linkId = self._linkName2Id[identifier[0]]
             if 0 <= linkId:
-                doing = True
-                position, orientation, linearVelocity, angularVelocity = None, None, None, None
-                while doing:
-                    try:
-                        _, _, _, _, position, orientation, linearVelocity, angularVelocity = p.getLinkState(self._id, linkId, 1, False, self._world.getSimConnection())
-                        doing = False
-                    except:
-                        continue
+                _, _, _, _, position, orientation, linearVelocity, angularVelocity = stubbornTry(lambda : p.getLinkState(self._id, linkId, 1, False, self._world.getSimConnection()))
             else:
-                doing = True
-                position, orientation = None, None
-                while doing:
-                    try:
-                        position, orientation = p.getBasePositionAndOrientation(self._id, self._world.getSimConnection())
-                        linearVelocity, angularVelocity = p.getBaseVelocity(self._id, self._world.getSimConnection())
-                        doing = False
-                    except:
-                        continue
+                position, orientation = stubbornTry(lambda : p.getBasePositionAndOrientation(self._id, self._world.getSimConnection()))
+                linearVelocity, angularVelocity = stubbornTry(lambda : p.getBaseVelocity(self._id, self._world.getSimConnection()))
             return {"position": position, "orientation": orientation, "linearVelocity": linearVelocity, "angularVelocity": angularVelocity}[propertyId]
         if not (isinstance(identifier, tuple) and (() != identifier)):
             identifier = [identifier]
@@ -243,24 +186,12 @@ class PObject():
             if isinstance(identifier, tuple) and (() != identifier):
                 linkId = self._linkName2Id[identifier[0]]
             if -1 == linkId:
-                doing = True
-                while doing:
-                    try:
-                        position, orientation = p.getBasePositionAndOrientation(self._id, self._world.getSimConnection())
-                        linearVelocity, angularVelocity = p.getBaseVelocity(self._id, self._world.getSimConnection())
-                        doing = False
-                    except:
-                        continue
+                position, orientation = stubbornTry(lambda : p.getBasePositionAndOrientation(self._id, self._world.getSimConnection()))
+                linearVelocity, angularVelocity = stubbornTry(lambda : p.getBaseVelocity(self._id, self._world.getSimConnection()))
                 aux = {"position": position, "orientation": orientation, "linearVelocity": linearVelocity, "angularVelocity": angularVelocity}
                 aux[propertyId] = value
-                doing = True
-                while doing:
-                    try:
-                        p.resetBasePositionAndOrientation(self._id, aux["position"], aux["orientation"], self._world.getSimConnection())
-                        p.resetBaseVelocity(self._id, aux["linearVelocity"], aux["angularVelocity"], self._world.getSimConnection())
-                        doing = False
-                    except:
-                        continue
+                stubbornTry(lambda : p.resetBasePositionAndOrientation(self._id, aux["position"], aux["orientation"], self._world.getSimConnection()))
+                stubbornTry(lambda : p.resetBaseVelocity(self._id, aux["linearVelocity"], aux["angularVelocity"], self._world.getSimConnection()))
                 return True
             return False
         if not (isinstance(identifier, tuple) and (() != identifier)):
@@ -295,32 +226,14 @@ class PObject():
         #     joints which is a dictionary where the keys are joint names and the values are pairs of floats giving that joint's position and velocity;
         #     links which is a dictionary where the keys are link names and the values are dictionaries with keys x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz
         #     constraints which is a list of tuples of form (linkName, parentName, parentLinkName)
-        doing = True
-        while doing:
-           try:
-               position, orientation = p.getBasePositionAndOrientation(self._id, self._world.getSimConnection())           
-               linearVelocity, angularVelocity = p.getBaseVelocity(self._id, self._world.getSimConnection())
-               doing = False
-           except:
-               continue
+        position, orientation = stubbornTry(lambda : p.getBasePositionAndOrientation(self._id, self._world.getSimConnection()))
+        linearVelocity, angularVelocity = stubbornTry(lambda : p.getBaseVelocity(self._id, self._world.getSimConnection()))
         retq = {"joints": {}, "links": {}, "constraints": [], "x": position[0], "y": position[1], "z": position[2], "qx": orientation[0], "qy": orientation[1], "qz": orientation[2], "qw": orientation[3], "vx": linearVelocity[0], "vy": linearVelocity[1], "vz": linearVelocity[2], "wx": angularVelocity[0], "wy": angularVelocity[1], "wz": angularVelocity[2]}
         for j, k in self._jointName2Id.items():
             # TODO: ignore joint reaction force and applied force/torque for now, since these are not used for the WorldDump
-            doing = True
-            while doing:
-                try:
-                    retq["joints"][j] = p.getJointState(self._id, k, self._world.getSimConnection())[0:2]
-                    doing = False
-                except:
-                    continue
+            retq["joints"][j] = stubbornTry(lambda : p.getJointState(self._id, k, self._world.getSimConnection()))[0:2]
         for l, k in self._linkName2Id.items():
-            doing = True
-            while doing:
-                try:
-                    _, _, _, _, position, orientation, linearVelocity, angularVelocity = p.getLinkState(self._id, k, 1, False, self._world.getSimConnection())
-                    doing = False
-                except:
-                    continue
+            _, _, _, _, position, orientation, linearVelocity, angularVelocity = stubbornTry(lambda : p.getLinkState(self._id, k, 1, False, self._world.getSimConnection()))
             retq["links"][l] = {"x": position[0], "y": position[1], "z": position[2], "qx": orientation[0], "qy": orientation[1], "qz": orientation[2], "qw": orientation[3], "vx": linearVelocity[0], "vy": linearVelocity[1], "vz": linearVelocity[2], "wx": angularVelocity[0], "wy": angularVelocity[1], "wz": angularVelocity[2]}
         for constraint in self._childOfConstraints.keys():
             retq["constraints"].append(constraint)
@@ -339,22 +252,10 @@ class PObject():
             # Also, iT.t = -iT.q*T.t
             relOr = quaternionProduct(parentIOrientation, childOrientation)
             relPos = [x-y for x,y in zip(p.rotateVector(parentIOrientation,childPosition), p.rotateVector(parentIOrientation, parentPosition))]
-            doing = True
-            while doing:
-                try:
-                    self._childOfConstraints[(linkName, parentName, parentLinkName)] = p.createConstraint(parent._id, parent._linkName2Id[parentLinkName], self._id, self._linkName2Id[linkName], p.JOINT_FIXED, [1,0,0], relPos, [0,0,0], relOr, [0,0,0,1], physicsClientId=self._world.getSimConnection())
-                    doing = False
-                except:
-                    continue
+            self._childOfConstraints[(linkName, parentName, parentLinkName)] = stubbornTry(lambda : p.createConstraint(parent._id, parent._linkName2Id[parentLinkName], self._id, self._linkName2Id[linkName], p.JOINT_FIXED, [1,0,0], relPos, [0,0,0], relOr, [0,0,0,1], physicsClientId=self._world.getSimConnection()))
             parent._parentOfConstraints[(linkName, self._name, parentLinkName)] = self._childOfConstraints[(linkName, parentName, parentLinkName)]
     def removeRigidBodyConstraint(self, linkName, parentName, parentLinkName):
-        doing = True
-        while doing:
-            try:
-                p.removeConstraint(self._childOfConstraints[(linkName, parentName, parentLinkName)], self._world.getSimConnection())
-                doing = False
-            except:
-                continue
+        stubbornTry(lambda : p.removeConstraint(self._childOfConstraints[(linkName, parentName, parentLinkName)], self._world.getSimConnection()))
         self._world._pobjects[parentName]._parentOfConstraints.pop((linkName, self._name, parentLinkName))
         self._childOfConstraints.pop((linkName, parentName, parentLinkName))
     def resetRigidBodyVariables(self, data):
@@ -364,22 +265,10 @@ class PObject():
         orientation = [data['qx'], data['qy'], data['qz'], data['qw']]
         linearVelocity = [data['vx'], data['vy'], data['vz']]
         angularVelocity = [data['wx'], data['wy'], data['wz']]
-        doing = True
-        while doing:
-            try:
-                p.resetBasePositionAndOrientation(self._id, position, orientation, self._world.getSimConnection())
-                p.resetBaseVelocity(self._id, linearVelocity, angularVelocity, self._world.getSimConnection())
-                doing = False
-            except:
-                continue
+        stubbornTry(lambda : p.resetBasePositionAndOrientation(self._id, position, orientation, self._world.getSimConnection()))
+        stubbornTry(lambda : p.resetBaseVelocity(self._id, linearVelocity, angularVelocity, self._world.getSimConnection()))
         for j, state in data['joints'].items():
-            doing = True
-            while doing:
-                try:
-                    p.resetJointState(self._id, self._jointName2Id[j], state[0], state[1], self._world.getSimConnection())
-                    doing = False
-                except:
-                    continue
+            stubbornTry(lambda : p.resetJointState(self._id, self._jointName2Id[j], state[0], state[1], self._world.getSimConnection()))
         for linkName, parentName, parentLinkName in self._childOfConstraints.keys():
             self.removeRigidBodyConstraint(linkName, parentName, parentLinkName)
         for linkName, parentName, parentLinkName in data['constraints']:
@@ -407,13 +296,7 @@ class PObject():
             targetPosition = jointTarget[0]/jointTarget[2]
             targetVelocity = jointTarget[1]/jointTarget[2]
             self._lastAppliedJointControls[jointName] = [targetPosition,targetVelocity]
-            doing = True
-            while doing:
-                try:
-                    p.setJointMotorControl2(self._id, self._jointName2Id[jointName], p.POSITION_CONTROL, targetPosition=targetPosition, targetVelocity=targetVelocity,force=self._getMaxForce(jointName), positionGain=self._getPositionGain(jointName), maxVelocity=self._getMaxVelocity(jointName), physicsClientId=self._world.getSimConnection())
-                    doing = False
-                except:
-                    continue
+            stubbornTry(lambda : p.setJointMotorControl2(self._id, self._jointName2Id[jointName], p.POSITION_CONTROL, targetPosition=targetPosition, targetVelocity=targetVelocity,force=self._getMaxForce(jointName), positionGain=self._getPositionGain(jointName), maxVelocity=self._getMaxVelocity(jointName), physicsClientId=self._world.getSimConnection()))
         for linkName, parentName, parentLinkName in constraintsWillDelete:
             self.removeRigidBodyConstraint(linkName, parentName, parentLinkName)
         for linkName, parentName, parentLinkName in constraintsWillAdd:

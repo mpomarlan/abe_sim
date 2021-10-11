@@ -43,4 +43,16 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(
 response = json.loads(r.text)
 print(response)
 
+### Command 1: get the kitchen state
+dws = {'kitchen': '?kitchen-state-1'}
+r = requests.post("http://localhost:54321/abe-sim-command/to-get-kitchen", data=bytes(json.dumps(dws), "utf-8"))
+worldState = json.loads(r.text)['response']
+with open("dbg_state2.txt","w") as outfile:
+    outfile.write(json.dumps(worldState))
+
+### Command 8: transfer bowl1 contents to bowl1
+dpo = {'input': 'mediumBowl1', 'container': 'mediumBowl3', 'kitchenInputState': None, 'setWorldState': False}
+r = requests.post("http://localhost:54321/abe-sim-command/to-transfer", data=bytes(json.dumps(dpo), "utf-8"))
+response = json.loads(r.text)
+print(response)
 

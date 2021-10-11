@@ -21,6 +21,8 @@ from abe_sim.world import World
 import abe_sim.garden as garden
 import abe_sim.procs as procs
 
+from abe_sim.geom import vectorNorm
+
 isAMac = ('Darwin' == platform.system())
 ## WORLD CREATION line: adjust this as needed on your system.
 if not isAMac:
@@ -40,6 +42,7 @@ from abe_sim.KitchenCabinet.kitchencabinet import KitchenCabinet
 from abe_sim.MediumBowl.mediumbowl import MediumBowl
 from abe_sim.Pantry.pantry import Pantry
 from abe_sim.Bag.bag import SugarBag, ButterBag
+from abe_sim.Particle.particle import Particle, SugarParticle, ButterParticle
 
 a = w.addPObjectOfType("abe", Abe, [0,0,0], [0,0,0,1])
 f = w.addPObjectOfType("floor", Floor, [0,0,0], [0,0,0,1])
@@ -52,6 +55,10 @@ p1 = w.addPObjectOfType("pantry1", Pantry, [4.31,-1.793,1.054], [0,0,0.707,0.707
 p2 = w.addPObjectOfType("pantry2", Pantry, [4.31,-3.683,1.054], [0,0,0.707,0.707])
 sg = w.addPObjectOfType("sugarBag", SugarBag, [-1.555,-4.174,1.35], [0,0,1,0])
 bg = w.addPObjectOfType("butterBag", ButterBag, [-1.7,-4.174,0.68], [0,0,1,0])
+aux = w.addPObjectOfType("aux", ButterParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
+aux = w.addPObjectOfType("aux", SugarParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
 
 
 g = garden.Garden()
@@ -157,6 +164,40 @@ def thread_function_flask():
         except SyntaxError:
             retq['status'] = 'ill-formed json for command'
         return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-transfer", methods = ['POST'])
+    def to_transfer():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            doAction = False
+            with updating:
+                request_data = request.get_json(force=True)
+                inputState = None
+                if "kitchenInputState" in request_data:
+                    inputState = request_data["kitchenInputState"]
+                sws = False
+                if "setWorldState" in request_data:
+                    sws = request_data["setWorldState"]
+                if sws and (None != inputState):
+                    cgr = inputState
+                name = request_data["input"]
+                storeName = request_data["container"]
+                if (name in w._pobjects) and (storeName in w._pobjects):
+                    doAction = True
+                    ccd = {'op': 'transfer', 'item': name, 'destination': storeName}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = {"innerContainer": name, "outerContainer": storeName, "kitchenOutputState": cwd}
+            else:
+                with updating:
+                    retq["response"] = {"innerContainer": None, "outerContainer": None, "kitchenOutputState": cwd}
+        except KeyError:
+            retq['status'] = 'missing entries from state data'
+        except SyntaxError:
+            retq['status'] = 'ill-formed json for command'
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-portion", methods = ['POST'])
     def to_portion():
         global cwd, cgr, ccd
@@ -224,6 +265,12 @@ while True:
                 g._processes = {}
                 g._commandProcess = garden.Process(coherence=[procs.ProportionedItem(item, amount, store),procs.ItemOnLocation(item,counter),procs.ParkedArms(agent)])
                 placeCamera(item)
+            elif 'transfer' == ccd['op']:
+                item = w._pobjects[ccd['item']]
+                store = w._pobjects[ccd['destination']]
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                g._processes = {}
+                g._commandProcess = garden.Process(coherence=[procs.TransferredContents(item,store),procs.ItemOnCounter(item),procs.ParkedArms(agent)])
             ccd = None
         w.update()
         if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):

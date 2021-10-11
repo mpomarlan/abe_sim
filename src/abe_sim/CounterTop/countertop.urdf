@@ -8,7 +8,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="countertop_visual.obj"/>
+        <mesh filename="countertop_collision.obj"/>
       </geometry>
     </visual>
     <collision>
