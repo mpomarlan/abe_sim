@@ -190,9 +190,11 @@ def planArmMotion(agent, hand, targetPos, corridor, controls,maxspeed=0.1):
         #print(corridors[0].waypoints, corridors[1].waypoints)
         corridor = planCorridor(sampleBox, boxes, allowableCollisionFn, world, corridors[0], corridors[1], positionArmBase, orientationBase)
     if None != corridor:
-        nextPosition, _ = corridor.nextAlong(position)
+        nextPosition, k = corridor.nextAlong(position)
         #if None == nextPosition:
         #    #print("HUHUHU")
+        if k == len(corridor.waypoints)-1:
+            nextPosition = targetPos
         if None != nextPosition:
             diff = vectorDifference(nextPosition, position)
             if maxspeed < vectorNorm(diff):
@@ -915,6 +917,9 @@ class PlacingItem(BodyProcess):
         #else:
         #    #print("ANGLE",angle)
         controls = getHandAngularJointControls(self._agent, self._hand, controls, orTH, velocity=[0,0,0])
+        print("Distances TH/H TO/O", distance(posTH, positionH), distance(targetPos,positionO))
+        if (None != self._corridor) and ([] != self._corridor.waypoints):
+            print("    H/C", distance(positionH,self._corridor.waypoints[-1]))
         self._agent.applyRigidBodyControls([controls])
         return
 

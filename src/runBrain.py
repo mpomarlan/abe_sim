@@ -282,6 +282,7 @@ while True:
                     with executingAction:
                         executingAction.notify_all()
             else:
+                print("bps", bodyProcs)
                 [x.bodyAction() for x in bodyProcs]
     if not isAMac:
         time.sleep(1.0/240.0)
