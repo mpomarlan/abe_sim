@@ -26,7 +26,7 @@ class PourPortioning:
         orientation = self._pobject.getBodyProperty((self._link,), "orientation")
         dripAxis = p.rotateVector(orientation, self._dripAxis)
         drip = dripAxis[2]
-        if -0.9 > drip:
+        if -0.95 > drip:
             # drip axis points down
             delay = self._pobject.getBodyProperty((self._link,), "pourPortioningDelay")
             if 0 == delay:

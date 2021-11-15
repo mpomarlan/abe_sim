@@ -102,7 +102,7 @@ class Garden:
         visited = {}
         while procsToVisit:
             proc = procsToVisit.pop(0)
-            #print("GV", proc, proc.coherenceConditions())
+            print("GV", proc, proc.coherenceConditions())
             s = str(proc)
             if s in visited:
                 continue
@@ -114,26 +114,27 @@ class Garden:
                 for g in proc.coherenceConditions():
                     if not g.isFulfilled():
                         doProc = False
+                    print("    bpg", g, g.isFulfilled(), "threatened by", g.getThreats(self._processes))
                 if doProc:
                     bodyProcesses.append(proc)
                 continue
             stopNow = False
             for g in proc.coherenceConditions():
                 if g.isFulfilled():
+                    print("    have", g, "threatened by", g.getThreats(self._processes))
                     threats = g.getThreats(self._processes)
                     stabilizerGoals = [threat.markForDeletion() for threat in threats]
                     stabilizerGoals = [g for g in stabilizerGoals if None != g]
                     if [] != stabilizerGoals:
-                        #print("STABILITYYYYY", g, stabilizerGoals)
                         self.updateEstablisher(g, Stabilizer(coherence=stabilizerGoals))
                     else:
                         self.updateEstablisher(g, None)
                 else: ### goal not fulfilled
+                    print("    need", g, g.suggestProcess())
                     self.updateEstablisher(g, g.suggestProcess())
                     stopNow = True
                 pa = g.getEstablishmentProc()
                 if None != pa:
-                    #print("APPENDING", g, g.getThreats(self._processes), g.isFulfilled(), pa)
                     procsToVisit.append(pa)
                 if stopNow:
                     break
@@ -147,9 +148,7 @@ class Garden:
                         found = True
                         break
                 if found:
-                    #print("DELETE PROC", s)
                     toDel.append(s)
             [self._processes.pop(s) for s in toDel]
-        #print("bps", bodyProcesses)
         return bodyProcesses
 

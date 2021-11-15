@@ -1,6 +1,4 @@
-## TODO: set up scene with 3 bowls, 2 bags and portion bags into 2 bowls
 ## TODO: mixing
-## TODO: placing into pantry/cabinet (low priority)
 
 ##### Init sim, place objects
 import os
@@ -29,6 +27,7 @@ if not isAMac:
     w = World(pybulletOptions = "--opengl2") # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
 else:
     w = World(pybulletOptions = "") # Hardware-accelerated rendering. Seems necessary on newer Macs.
+
 p.setGravity(0,0,-5, w.getSimConnection())
 p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0])
 
@@ -38,23 +37,30 @@ w._particleTypes = {"particle": prt.Particle, "sugarparticle": prt.SugarParticle
 from abe_sim.Abe.abe import Abe
 from abe_sim.Floor.floor import Floor
 from abe_sim.CounterTop.countertop import CounterTop
-from abe_sim.KitchenCabinet.kitchencabinet import KitchenCabinet
+from abe_sim.KitchenCabinet.kitchencabinet import KitchenCabinet,KitchenCabinetLow
 from abe_sim.MediumBowl.mediumbowl import MediumBowl
 from abe_sim.Pantry.pantry import Pantry
 from abe_sim.Bag.bag import SugarBag, ButterBag
 from abe_sim.Particle.particle import Particle, SugarParticle, ButterParticle
+from abe_sim.Fridge.fridge import Fridge, Freezer, FridgeDoor, FreezerDoor
 
 a = w.addPObjectOfType("abe", Abe, [0,0,0], [0,0,0,1])
 f = w.addPObjectOfType("floor", Floor, [0,0,0], [0,0,0,1])
 c = w.addPObjectOfType("counterTop", CounterTop, [-0.051,4.813,0], [0,0,0,1])
 k = w.addPObjectOfType("kitchenCabinet", KitchenCabinet, [-1.667,-4.677,0.963], [0,0,0,1])
-mb1 = w.addPObjectOfType("mediumBowl1", MediumBowl, [1.03,-4.17,1.205], [0,0,0,1])
-mb2 = w.addPObjectOfType("mediumBowl2", MediumBowl, [0.48,-4.17,1.205], [0,0,0,1])
-mb3 = w.addPObjectOfType("mediumBowl3", MediumBowl, [-0.07,-4.17,1.205], [0,0,0,1])
+mb1 = w.addPObjectOfType("mediumBowl1", MediumBowl, [4.278,0.687,0.999], [0,0,0,1])
+mb2 = w.addPObjectOfType("mediumBowl2", MediumBowl, [0.48,-4.17,1.305], [0,0,0,1])
+mb3 = w.addPObjectOfType("mediumBowl3", MediumBowl, [-0.07,-4.17,1.305], [0,0,0,1])
 p1 = w.addPObjectOfType("pantry1", Pantry, [4.31,-1.793,1.054], [0,0,0.707,0.707])
 p2 = w.addPObjectOfType("pantry2", Pantry, [4.31,-3.683,1.054], [0,0,0.707,0.707])
-sg = w.addPObjectOfType("sugarBag", SugarBag, [-1.555,-4.174,1.35], [0,0,1,0])
+sg = w.addPObjectOfType("sugarBag", SugarBag, [-1.555,-4.174,1.45], [0,0,1,0])
 bg = w.addPObjectOfType("butterBag", ButterBag, [-1.7,-4.174,0.68], [0,0,1,0])
+fg = w.addPObjectOfType("fridge", Fridge, [4.781,0.05,0.691], [0,0,0.707,0.707])
+fz = w.addPObjectOfType("freezer", Freezer, [4.781,0.05,0.691], [0,0,0.707,0.707])
+fgd = w.addPObjectOfType("fridgeDoor", FridgeDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
+fzd = w.addPObjectOfType("freezerDoor", FreezerDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
+fg.setBodyProperty("fn", "door", "fridgeDoor")
+fz.setBodyProperty("fn", "door", "freezerDoor")
 aux = w.addPObjectOfType("aux", ButterParticle,[0,0,0],[0,0,0,1])
 w.removePObject("aux")
 aux = w.addPObjectOfType("aux", SugarParticle,[0,0,0],[0,0,0,1])
@@ -262,15 +268,17 @@ while True:
                 amount = ccd['amount']
                 agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
                 counter = w._pobjects["counterTop"]
+                cabinet = w._pobjects["kitchenCabinet"]
                 g._processes = {}
-                g._commandProcess = garden.Process(coherence=[procs.ProportionedItem(item, amount, store),procs.ItemOnLocation(item,counter),procs.ParkedArms(agent)])
+                g._commandProcess = garden.Process(coherence=[procs.ProportionedItem(item, amount, store),procs.ItemOnLocation(item,cabinet),procs.ParkedArms(agent)])
                 placeCamera(item)
             elif 'transfer' == ccd['op']:
                 item = w._pobjects[ccd['item']]
                 store = w._pobjects[ccd['destination']]
                 agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                cabinet = w._pobjects["kitchenCabinet"]
                 g._processes = {}
-                g._commandProcess = garden.Process(coherence=[procs.TransferredContents(item,store),procs.ItemOnCounter(item),procs.ParkedArms(agent)])
+                g._commandProcess = garden.Process(coherence=[procs.TransferredContents(item,store),procs.ItemOnLocation(item,cabinet),procs.ParkedArms(agent)])
             ccd = None
         w.update()
         if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):

@@ -11,6 +11,7 @@ class PObjectWrapper:
         self._pobject = pobject
         self._bodyName = bodyName
         self._parentJointName = parentJointName
+        self._world = self._pobject._world
     def __str__(self):
         return str(self._pobject) + ":" + str(self._bodyName)
     def getJointId(self, name):

@@ -8,7 +8,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="kitchencabinet_visual.obj"/>
+        <mesh filename="kitchencabinet_collision.obj"/>
       </geometry>
     </visual>
     <collision>

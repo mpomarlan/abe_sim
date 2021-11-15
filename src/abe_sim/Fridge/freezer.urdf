@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<robot name="fridge">
+<robot name="freezer">
   <link name="world"/>
-  <link name="fridge">
+  <link name="freezer">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <mass value="30.0"/>
@@ -10,17 +10,18 @@
     <visual>
       <geometry>
         <mesh filename="fridge_visual.obj"/>
+        <!--<mesh filename="fridge_collision.obj"/>-->
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="fridge_collision.obj"/>
+        <mesh filename="freezer_collision.obj"/>
       </geometry>
     </collision>
   </link>
   <joint name="base" type="fixed">
     <parent link="world"/>
-    <child link="fridge"/>
+    <child link="freezer"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 </robot>
