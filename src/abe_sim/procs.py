@@ -951,6 +951,19 @@ class ItemNear(Goal):
     def suggestProcess(self):
         return PlacingItem(self._item, self._location, self._hand)
 
+def getHandTargetPose(targetPos, targetOr, positionO, orientationO, positionH, orientationH):
+    ### Have (cr.) object in world, hand in world; need object in hand
+    ### Toiw = Thiw*Toih => Toih = inv(Thiw)*Toiw
+    posOiH = [a-b for a,b in zip(p.rotateVector((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), positionO), p.rotateVector((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), positionH))]
+    orOiH = quaternionProduct((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), orientationO)
+    ### have (targ.) object in world, object in hand; need (targ.) hand in world
+    ### Toiw = Thiw*Toih => Thiw = Toiw*inv(Toih)
+    ### inv(T)*T has 0 translation so -iT.q*T.t = iT.t
+    posOiH = p.rotateVector((orOiH[0], orOiH[1], orOiH[2], -orOiH[3]), posOiH)
+    posTH = [a+b for a,b in zip(targetPos, p.rotateVector(targetOr, (-posOiH[0], -posOiH[1], -posOiH[2])))]
+    orTH = quaternionProduct(targetOr, (orOiH[0], orOiH[1], orOiH[2], -orOiH[3]))
+    return posTH, orTH
+
 def angleRemap(angle):
     while math.pi < angle:
         angle = angle - 2*math.pi
@@ -1313,12 +1326,19 @@ class PouringContents(Process):
     def _markForDeletionInternal(self, replacement=None):
         return StoppedPouring(self._item)
 
+def getMixedSubstance(item):
+    substances = set([getSubstance(x) for x in getContents(item)])
+    sweetbutter = set(['sugar', 'butter'])
+    if substances == sweetbutter:
+        return "sweetbutter"
+    return ""
+
 class MixedContents(Goal):
-    def __init__(self, item, substance):
+    def __init__(self, item, tool, substance):
         super().__init__()
         self._item = item
         self._substance = substance
-        self._tool = findByType(self._item._world, "Whisk")
+        self._tool = tool
     def _strVarPart(self):
         return str(self._item) + "," + str(self._substance)
     def _isFulfilled(self):
@@ -1330,14 +1350,12 @@ class MixedContents(Goal):
 
 class MixingContents(Process):
     def __init__(self, item, tool, substance):
-        super().__init__(coherence=[Grasped(tool), BaseNear(item), MixedStuff(item, tool, substance)])
+        super().__init__(coherence=[Grasped(tool,"right"), BaseNear(item), MixedStuff(item, tool, substance)])
         self._item = item
         self._tool = tool
         self._substance = substance
     def _strVarPart(self):
         return str(self._item) + "," + str(self._tool) + "," + str(self._substance)
-    def _markForDeletionInternal(self, replacement=None):
-        return ItemOnCounter(self._tool)
 
 class MixedStuff(Goal):
     def __init__(self, item, tool, substance):
@@ -1350,17 +1368,47 @@ class MixedStuff(Goal):
     def _isFulfilled(self):
         return all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
     def suggestProcess(self):
-        return MixingStuff(self._item, self._tool)
+        return MixingStuff(self._item, self._tool, "right")
 
 class MixingStuff(BodyProcess):
-    def __init__(self, item, tool):
+    def __init__(self, item, tool, hand):
         super().__init__(coherence=[Grasped(tool), BaseNear(item)])
         self._item = item
         self._tool = tool
+        self._hand = hand
+        self._handLink = {"left": "hand_left_roll", "right": "hand_right_roll"}[hand]
     def _strVarPart(self):
         return str(self._item) + "," + str(self._tool)
     def bodyAction(self):
         ### TODO
+        refpt = self._tool.getBodyProperty("fn", "refpt")
+        refaxis = self._tool.getBodyProperty("fn", "refaxis")
+        position = self._tool.getBodyProperty((), "position")
+        orientation = self._tool.getBodyProperty((), "orientation")
+        positionI = self._item.getBodyProperty((), "position")
+        positionH = self._agent.getBodyProperty((self._handLink,), "position")
+        orientationH = self._agent.getBodyProperty((self._handLink,), "orientation")
+        refpt = translateVector(position, p.rotateVector(orientation, refpt))
+        refaxis = p.rotateVector(orientation, refaxis)
+        dist = distance(refpt, positionI)
+        refptXY = [refpt[0],refpt[1],0]
+        positionIXY = [positionI[0],positionI[1],0]
+        xydist = distance(refptXY,positionIXY)
+        _, targetOr = LocationUpright().suggestPose(self._tool)
+        if -0.98 < refaxis[2]:
+            targetPos = [position[0], position[1], 1]
+        elif 0.01 < xydist:
+            targetPos = [positionI[0], positionI[1], position[2]]
+        elif 0.01 < dist:
+            inc = -0.002
+            targetPos = [positionI[0], positionI[1], position[2]+inc]
+        else:
+            targetPos = [positionI[0], positionI[1], position[2]]
+            targetOr = quaternionProduct(p.getQuaternionFromAxisAngle([0,0,1], math.pi/180.0), orientation)
+        positionH, orientationH = getHandTargetPose(targetPos, targetOr, position, orientation, positionH, orientationH)
+        controls = getHandLinearJointControls(self._agent, self._hand, {"+constraints": [], "-constraints": [], "jointTargets": {}}, positionH, velocity=[0,0,0])
+        controls = getHandAngularJointControls(self._agent, self._hand, controls, orientationH, velocity=[0,0,0])
+        self._agent.applyRigidBodyControls([controls])
         return
 
 class CombinedStuffInto(Goal):

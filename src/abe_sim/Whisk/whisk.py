@@ -8,7 +8,7 @@ class Whisk(pob.PObject):
         self._urdf = os.path.join(cDir, "./whisk.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"": {"type": "whisk"}, "whisk": {"graspable": True}, "fn": {"canwhisk": True, "graspingradius": 0.2, "handle": [-0.226,0,0]}}
+        self._customStateVariables = {"": {"type": "whisk"}, "whisk": {"graspable": True}, "fn": {"canwhisk": True, "graspingradius": 0.2, "handle": [-0.226,0,0], "refpt": [0.341,0,0], "refaxis": [1,0,0]}}
     def _customInitDynamicModels(self):
         graspable = gr.Grasping(self._world, self, "whisk", graspingRadius=self._customStateVariables["fn"]["graspingradius"])
         self._dynamics = {"graspable": graspable}

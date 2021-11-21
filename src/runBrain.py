@@ -208,6 +208,40 @@ def thread_function_flask():
         except SyntaxError:
             retq['status'] = 'ill-formed json for command'
         return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-mix", methods = ['POST'])
+    def to_mix():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            doAction = False
+            with updating:
+                request_data = request.get_json(force=True)
+                inputState = None
+                if "kitchenInputState" in request_data:
+                    inputState = request_data["kitchenInputState"]
+                sws = False
+                if "setWorldState" in request_data:
+                    sws = request_data["setWorldState"]
+                if sws and (None != inputState):
+                    cgr = inputState
+                name = request_data["input"]
+                tool = request_data["tool"]
+                if (name in w._pobjects) and (storeName in w._pobjects):
+                    doAction = True
+                    ccd = {'op': 'mix', 'item': name, 'tool': tool}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = {"mixture": name, "kitchenOutputState": cwd}
+            else:
+                with updating:
+                    retq["response"] = {"mixture": None, "kitchenOutputState": cwd}
+        except KeyError:
+            retq['status'] = 'missing entries from state data'
+        except SyntaxError:
+            retq['status'] = 'ill-formed json for command'
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-portion", methods = ['POST'])
     def to_portion():
         global cwd, cgr, ccd
@@ -283,6 +317,16 @@ while True:
                 cabinet = w._pobjects["kitchenCabinet"]
                 g._processes = {}
                 g._commandProcess = garden.Process(coherence=[procs.TransferredContents(item,store),procs.ItemOnLocation(item,cabinet),procs.ParkedArms(agent)])
+            elif 'mix' == ccd['op']:
+                item = w._pobjects[ccd['item']]
+                tool = w._pobjects[ccd['tool']]
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                counter = w._pobjects["counterTop"]
+                cabinet = w._pobjects["kitchenCabinet"]
+                g._processes = {}
+                substance = procs.getMixedSubstance(item)
+                g._commandProcess = garden.Process(coherence=[procs.MixedContents(item, tool, substance),procs.ItemOnLocation(tool,cabinet),procs.ParkedArms(agent)])
+                placeCamera(item)
             ccd = None
         w.update()
         if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):
