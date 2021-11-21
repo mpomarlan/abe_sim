@@ -1,6 +1,7 @@
 import os
 import abe_sim.pobject as pob
 import abe_sim.dynamics.grasping as gr
+import abe_sim.dynamics.mixing as mx
 
 class Particle(pob.PObject):
     def _customInitPreLoad(self, *args, **kwargs):
@@ -15,9 +16,13 @@ class Particle(pob.PObject):
         return "particle"
     def _urdfName(self):
         return "./particle.urdf"
+    def _particleDynamics(self):
+        return {}
     def _customInitDynamicModels(self):
         graspable = gr.Grasping(self._world, self, "particle", graspingRadius=self._customStateVariables["fn"]["graspingradius"])
-        self._dynamics = {"graspable": graspable}
+        aux = self._particleDynamics()
+        aux["graspable"] = graspable
+        self._dynamics = aux
 
 class SugarParticle(Particle):
     def _urdfName(self):
@@ -26,6 +31,8 @@ class SugarParticle(Particle):
         return "sugarparticle"
     def _substanceName(self):
         return "sugar"
+    def _particleDynamics(self):
+        return {"mixing": mx.Mixing(self._world, self, "particle", mixingRadius=0.08, inputSubstances=set(["sugar","butter"]), outputSubstance="sweetbutter", nextURDF="./sweetbutterparticle.urdf", mixDecrement=1, mixSpeed=0.1, maxMixing=500, mixKey="mixing", nextMixDynamics=None, nearTypeFilter=Particle)}
 
 class ButterParticle(Particle):
     def _urdfName(self):
@@ -34,4 +41,16 @@ class ButterParticle(Particle):
         return "butterparticle"
     def _substanceName(self):
         return "butter"
+    def _particleDynamics(self):
+        return {"mixing": mx.Mixing(self._world, self, "particle", mixingRadius=0.08, inputSubstances=set(["sugar","butter"]), outputSubstance="sweetbutter", nextURDF="./sweetbutterparticle.urdf", mixDecrement=1, mixSpeed=0.1, maxMixing=500, mixKey="mixing", nextMixDynamics=None, nearTypeFilter=Particle)}
+
+class SweetButterParticle(Particle):
+    def _urdfName(self):
+        return "./sweetbutterparticle.urdf"
+    def _ontoTypeName(self):
+        return "sweetbutterparticle"
+    def _substanceName(self):
+        return "sweetbutter"
+    def _particleDynamics(self):
+        return {}
 

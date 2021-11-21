@@ -32,7 +32,7 @@ p.setGravity(0,0,-5, w.getSimConnection())
 p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0])
 
 import abe_sim.Particle.particle as prt
-w._particleTypes = {"particle": prt.Particle, "sugarparticle": prt.SugarParticle, "butterparticle": prt.ButterParticle}
+w._particleTypes = {"particle": prt.Particle, "sugarparticle": prt.SugarParticle, "butterparticle": prt.ButterParticle, "sweetbutterparticle": prt.SweetButterParticle}
 
 from abe_sim.Abe.abe import Abe
 from abe_sim.Floor.floor import Floor
@@ -41,8 +41,9 @@ from abe_sim.KitchenCabinet.kitchencabinet import KitchenCabinet,KitchenCabinetL
 from abe_sim.MediumBowl.mediumbowl import MediumBowl
 from abe_sim.Pantry.pantry import Pantry
 from abe_sim.Bag.bag import SugarBag, ButterBag
-from abe_sim.Particle.particle import Particle, SugarParticle, ButterParticle
+from abe_sim.Particle.particle import Particle, SugarParticle, ButterParticle, SweetButterParticle
 from abe_sim.Fridge.fridge import Fridge, Freezer, FridgeDoor, FreezerDoor
+from abe_sim.Whisk.whisk import Whisk
 
 a = w.addPObjectOfType("abe", Abe, [0,0,0], [0,0,0,1])
 f = w.addPObjectOfType("floor", Floor, [0,0,0], [0,0,0,1])
@@ -59,11 +60,14 @@ fg = w.addPObjectOfType("fridge", Fridge, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fz = w.addPObjectOfType("freezer", Freezer, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fgd = w.addPObjectOfType("fridgeDoor", FridgeDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fzd = w.addPObjectOfType("freezerDoor", FreezerDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
+wh = w.addPObjectOfType("whisk", Whisk, [-3.956, -4.43, 1.247], [0.5, -0.5, -0.5, 0.5])
 fg.setBodyProperty("fn", "door", "fridgeDoor")
 fz.setBodyProperty("fn", "door", "freezerDoor")
 aux = w.addPObjectOfType("aux", ButterParticle,[0,0,0],[0,0,0,1])
 w.removePObject("aux")
 aux = w.addPObjectOfType("aux", SugarParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
+aux = w.addPObjectOfType("aux", SweetButterParticle,[0,0,0],[0,0,0,1])
 w.removePObject("aux")
 
 

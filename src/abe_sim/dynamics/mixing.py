@@ -1,9 +1,8 @@
 import pybullet as p
 import math
-import abe_sim.Particle.particle as prt
 
 class Mixing:
-    def __init__(self, world, pobject, link, mixingRadius=0, inputSubstances=set([]), outputSubstance="", nextURDF="", mixDecrement=0.1, mixSpeed=0.1, maxMixing=0, mixKey="", nextMixDynamics=None):
+    def __init__(self, world, pobject, link, mixingRadius=0, inputSubstances=set([]), outputSubstance="", nextURDF="", mixDecrement=0.1, mixSpeed=0.1, maxMixing=0, mixKey="", nextMixDynamics=None, nearTypeFilter=None):
         self._world = world
         self._simConnection = self._world.getSimConnection()
         self._pobject = pobject
@@ -19,11 +18,12 @@ class Mixing:
         self._maxMixing = maxMixing
         self._mixKey = mixKey
         self._nextMixDynamics = nextMixDynamics
+        self._nearTypeFilter = nearTypeFilter
     def _closeParticles(self, position):
         minC = [a - self._mixingRadius for a in position]
         maxC = [a + self._mixingRadius for a in position]
         closePObjects = list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)]))
-        closePObjects = [x for x in closePObjects if isinstance(x, prt.Particle)]
+        closePObjects = [x for x in closePObjects if isinstance(x, self._nearTypeFilter)]
         retq = {}
         for pob in closePObjects:
             bodyIdentifiers = pob.getBodyIdentifiers()
@@ -64,7 +64,7 @@ class Mixing:
         self._pobject.reloadObject(position, orientation)
         self._pobject.setBodyProperty((self._link,), "substance", self._outputSubstance)
         self._pobject.setBodyProperty((self._link,), "mixing", self._maxMixing)
-        if None != self._mixKey:
+        if None != self._nextMixDynamics:
             self._pobject._dynamics[self._mixKey] = self._nextMixDynamics
         elif self._mixKey in self._pobject._dynamics:
             self._pobject._dynamics.pop(self._mixKey)

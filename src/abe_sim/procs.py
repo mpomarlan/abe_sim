@@ -103,7 +103,7 @@ def getTrajectorBoxes(agent, handLink, tolerance=0.0):
         aabbMax = translateVector(vectorDifference(aabbMax, position), [tolerance]*3)
         return aabbMin, aabbMax
     boxes = [aux(x) for x in boxes]
-    allowableCollisionFn = lambda box, collidingObjects: allowCollisionByWhitelist(box, collidingObjects, whitelistNames=whitelist, whitelistTypes=["sugarparticle", "butterparticle", "particle"])
+    allowableCollisionFn = lambda box, collidingObjects: allowCollisionByWhitelist(box, collidingObjects, whitelistNames=whitelist, whitelistTypes=w._particleTypes.keys())
     return boxes, allowableCollisionFn
 
 def isGraspValid(agent, hand):
@@ -306,10 +306,11 @@ def isGrasping(agent, handLink, item, radius):
         return False
     if item.getName() in grasping:
         posI = item.getBodyProperty((), "position")
+        handle = item.getBodyProperty("fn", "handle")
+        if handle:
+            posI = translateVector(posI, p.rotateVector(item.getBodyProperty((), "orientation"), handle))
         posH = agent.getBodyProperty((handLink,), "position")
-        d = [a-b for a,b in zip(posI,posH)]
-        d = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
-        return d < radius
+        return distance(posI, posH) < radius
     return False
 
 
@@ -825,6 +826,7 @@ class HandNear(Goal):
         return str(self._item) + ","+ str(self._hand)
     def _isFulfilled(self):
         posI = self._item.getBodyProperty((), "position")
+        handle = self._item.getBodyProperty("fn", "handle")
         posH = self._agent.getBodyProperty((self._handLink,), "position")
         velocityR = self._item.getBodyProperty((), "linearVelocity")
         velocity = self._agent.getBodyProperty((self._handLink,), "linearVelocity")
@@ -834,6 +836,8 @@ class HandNear(Goal):
             pullAxis = [self._radius*x for x in self._item.getBodyProperty("fn", "openingaxis")]
             posI = translateVector(posI, p.rotateVector(orientationI, translateVector(pullAxis, handlePoint)))
             ## TODO: recompute velocity too
+        elif handle:
+            posI = translateVector(posI, p.rotateVector(orientationI, handle))
         tracking = distance(velocityR, velocity) < 0.01
         ok = distance(posI, posH) < self._radius
         if not ok:
@@ -910,11 +914,15 @@ class HandReaching(BodyProcess):
             whitelist = [refPO.getName()] + [x.getName() for x in closeObjects(refPO)]
             positionR = refPO.getBodyProperty((), "position")
             position = translateVector(positionR,[0,0,self._radius])
+            handle = refPO.getBodyProperty("fn", "handle")
             if refPO.getBodyProperty("fn", "pullabledoor"):
                 handlePoint = refPO.getBodyProperty("fn", "handlepoint")
                 orientationR = refPO.getBodyProperty((), "orientation")
                 pullAxis = [0.8*self._radius*x for x in refPO.getBodyProperty("fn", "openingaxis")]
                 position = translateVector(positionR, p.rotateVector(orientationR, translateVector(pullAxis, handlePoint)))
+            elif handle:
+                orientationR = refPO.getBodyProperty((), "orientation")
+                position = translateVector(positionR, p.rotateVector(orientationR, handle))
         else:
             position = self._corridor.waypoints[-1]
         controls = {"+constraints": [], "-constraints": [], "jointTargets": {}}

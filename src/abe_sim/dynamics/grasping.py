@@ -1,5 +1,6 @@
 import pybullet as p
 import math
+from abe_sim.geom import translateVector
 
 class Grasping:
     def __init__(self, world, pobject, link, graspingRadius=0):
@@ -35,6 +36,10 @@ class Grasping:
         conPlus = []
         conMinus = []
         position = self._pobject.getBodyProperty((self._link,), "position")
+        handle = self._pobject.getBodyProperty("fn", "handle")
+        if None != handle:
+            orientation = self._pobject.getBodyProperty((self._link,), "orientation")
+            position = translateVector(position, p.rotateVector(orientation, handle))
         grasper = self._pobject.getBodyProperty((self._link,), "grasper")
         closeGripper = self._closeGripper(position)
         if (None != closeGripper) and (grasper != closeGripper):
