@@ -197,6 +197,8 @@ class PObject():
             return False
         if not (isinstance(identifier, tuple) and (() != identifier)):
             identifier = [identifier]
+        if identifier[0] not in self._customStateVariables:
+            self._customStateVariables[identifier[0]] = {}
         self._customStateVariables[identifier[0]][propertyId] = value
         return True
     def getName(self):

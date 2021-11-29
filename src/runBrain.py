@@ -60,7 +60,7 @@ fg = w.addPObjectOfType("fridge", Fridge, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fz = w.addPObjectOfType("freezer", Freezer, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fgd = w.addPObjectOfType("fridgeDoor", FridgeDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fzd = w.addPObjectOfType("freezerDoor", FreezerDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
-wh = w.addPObjectOfType("whisk", Whisk, [-3.956, -4.43, 1.247], [0.5, -0.5, -0.5, 0.5])
+wh = w.addPObjectOfType("whisk", Whisk, [-3.956, -4.54, 1.247], [0.5, -0.5, -0.5, 0.5])
 fg.setBodyProperty("fn", "door", "fridgeDoor")
 fz.setBodyProperty("fn", "door", "freezerDoor")
 aux = w.addPObjectOfType("aux", ButterParticle,[0,0,0],[0,0,0,1])
@@ -226,7 +226,7 @@ def thread_function_flask():
                     cgr = inputState
                 name = request_data["input"]
                 tool = request_data["tool"]
-                if (name in w._pobjects) and (storeName in w._pobjects):
+                if (name in w._pobjects) and (tool in w._pobjects):
                     doAction = True
                     ccd = {'op': 'mix', 'item': name, 'tool': tool}
             if doAction:
@@ -234,6 +234,7 @@ def thread_function_flask():
                     executingAction.wait()
                 with updating:
                     retq["response"] = {"mixture": name, "kitchenOutputState": cwd}
+                    w._pobjects["abe"].setBodyProperty("fn", "done", False)
             else:
                 with updating:
                     retq["response"] = {"mixture": None, "kitchenOutputState": cwd}

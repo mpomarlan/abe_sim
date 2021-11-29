@@ -15,13 +15,15 @@ def closestPointOnCuboid(aabbMin, aabbMax, position):
     xM, yM, zM = aabbMax
     return (min(xM, max(xm, x)), min(yM, max(ym, y)), min(zM, max(zm, z)))
 
-def closestFreePointOnCuboid(world, name, whitelist, suppMin, suppMax, position, dims):
+def closestFreePointOnCuboid(h,boxes,allowableCollisionFn, posO2H, world, name, whitelist, suppMin, suppMax, position, dims):
     initialPos = closestPointOnCuboid(suppMin, suppMax, position)
-    auxMin = [a-b for a,b in zip(initialPos,dims)]
-    auxMax = [a+b for a,b in zip(initialPos,dims)]
+    initialPosH = translateVector(initialPos, posO2H)
+    #auxMin = [a-b for a,b in zip(initialPos,dims)]
+    #auxMax = [a+b for a,b in zip(initialPos,dims)]
     dimsAdj = [0.15,0.15,0.05]
-    blockNames = set(overlappingObjectNames(auxMin, auxMax, world)).difference(whitelist)
-    if 0 == len(blockNames):
+    #blockNames = set(overlappingObjectNames(auxMin, auxMax, world)).difference(whitelist)
+    if validExtrusion(boxes, initialPosH, initialPosH, allowableCollisionFn, world):
+    #if 0 == len(blockNames):
         return initialPos
     kMax = [round((a - b)/(c)) for a,b,c in zip(suppMax,suppMin,dimsAdj)]
     initialPosK = [round((a-b)/(c)) for a,b,c in zip(initialPos,suppMin,dimsAdj)]
@@ -32,27 +34,14 @@ def closestFreePointOnCuboid(world, name, whitelist, suppMin, suppMax, position,
     for c in sorted(cells):
         if 1>=c[0]:
             continue
-        auxMin = [suppMin[0]+dimsAdj[0]*c[1]-dims[0], suppMin[1]+dimsAdj[1]*c[2]-dims[1], suppMax[2]-dims[2]+0.01]
-        auxMax = [suppMin[0]+dimsAdj[0]*c[1]+dims[0], suppMin[1]+dimsAdj[1]*c[2]+dims[1], suppMax[2]+dims[2]+0.01]
-        if 0 == len(set(overlappingObjectNames(auxMin, auxMax, world)).difference(whitelist)):
-            px = [suppMin[0] + c[1]*dimsAdj[0], suppMin[1] + c[2]*dimsAdj[1], suppMax[2]+0.01]
+        #auxMin = [suppMin[0]+dimsAdj[0]*c[1]-dims[0], suppMin[1]+dimsAdj[1]*c[2]-dims[1], suppMax[2]-dims[2]+0.01]
+        #auxMax = [suppMin[0]+dimsAdj[0]*c[1]+dims[0], suppMin[1]+dimsAdj[1]*c[2]+dims[1], suppMax[2]+dims[2]+0.01]
+        px = [suppMin[0] + c[1]*dimsAdj[0], suppMin[1] + c[2]*dimsAdj[1], suppMax[2]+h+0.01]
+        posH = translateVector(px, posO2H)
+        if validExtrusion(boxes, posH, posH, allowableCollisionFn, world):
+        #if 0 == len(set(overlappingObjectNames(auxMin, auxMax, world)).difference(whitelist)):
             return px
     return None
-
-def closestPointOnSphere(center, radius, position, onUpper=True):
-    d = [a-b for a,b in zip(position, center)]
-    nd = math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])
-    d = [x*radius/nd for x in d]
-    if onUpper:
-        if 0 > d[2]:
-            d[2] = 0
-            nD = math.sqrt(d[0]*d[0] + d[1]*d[1])
-            if 0.001 > nD:
-                d = [0,0,1]
-            else:
-                d[0] = radius*d[0]/nD
-                d[1] = radius*d[1]/nD
-    return [a+b for a,b in zip(center, d)]
 
 def getHandLinearJointControls(agent, hand, controls, posHTarget, velocity=[0,0,0]):
     positionB = agent.getBodyProperty(("base_yaw",), "position")
@@ -103,7 +92,7 @@ def getTrajectorBoxes(agent, handLink, tolerance=0.0):
         aabbMax = translateVector(vectorDifference(aabbMax, position), [tolerance]*3)
         return aabbMin, aabbMax
     boxes = [aux(x) for x in boxes]
-    allowableCollisionFn = lambda box, collidingObjects: allowCollisionByWhitelist(box, collidingObjects, whitelistNames=whitelist, whitelistTypes=w._particleTypes.keys())
+    allowableCollisionFn = lambda box, collidingObjects: allowCollisionByWhitelist(box, collidingObjects, whitelistNames=whitelist, whitelistTypes=agent._world._particleTypes.keys())
     return boxes, allowableCollisionFn
 
 def isGraspValid(agent, hand):
@@ -218,6 +207,9 @@ def getFreeTargetAroundAgent(agent, hand, corridor, samples=100):
     handLink = {"right": "hand_right_roll", "left": "hand_left_roll"}[hand]
     refPos = [0, {"left": 0.4, "right": -0.4}[hand], 0.95]
     boxes, allowableCollisionFn = getTrajectorBoxes(agent, handLink, tolerance=0)
+    if corridor and corridor.waypoints:
+        if validExtrusion(boxes, corridor.waypoints[-1], corridor.waypoints[-1], allowableCollisionFn, world):
+            return corridor.waypoints[-1]
     positionBase = agent.getBodyProperty(("base_yaw",), "position")
     orientationBase = agent.getBodyProperty((), "orientation")
     points = []
@@ -327,17 +319,42 @@ class Location:
 class LocationUpright(Location):
     def isThere(self, trajector):
         orientation = trajector.getBodyProperty((), "orientation")
-        vertical = p.rotateVector(orientation, [0, 0, 1])
-        return 0.98 < vertical[2]
+        _, targetOr = self.suggestPose(trajector)
+        axis, angle = p.getAxisAngleFromQuaternion(quaternionProduct(orientation, [targetOr[0], targetOr[1], targetOr[2], -targetOr[3]]))
+        #vertical = p.rotateVector(orientation, [0, 0, 1])
+        return 0.002 > abs(angleRemap(angle))#0.98 < vertical[2]
     def suggestPose(self, trajector):
         position = trajector.getBodyProperty((), "position")
         orientation = trajector.getBodyProperty((), "orientation")
-        adjVert = p.rotateVector(orientation, [0,0,1])
-        if 0.98 > adjVert[2]:
-            axis = [adjVert[1],-adjVert[0],0]
-            nA = math.sqrt(axis[0]*axis[0] + axis[1]*axis[1])
-            axis = [x/nA for x in axis]
-            angle = math.acos(adjVert[2])
+        refAxisLocal = trajector.getBodyProperty("fn", "uprightLocalReference")
+        refAxisGlobal = trajector.getBodyProperty("fn", "uprightGlobalReference")
+        orthogonal = trajector.getBodyProperty("fn", "referenceOrthogonal")
+        if not refAxisLocal:
+            refAxisLocal = [0,0,1]
+        if not refAxisGlobal:
+            refAxisGlobal = [0,0,1]
+        adjAxis = p.rotateVector(orientation, refAxisLocal)
+        dot = [a*b for a,b in zip(adjAxis, refAxisGlobal)]
+        dot = dot[0]*dot[0] + dot[1]*dot[1] + dot[2]*dot[2]
+        # refAxisGlobal cross product adjAxis
+        # i  j  k
+        # ax ay az
+        # gx gy gz
+        axis = [-refAxisGlobal[1]*adjAxis[2] + refAxisGlobal[2]*adjAxis[1], -refAxisGlobal[2]*adjAxis[0] + refAxisGlobal[0]*adjAxis[2], -refAxisGlobal[0]*adjAxis[1] + refAxisGlobal[1]*adjAxis[0]]
+        nA = math.sqrt(axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2])
+        axis = [x/nA for x in axis]
+        angle = math.acos(min(1, max(-1, dot)))
+        if math.pi < angle:
+            angle = angle - 2*math.pi
+        elif -math.pi > angle:
+            angle = angle + 2*math.pi
+        if orthogonal:
+            if 0 <= angle:
+                angle = 0.5*math.pi - angle
+            else:
+                angle = -0.5*math.pi - angle
+        elif (0.98 > dot) or (orthogonal and (0.002 < abs(angle))):
+            #angle = math.acos(min(1, max(-1,adjVert[2])))
             dq = p.getQuaternionFromAxisAngle(axis, angle)
             orientation = quaternionProduct(dq, orientation)
         return position, orientation
@@ -370,10 +387,30 @@ class LocationAt(Location):
         return False
     def suggestPose(self, trajector):
         aabbMin, aabbMax = trajector.getAABB(None)
+        h = 0.5*(aabbMax[2]-aabbMin[2])
         dims = [(a-b)/2.0 for a,b in zip(aabbMax,aabbMin)]
         dims = [dims[0]+0.015, dims[1]+0.015, dims[2]]
         position = trajector.getBodyProperty((), "position")
         _, orientation = LocationUpright(trajector).suggestPose(trajector)
+        agent = trajector._world._pobjects['abe']
+        hand = None
+        if trajector.getName() in agent.getBodyProperty(("hand_left_roll",), "grasping"):
+            hand = "left"
+        elif trajector.getName() in agent.getBodyProperty(("hand_right_roll",), "grasping"):
+            hand = "right"
+        if hand:
+            handLink = {"left": "hand_left_roll", "right": "hand_right_roll"}[hand]
+            boxes,allowableCollisionFn = getTrajectorBoxes(agent, handLink)
+            posO2H = [a-b for a,b in zip(agent.getBodyProperty((handLink,), "position"),position)]
+        else:
+            def aux(box):
+                aabbMin, aabbMax = box
+                aabbMin = translateVector(vectorDifference(aabbMin, position), [0,0,0])
+                aabbMax = translateVector(vectorDifference(aabbMax, position), [0,0,0])
+                return aabbMin, aabbMax
+            boxes = [aux(trajector.getAABB(None))]
+            allowableCollisionFn = lambda box, collidingObjects: allowCollisionByWhitelist(box, collidingObjects, whitelistNames=[trajector.getName()], whitelistTypes=agent._world._particleTypes.keys())
+            posO2H = [0,0,0]
         supportBBs = self._relatum.getBodyProperty("fn", "supportbbs")
         shelved = True
         if None == supportBBs:
@@ -396,7 +433,7 @@ class LocationAt(Location):
         for supp in supportBBs:
             suppMin = [supp[0][0]+dims[0], supp[0][1]+dims[1], supp[1][2]+dims[2]+0.01]
             suppMax = [supp[1][0]-dims[0], supp[1][1]-dims[1], supp[1][2]+dims[2]+0.02]
-            candidate = closestFreePointOnCuboid(self._relatum._world, trajector.getName(), whitelist, suppMin, suppMax, position, dims)
+            candidate = closestFreePointOnCuboid(h,boxes, allowableCollisionFn, posO2H, self._relatum._world, trajector.getName(), whitelist, suppMin, suppMax, position, dims)
             if None == candidate:
                 continue
             d = distance(candidate, position)
@@ -461,14 +498,18 @@ class LocationTippedOver(Location):
         orientation = trajector.getBodyProperty((), "orientation")
         dripAxis = trajector.getBodyProperty("fn", "dripaxis")
         if None == dripAxis:
-            dripAxis = [0,1,0]
+            dripAxis = trajector.getBodyProperty("fn", "refaxis")
+            if None == dripAxis:
+                dripAxis = [0,1,0]
         tipped = -0.99 > p.rotateVector(orientation, dripAxis)[2]
         return LocationOver(self._relatum).isThere(trajector) and tipped
     def suggestPose(self, trajector):
         positionO, orientationO = LocationOver(self._relatum).suggestPose(trajector)
         dripAxis = trajector.getBodyProperty("fn", "dripaxis")
         if None == dripAxis:
-            dripAxis = [0,1,0]
+            dripAxis = trajector.getBodyProperty("fn", "refaxis")
+            if None == dripAxis:
+                dripAxis = [0,1,0]
         dripAdj = p.rotateVector(orientationO, dripAxis)
         # dripAdj crossproduct -z
         crossP = [-dripAdj[1], dripAdj[0], 0]
@@ -480,7 +521,7 @@ class LocationTippedOver(Location):
             refPt = trajector.getBodyProperty("fn", "refpt")
             if None == refPt:
                 refPt = [0,0,0]
-            q = p.getQuaternionFromAxisAngle([x/cD for x in crossP], math.acos(-dripAdj[2]))
+            q = p.getQuaternionFromAxisAngle([x/cD for x in crossP], math.acos(min(1,max(-1,-dripAdj[2]))))
             orientation = quaternionProduct(q, orientationO)
             positionR = [a+b for a,b in zip(positionO, p.rotateVector(orientationO, refPt))]
             bestPos = p.rotateVector(q, [a-b for a,b in zip(positionO,positionR)])
@@ -769,7 +810,7 @@ class NavigateTo(BodyProcess):
             self._agent.applyRigidBodyControls([controls])
             return
         stillUprighting = False
-        for hl, ups in [("hand_left_roll", self._agent.getBodyProperty(("hand_left_roll",), "uprighting")), ("hand_right_roll", self._agent.getBodyProperty(("hand_right_roll",), "uprighting"))]:
+        for h, hl, ups in [("left", "hand_left_roll", self._agent.getBodyProperty(("hand_left_roll",), "uprighting")), ("right", "hand_right_roll", self._agent.getBodyProperty(("hand_right_roll",), "uprighting"))]:
             if None == ups:
                 continue
             aux = []
@@ -777,6 +818,22 @@ class NavigateTo(BodyProcess):
                 if not LocationUpright(None).isThere(self._agent._world._pobjects[trajectorName]):
                     aux.append(trajectorName)
                     stillUprighting = True
+                    _, targetOr = LocationUpright(None).suggestPose(self._agent._world._pobjects[trajectorName])
+                    positionH = self._agent.getBodyProperty((hl,), "position")
+                    orientationH = self._agent.getBodyProperty((hl,), "orientation")
+                    positionO = self._agent._world._pobjects[trajectorName].getBodyProperty((), "position")
+                    orientationO = self._agent._world._pobjects[trajectorName].getBodyProperty((), "orientation")
+                    ### Have (cr.) object in world, hand in world; need object in hand
+                    ### Toiw = Thiw*Toih => Toih = inv(Thiw)*Toiw
+                    posOiH = [a-b for a,b in zip(p.rotateVector((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), positionO), p.rotateVector((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), positionH))]
+                    orOiH = quaternionProduct((orientationH[0], orientationH[1], orientationH[2], -orientationH[3]), orientationO)
+                    ### have (targ.) object in world, object in hand; need (targ.) hand in world
+                    ### Toiw = Thiw*Toih => Thiw = Toiw*inv(Toih)
+                    ### inv(T)*T has 0 translation so -iT.q*T.t = iT.t
+                    posOiH = p.rotateVector((orOiH[0], orOiH[1], orOiH[2], -orOiH[3]), posOiH)
+                    #posTH = [a+b for a,b in zip(targetPos, p.rotateVector(targetOr, (-posOiH[0], -posOiH[1], -posOiH[2])))]
+                    orTH = quaternionProduct(targetOr, (orOiH[0], orOiH[1], orOiH[2], -orOiH[3]))
+                    controls = getHandAngularJointControls(self._agent, h, controls, orTH)
             self._agent.setBodyProperty((hl,), "uprighting", aux)
         if stillUprighting:
             controls.update({"world_to_base_x": (position[0], 0, 1.0), "base_x_to_base_y": (position[1], 0, 1.0), "base_y_to_base_yaw": (yaw, 0, 1.0)})
@@ -826,13 +883,13 @@ class HandNear(Goal):
         return str(self._item) + ","+ str(self._hand)
     def _isFulfilled(self):
         posI = self._item.getBodyProperty((), "position")
+        orientationI = self._item.getBodyProperty((), "orientation")
         handle = self._item.getBodyProperty("fn", "handle")
         posH = self._agent.getBodyProperty((self._handLink,), "position")
         velocityR = self._item.getBodyProperty((), "linearVelocity")
         velocity = self._agent.getBodyProperty((self._handLink,), "linearVelocity")
         if self._item.getBodyProperty("fn", "pullabledoor"):
             handlePoint = self._item.getBodyProperty("fn", "handlepoint")
-            orientationI = self._item.getBodyProperty((), "orientation")
             pullAxis = [self._radius*x for x in self._item.getBodyProperty("fn", "openingaxis")]
             posI = translateVector(posI, p.rotateVector(orientationI, translateVector(pullAxis, handlePoint)))
             ## TODO: recompute velocity too
@@ -922,7 +979,7 @@ class HandReaching(BodyProcess):
                 position = translateVector(positionR, p.rotateVector(orientationR, translateVector(pullAxis, handlePoint)))
             elif handle:
                 orientationR = refPO.getBodyProperty((), "orientation")
-                position = translateVector(positionR, p.rotateVector(orientationR, handle))
+                position = translateVector(translateVector(positionR, p.rotateVector(orientationR, handle)), [0,0,self._radius])
         else:
             position = self._corridor.waypoints[-1]
         controls = {"+constraints": [], "-constraints": [], "jointTargets": {}}
@@ -994,11 +1051,11 @@ class PlacingItem(BodyProcess):
         targetPos, targetOr = location.suggestPose(self._item)
         positionO = self._item.getBodyProperty((), "position")
         orientationO = self._item.getBodyProperty((), "orientation")
+        dq = quaternionProduct(targetOr, [orientationO[0], orientationO[1], orientationO[2], -orientationO[3]])
+        _, angle = p.getAxisAngleFromQuaternion(dq)
+        angle = angleRemap(angle)
         need2Upright = False
         if isinstance(location, LocationUpright):
-            dq = quaternionProduct(targetOr, [orientationO[0], orientationO[1], orientationO[2], -orientationO[3]])
-            _, angle = p.getAxisAngleFromQuaternion(dq)
-            angle = angleRemap(angle)
             uprighting = self._agent.getBodyProperty((self._handLink,), "uprighting")
             if 0.1 < abs(angle):
                 if self._item.getName() not in uprighting:
@@ -1022,7 +1079,6 @@ class PlacingItem(BodyProcess):
         posTH = [a+b for a,b in zip(targetPos, p.rotateVector(targetOr, (-posOiH[0], -posOiH[1], -posOiH[2])))]
         orTH = quaternionProduct(targetOr, (orOiH[0], orOiH[1], orOiH[2], -orOiH[3]))
         controls = {"+constraints": [], "-constraints": [], "jointTargets": {}}
-        _, angle = p.getAxisAngleFromQuaternion(quaternionProduct(orientationH, [orTH[0], orTH[1], orTH[2], -orTH[3]]))
         if 0.005 > abs(angleRemap(angle)):
             self._corridor, controls = planArmMotion(self._agent, self._hand, posTH, self._corridor, controls,maxspeed=0.015)
         if need2Upright:
@@ -1342,7 +1398,10 @@ class MixedContents(Goal):
     def _strVarPart(self):
         return str(self._item) + "," + str(self._substance)
     def _isFulfilled(self):
-        return all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
+        mixed = all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
+        js = self._tool._world._pobjects["abe"].getJointStates()
+        toolUpright = self._tool._world._pobjects["abe"].getBodyProperty("fn", "done")
+        return mixed and toolUpright
     def getThreats(self, processes):
         return [x for x in [MixingContents(self._item, self._tool, self._substance)] if str(x) in processes]
     def suggestProcess(self):
@@ -1366,17 +1425,24 @@ class MixedStuff(Goal):
     def _strVarPart(self):
         return str(self._item) + "," + str(self._tool) + "," + str(self._substance)
     def _isFulfilled(self):
-        return all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
+        mixed = all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
+        js = self._tool._world._pobjects["abe"].getJointStates()
+        toolUpright = self._tool._world._pobjects["abe"].getBodyProperty("fn", "done")
+        return mixed and toolUpright
     def suggestProcess(self):
-        return MixingStuff(self._item, self._tool, "right")
+        return MixingStuff(self._item, self._tool, "right", self._substance)
 
 class MixingStuff(BodyProcess):
-    def __init__(self, item, tool, hand):
-        super().__init__(coherence=[Grasped(tool), BaseNear(item)])
+    def __init__(self, item, tool, hand, substance):
+        super().__init__(coherence=[Grasped(tool, "right"), BaseNear(item)])
         self._item = item
         self._tool = tool
         self._hand = hand
         self._handLink = {"left": "hand_left_roll", "right": "hand_right_roll"}[hand]
+        self._agent = item._world._pobjects["abe"]
+        self._substance = substance
+        self._flip = False
+        self._refHP = [0,0,0]
     def _strVarPart(self):
         return str(self._item) + "," + str(self._tool)
     def bodyAction(self):
@@ -1394,17 +1460,45 @@ class MixingStuff(BodyProcess):
         refptXY = [refpt[0],refpt[1],0]
         positionIXY = [positionI[0],positionI[1],0]
         xydist = distance(refptXY,positionIXY)
-        _, targetOr = LocationUpright().suggestPose(self._tool)
-        if -0.98 < refaxis[2]:
-            targetPos = [position[0], position[1], 1]
-        elif 0.01 < xydist:
-            targetPos = [positionI[0], positionI[1], position[2]]
-        elif 0.01 < dist:
-            inc = -0.002
-            targetPos = [positionI[0], positionI[1], position[2]+inc]
+        zdist = abs(positionI[2]-position[2])
+        _, targetOr = LocationTippedOver(self._item).suggestPose(self._tool)
+        mixed = all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
+        if not mixed:
+            if (-0.98 < refaxis[2]):
+                print("MIXING: 01 Tipping")
+                targetPos = [positionI[0], positionI[1], 1.5]
+            elif ((0.01 < xydist) and (0.38 < zdist)) or ((0.05 < xydist) and (0.4 > zdist)):
+                print("MIXING: 02 Aligning")
+                targetPos = [positionI[0], positionI[1], 1.5]
+            elif 0.41 < zdist:
+                print("MIXING: 03 Lowering")
+                inc = -0.005
+                targetPos = [positionI[0], positionI[1], position[2]+inc]
+            else:
+                print("MIXING: 04 Mixing")
+                targetPos = [positionI[0], positionI[1], positionI[2]+0.365]
+                #targetOr = quaternionProduct(orientation, p.getQuaternionFromAxisAngle([1,0,0], 1*math.pi/180.0))
+                targetOr = orientation
+                self._tool.spin()
         else:
-            targetPos = [positionI[0], positionI[1], position[2]]
-            targetOr = quaternionProduct(p.getQuaternionFromAxisAngle([0,0,1], math.pi/180.0), orientation)
+            print("MIXING: 05 Returning")
+            js = self._agent.getJointStates()
+            if not self._flip:
+                self._flip = True
+                self._refHP = [js["hand_right_base_to_hand_right_x"][0], js["hand_right_x_to_hand_right_y"][0], js["hand_right_y_to_hand_right_z"][0]]
+                self._refHP[2] += 0.12
+            toolUpright = 0.02 > (abs(js["hand_right_z_to_hand_right_yaw"][0]) + abs(js["hand_right_yaw_to_hand_right_pitch"][0]) + abs(js["hand_right_pitch_to_hand_right_roll"][0]))
+            if toolUpright:
+                self._agent.applyRigidBodyControls([{"+constraints": [], "-constraints": [], "jointTargets": {"hand_right_base_to_hand_right_x": (self._refHP[0],0,1), "hand_right_x_to_hand_right_y": (self._refHP[1],0,1), "hand_right_y_to_hand_right_z": (self._refHP[2]-0.2,0,1)}}])
+                if 0.01 > abs(self._refHP[2]-0.2-js["hand_right_y_to_hand_right_z"][0]):
+                    self._agent.setBodyProperty("fn", "done", True)
+                return
+            elif (0.01 < self._refHP[2] - js["hand_right_y_to_hand_right_z"][0]):
+                self._agent.applyRigidBodyControls([{"+constraints": [], "-constraints": [], "jointTargets": {"hand_right_base_to_hand_right_x": (self._refHP[0],0,1), "hand_right_x_to_hand_right_y": (self._refHP[1],0,1), "hand_right_y_to_hand_right_z": (self._refHP[2],0,1)}}])
+                return
+            else:
+                self._agent.applyRigidBodyControls([{"+constraints": [], "-constraints": [], "jointTargets": {"hand_right_z_to_hand_right_yaw": (0,0,1), "hand_right_yaw_to_hand_right_pitch": (0,0,1), "hand_right_pitch_to_hand_right_roll": (0,0,1)}}])
+                return
         positionH, orientationH = getHandTargetPose(targetPos, targetOr, position, orientation, positionH, orientationH)
         controls = getHandLinearJointControls(self._agent, self._hand, {"+constraints": [], "-constraints": [], "jointTargets": {}}, positionH, velocity=[0,0,0])
         controls = getHandAngularJointControls(self._agent, self._hand, controls, orientationH, velocity=[0,0,0])

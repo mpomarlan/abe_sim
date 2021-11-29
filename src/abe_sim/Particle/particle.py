@@ -9,7 +9,7 @@ class Particle(pob.PObject):
         self._urdf = os.path.join(cDir, self._urdfName())
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"particle": {"graspable": True, "substance": self._substanceName()}, "": {"type": self._ontoTypeName()}, "fn": {"ingredient": True, "graspingradius": 0.2, "substancelink": "particle"}}
+        self._customStateVariables = {"particle": {"graspable": True, "substance": self._substanceName(), "mixing": 500}, "": {"type": self._ontoTypeName()}, "fn": {"maxmixing": 500, "ingredient": True, "graspingradius": 0.2, "mixingradius": 0.1, "substancelink": "particle"}}
     def _ontoTypeName(self):
         return "particle"
     def _substanceName(self):
@@ -32,7 +32,8 @@ class SugarParticle(Particle):
     def _substanceName(self):
         return "sugar"
     def _particleDynamics(self):
-        return {"mixing": mx.Mixing(self._world, self, "particle", mixingRadius=0.08, inputSubstances=set(["sugar","butter"]), outputSubstance="sweetbutter", nextURDF="./sweetbutterparticle.urdf", mixDecrement=1, mixSpeed=0.1, maxMixing=500, mixKey="mixing", nextMixDynamics=None, nearTypeFilter=Particle)}
+        cDir = os.path.dirname(os.path.abspath(__file__))
+        return {"mixing": mx.Mixing(self._world, self, "particle", mixingRadius=self._customStateVariables["fn"]["mixingradius"], inputSubstances=set(["sugar","butter"]), outputSubstance="sweetbutter", nextURDF=os.path.join(cDir, "./sweetbutterparticle.urdf"), mixDecrement=1, mixSpeed=0.1, maxMixing=self._customStateVariables["fn"]["maxmixing"], mixKey="mixing", nextMixDynamics=None, nearTypeFilter=Particle)}
 
 class ButterParticle(Particle):
     def _urdfName(self):
@@ -42,7 +43,8 @@ class ButterParticle(Particle):
     def _substanceName(self):
         return "butter"
     def _particleDynamics(self):
-        return {"mixing": mx.Mixing(self._world, self, "particle", mixingRadius=0.08, inputSubstances=set(["sugar","butter"]), outputSubstance="sweetbutter", nextURDF="./sweetbutterparticle.urdf", mixDecrement=1, mixSpeed=0.1, maxMixing=500, mixKey="mixing", nextMixDynamics=None, nearTypeFilter=Particle)}
+        cDir = os.path.dirname(os.path.abspath(__file__))
+        return {"mixing": mx.Mixing(self._world, self, "particle", mixingRadius=self._customStateVariables["fn"]["mixingradius"], inputSubstances=set(["sugar","butter"]), outputSubstance="sweetbutter", nextURDF=os.path.join(cDir, "./sweetbutterparticle.urdf"), mixDecrement=1, mixSpeed=0.1, maxMixing=self._customStateVariables["fn"]["maxmixing"], mixKey="mixing", nextMixDynamics=None, nearTypeFilter=Particle)}
 
 class SweetButterParticle(Particle):
     def _urdfName(self):

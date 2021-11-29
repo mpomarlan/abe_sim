@@ -43,21 +43,6 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(
 response = json.loads(r.text)
 print(response)
 
-#### Command 1: get the kitchen state
-#dws = {'kitchen': '?kitchen-state-1'}
-#r = requests.post("http://localhost:54321/abe-sim-command/to-get-kitchen", data=bytes(json.dumps(dws), "utf-8"))
-#worldState = json.loads(r.text)['response']
-##print(worldState)
-#with open("dbg22.log", "w") as outfile:
-#    outfile.write(json.dumps(worldState["?kitchen-state-1"]))
-
-#worldState = json.loads(open("dbg22.log").read())
-#### Command 2: set the kitchen state
-#dgr = {'kitchenInputState': worldState}
-#r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=bytes(json.dumps(dgr), "utf-8"))
-#response = json.loads(r.text)
-#print(response)
-
 ### Command 8: transfer bowl1 contents to bowl3
 dpo = {'input': 'mediumBowl1', 'container': 'mediumBowl3', 'kitchenInputState': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-transfer", data=bytes(json.dumps(dpo), "utf-8"))
@@ -67,6 +52,27 @@ print(response)
 ### Command 9: transfer bowl2 contents to bowl3
 dpo = {'input': 'mediumBowl2', 'container': 'mediumBowl3', 'kitchenInputState': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-transfer", data=bytes(json.dumps(dpo), "utf-8"))
+response = json.loads(r.text)
+print(response)
+
+### Command 1: get the kitchen state
+dws = {'kitchen': '?kitchen-state-1'}
+r = requests.post("http://localhost:54321/abe-sim-command/to-get-kitchen", data=bytes(json.dumps(dws), "utf-8"))
+worldState = json.loads(r.text)['response']
+#print(worldState)
+with open("dbg22.log", "w") as outfile:
+    outfile.write(json.dumps(worldState["?kitchen-state-1"]))
+
+#worldState = json.loads(open("dbg22.log").read())
+#### Command 2: set the kitchen state
+#dgr = {'kitchenInputState': worldState}
+#r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=bytes(json.dumps(dgr), "utf-8"))
+#response = json.loads(r.text)
+#print(response)
+
+### Command 10: mixing
+dpo = {'input': 'mediumBowl3', 'tool': 'whisk', 'kitchenInputState': None, 'setWorldState': False}
+r = requests.post("http://localhost:54321/abe-sim-command/to-mix", data=bytes(json.dumps(dpo), "utf-8"))
 response = json.loads(r.text)
 print(response)
 

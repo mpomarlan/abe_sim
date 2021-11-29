@@ -36,22 +36,32 @@ def overlappingBoxes(a,b):
         return fb(xm1, xm2, xM1) or fb(xm1, xM2, xM1) or fb(xm2, xm1, xM2) or fb(xm2, xM1, xM2)
     return all([fn(x,y,z,w) for x,y,z,w in zip(a[0],a[1],b[0],b[1])])
 
-def detailedTestValid(box, obj):
+def detailedTestValid(box, obj, debug=False):
     details = obj.getBodyProperty("fn", "boards")
     if None == details:
+        if debug:
+            print("    No detailed test because no detailed boxes, and the overall box is in collision.")
         return False
     position = obj.getBodyProperty((), "position")
     orientation = obj.getBodyProperty((), "orientation")
     details = [adjustBox(x, position, orientation) for x in details]
     for d in details:
         if overlappingBoxes(d,box):
+            if debug:
+                print("    detailed collision", d)
             return False
     return True
 
-def allowCollisionByWhitelist(box, collidingObjects, whitelistNames=[], whitelistTypes=[]):
+def allowCollisionByWhitelist(box, collidingObjects, whitelistNames=[], whitelistTypes=[], debug=False):
+    if debug:
+        print("aCBWB", collidingObjects, whitelistNames, whitelistTypes)
     for o in collidingObjects:
         if (o.getName() not in whitelistNames) and (o.getBodyProperty("", "type") not in whitelistTypes):
-            if not detailedTestValid(box, o):
+            if debug:
+                print("    ?", o.getName())
+            if not detailedTestValid(box, o, debug=debug):
+                if debug:
+                    print("        colliding", box, o.getAABB(None))
                 return False
     return True
 
@@ -107,8 +117,18 @@ def planCorridor(sampleBox, trajectorBoxes, allowableCollisionFn, world, end, st
         print(start, end, trajectorBoxes, sampleBox, position, orientation)
     if not validExtrusion(trajectorBoxes, start, start, allowableCollisionFn, world, debug=debug):
         print("START NOT VALID!!!!!", end, world._pobjects["abe"].getBodyProperty(("hand_right_roll",), "position"))
-    if not validExtrusion(trajectorBoxes, end, end, allowableCollisionFn, world, debug=debug):
+        extrudedBoxes = [extrudeBox(x, start, start) for x in trajectorBoxes]
+        collidingObjects = [overlappingObjects(*(list(x) + [world])) for x in extrudedBoxes][0]
+        print("    ", collidingObjects)
+        for box in extrudedBoxes:
+            allowCollisionByWhitelist(box, collidingObjects, whitelistNames=["abe"], whitelistTypes=[], debug=True)
+    if not validExtrusion(trajectorBoxes, end, end, allowableCollisionFn, world, debug=True):
         print("GOAL NOT VALID!!!!!", end, world._pobjects["abe"].getBodyProperty(("hand_right_roll",), "position"))
+        extrudedBoxes = [extrudeBox(x, end, end) for x in trajectorBoxes]
+        collidingObjects = [overlappingObjects(*(list(x) + [world])) for x in extrudedBoxes][0]
+        print("    ", collidingObjects)
+        for box in extrudedBoxes:
+            allowCollisionByWhitelist(box, collidingObjects, whitelistNames=["abe"], whitelistTypes=[], debug=True)
     while toVisit:
         estTotalCost, cost, pos, prev = heapq.heappop(toVisit)
         if pos in visited:
