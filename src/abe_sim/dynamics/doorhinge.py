@@ -1,5 +1,6 @@
 import pybullet as p
 import math
+from abe_sim.utils import stubbornTry
 
 class DoorHinge:
     def __init__(self, world, pobject, doorJoint="", handlePoint=[0,0,0], handleRadius=0, openedAngle=0, closedAngle=0, openingAxis=[0,1,0]):
@@ -9,7 +10,7 @@ class DoorHinge:
         self._pobjectId = self._pobject.getId()
         self._doorJoint = doorJoint
         self._doorJointId = self._pobject.getJointId(self._doorJoint)
-        self._doorLink = p.getJointInfo(self._pobjectId, self._doorJointId, self._simConnection)[12].decode('ascii')
+        self._doorLink = stubbornTry(lambda : p.getJointInfo(self._pobjectId, self._doorJointId, self._simConnection))[12].decode('ascii')
         self._doorLinkId = self._pobject.getLinkId(self._doorLink)
         self._handlePoint = handlePoint
         self._handleRadius = handleRadius
@@ -17,12 +18,12 @@ class DoorHinge:
         self._closedAngle = closedAngle
         self._openingAxis = openingAxis
     def _closeHandlerVelocity(self):
-        _, _, _, _, position, orientation = p.getLinkState(self._pobjectId, self._doorLinkId, 0, 0, self._simConnection)
+        _, _, _, _, position, orientation = stubbornTry(lambda : p.getLinkState(self._pobjectId, self._doorLinkId, 0, 0, self._simConnection))
         refAxis = p.rotateVector(orientation, self._openingAxis)
         refPt = [a+b for a,b in zip(position, p.rotateVector(orientation, self._handlePoint))]
         minC = [a - self._handleRadius for a in refPt]
         maxC = [a + self._handleRadius for a in refPt]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)]))
+        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         retq = None, None, None
         minD = self._handleRadius*10.0
         wrappedName = self._pobject.getName() + ":" + self._doorLink
@@ -41,7 +42,7 @@ class DoorHinge:
         return retq
     def update(self):
         updateFn = lambda : None
-        angle = p.getJointState(self._pobjectId, self._doorJointId, self._simConnection)[0]
+        angle = stubbornTry(lambda : p.getJointState(self._pobjectId, self._doorJointId, self._simConnection))[0]
         if True != self._pobject.getBodyProperty(self._doorLink, "pullable"):
             return updateFn, [{"+constraints": [], "-constraints": [], "jointTargets": {self._doorJoint: (angle,0,1)}}]
         pob, b, closeHandlerVelocity = self._closeHandlerVelocity()

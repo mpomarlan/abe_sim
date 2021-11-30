@@ -1,5 +1,6 @@
 import pybullet as p
 import math
+from abe_sim.utils import stubbornTry
 
 class Slicing:
     def __init__(self, world, pobject, link, sliceProcRadiusGrob=0.5, sliceProcRadiusAlong=0.15, sliceProcRadiusFine=0.05, sliceStackAxis=[1,0,0], sliceAxis=[0,1,0], initialSliceIntegrity=1, sliceType=None, sliceArgs=[], sliceKWArgs={}):
@@ -23,10 +24,10 @@ class Slicing:
         refPt = [a+b for a,b in zip(position, p.rotateVector(orientation, slicePoints[0]))]
         minC = [a - self._sliceProcRadiusGrob for a in refPt]
         maxC = [a + self._sliceProcRadiusGrob for a in refPt]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)]))
+        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         slicingAxis = p.rotateVector(orientation, self._sliceAxis)
         retq = None
-        dt = p.getPhysicsEngineParameters()['fixedTimeStep']
+        dt = stubbornTry(lambda : p.getPhysicsEngineParameters())['fixedTimeStep']
         for pob in closePObjects:
             bodyIdentifiers = pob.getBodyIdentifiers()
             for b in bodyIdentifiers:

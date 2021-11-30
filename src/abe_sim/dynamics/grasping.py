@@ -1,6 +1,7 @@
 import pybullet as p
 import math
 from abe_sim.geom import translateVector
+from abe_sim.utils import stubbornTry
 
 class Grasping:
     def __init__(self, world, pobject, link, graspingRadius=0):
@@ -14,7 +15,7 @@ class Grasping:
     def _closeGripper(self, position):
         minC = [a - self._graspingRadius for a in position]
         maxC = [a + self._graspingRadius for a in position]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)]))
+        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         retq = None
         minD = self._graspingRadius*10.0
         for pob in closePObjects:

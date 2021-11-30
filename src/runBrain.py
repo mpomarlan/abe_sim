@@ -20,6 +20,7 @@ import abe_sim.garden as garden
 import abe_sim.procs as procs
 
 from abe_sim.geom import vectorNorm
+from abe_sim.utils import stubbornTry
 
 isAMac = ('Darwin' == platform.system())
 ## WORLD CREATION line: adjust this as needed on your system.
@@ -28,8 +29,8 @@ if not isAMac:
 else:
     w = World(pybulletOptions = "") # Hardware-accelerated rendering. Seems necessary on newer Macs.
 
-p.setGravity(0,0,-5, w.getSimConnection())
-p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0])
+stubbornTry(lambda : p.setGravity(0,0,-5, w.getSimConnection()))
+stubbornTry(lambda : p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0]))
 
 import abe_sim.Particle.particle as prt
 w._particleTypes = {"particle": prt.Particle, "sugarparticle": prt.SugarParticle, "butterparticle": prt.ButterParticle, "sweetbutterparticle": prt.SweetButterParticle}
@@ -84,7 +85,7 @@ def placeCamera(item):
     iP = item.getBodyProperty((), "position")
     cP = w._pobjects["counterTop"].getBodyProperty((), "position")
     yaw = 180*math.atan2(iP[1]-cP[1],iP[0]-cP[0])/math.pi
-    p.resetDebugVisualizerCamera(4,yaw-90,-35, cP)
+    stubbornTry(lambda : p.resetDebugVisualizerCamera(4,yaw-90,-35, cP))
 
 def thread_function_flask():
     @flask.route("/abe-sim-command/to-get-kitchen", methods = ['POST'])
@@ -234,7 +235,6 @@ def thread_function_flask():
                     executingAction.wait()
                 with updating:
                     retq["response"] = {"mixture": name, "kitchenOutputState": cwd}
-                    w._pobjects["abe"].setBodyProperty("fn", "done", False)
             else:
                 with updating:
                     retq["response"] = {"mixture": None, "kitchenOutputState": cwd}
@@ -295,6 +295,7 @@ while True:
             cgr = None
         cwd = w.worldDump()
         if None != ccd:
+            w._pobjects["abe"].setBodyProperty("fn", "done", False)
             if 'fetch' == ccd['op']:
                 item = w._pobjects[ccd['item']]
                 agent = w._pobjects[list(w._ontoTypes["agent"])[0]]

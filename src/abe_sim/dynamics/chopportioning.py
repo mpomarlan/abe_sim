@@ -1,6 +1,7 @@
 import pybullet as p
 import math
 import abe_sim.Particle.particle as prt
+from abe_sim.utils import stubbornTry
 
 class ChopPortioning:
     def __init__(self, world, pobject, link, chopRadiusGrob=0.5, chopRadius=0.05, chopAxis=[0,0,1], chopPoint=[0,0,0], portionPoint=[0,0,0], initialPortioningIntegrity=0.06, particleType=prt.Particle, portionArgs=[], portionKWArgs={}):
@@ -26,10 +27,10 @@ class ChopPortioning:
         chopPoint = [a+b for a,b in zip(position, p.rotateVector(orientation, self._chopPoint))]
         minC = [a - self._chopRadiusGrob for a in chopPoint]
         maxC = [a + self._chopRadiusGrob for a in chopPoint]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)]))
+        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         chopAxis = p.rotateVector(orientation, self._chopAxis)
         retq = None
-        dt = p.getPhysicsEngineParameters()['fixedTimeStep']
+        dt = stubbornTry(lambda : p.getPhysicsEngineParameters())['fixedTimeStep']
         for pob in closePObjects:
             bodyIdentifiers = pob.getBodyIdentifiers()
             for b in bodyIdentifiers:

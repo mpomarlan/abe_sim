@@ -79,7 +79,13 @@ def getHandAngularJointControls(agent, hand, controls, orHTarget, velocity=[0,0,
     return controls
 
 def getTrajectorBoxes(agent, handLink, tolerance=0.0):
-    tolerance = abs(tolerance)
+    if isinstance(tolerance, float) or isinstance(tolerance, int):
+        tolerance = abs(tolerance)
+        ntolerance = [-tolerance]*3
+        tolerance = [tolerance]*3
+    elif isinstance(tolerance,list) or isinstance(tolerance,tuple):
+        tolerance = [abs(x) for x in tolerance]
+        ntolerance = [-x for x in tolerance]
     world = agent._world
     position = agent.getBodyProperty((handLink,), "position")
     graspedNames = agent.getBodyProperty((handLink,), "grasping")
@@ -88,8 +94,8 @@ def getTrajectorBoxes(agent, handLink, tolerance=0.0):
     boxes = [agent.getAABB((handLink,))] + [world._pobjects[x].getAABB(None) for x in graspedNames]
     def aux(box):
         aabbMin, aabbMax = box
-        aabbMin = translateVector(vectorDifference(aabbMin, position), [-tolerance]*3)
-        aabbMax = translateVector(vectorDifference(aabbMax, position), [tolerance]*3)
+        aabbMin = translateVector(vectorDifference(aabbMin, position), ntolerance)
+        aabbMax = translateVector(vectorDifference(aabbMax, position), tolerance)
         return aabbMin, aabbMax
     boxes = [aux(x) for x in boxes]
     allowableCollisionFn = lambda box, collidingObjects: allowCollisionByWhitelist(box, collidingObjects, whitelistNames=whitelist, whitelistTypes=agent._world._particleTypes.keys())
@@ -400,7 +406,7 @@ class LocationAt(Location):
             hand = "right"
         if hand:
             handLink = {"left": "hand_left_roll", "right": "hand_right_roll"}[hand]
-            boxes,allowableCollisionFn = getTrajectorBoxes(agent, handLink)
+            boxes,allowableCollisionFn = getTrajectorBoxes(agent, handLink, tolerance=[0.04,0.04,0.0])
             posO2H = [a-b for a,b in zip(agent.getBodyProperty((handLink,), "position"),position)]
         else:
             def aux(box):
@@ -543,10 +549,10 @@ class ParkedArms(Goal):
         return str(self._agent)
     def _armParked(self, arm):
         joints = self._joints[arm]
-        velT = all([0.001 > abs(p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection())[1]) for j in joints[0]])
-        velQ = all([0.001 > abs(p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection())[1]) for j in joints[1]])
-        atT = all([l > abs(p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection())[0]) for l,j in zip([0.15,0.15,0.5], joints[0])])
-        atQ = all([0.15 > abs(p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection())[0]) for j in joints[1]])
+        velT = all([0.001 > abs(stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection()))[1]) for j in joints[0]])
+        velQ = all([0.001 > abs(stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection()))[1]) for j in joints[1]])
+        atT = all([l > abs(stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection()))[0]) for l,j in zip([0.15,0.15,0.5], joints[0])])
+        atQ = all([0.15 > abs(stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id[j],self._agent._world.getSimConnection()))[0]) for j in joints[1]])
         pB = self._agent.getBodyProperty(("base_yaw",), "position")
         oB = self._agent.getBodyProperty(("base_yaw",), "orientation")
         aB = translateVector(pB, p.rotateVector(oB,self._armBases[arm]))
@@ -797,7 +803,7 @@ class NavigateTo(BodyProcess):
     def bodyAction(self):
         position = self._agent.getBodyProperty(("base_yaw",), "position")
         position = (position[0], position[1], 0)
-        yaw = p.getJointState(self._agent._id, self._agent._jointName2Id["base_y_to_base_yaw"],self._agent._world.getSimConnection())[0]
+        yaw = stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id["base_y_to_base_yaw"],self._agent._world.getSimConnection()))[0]
         controls = {"+constraints": [], "-constraints": [], "jointTargets": {}}
         needPark = False
         for hand in ["right", "left"]:
@@ -850,7 +856,7 @@ class NavigateTo(BodyProcess):
         positionR = (positionR[0], positionR[1], 0)
         position = self._agent.getBodyProperty(("base_yaw",), "position")
         position = (position[0], position[1], 0)
-        yaw = p.getJointState(self._agent._id, self._agent._jointName2Id["base_y_to_base_yaw"],self._agent._world.getSimConnection())[0]
+        yaw = stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id["base_y_to_base_yaw"],self._agent._world.getSimConnection()))[0]
         positionT = closestPointOnCuboid(aabbMin, aabbMax, position)
         d = vectorNormalize(vectorDifference(positionR, position))
         yawT = math.atan2(d[1], d[0])

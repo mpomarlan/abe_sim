@@ -128,15 +128,15 @@ class PObject():
         for cN, cI in self._parentOfConstraints.items():
             self._world._pobjects[cN[1]].removeRigidBodyConstraint(cN[0], self._name, cN[2])
         if None != self._id:
-            p.removeBody(self._id, self._world.getSimConnection())
-        self._id = p.loadURDF(self._urdf, position, orientation, self._useMaximalCoordinates, self._useFixedBase, self._urdfFlags, self._globalScaling, self._world.getSimConnection())
+            stubbornTry(lambda : p.removeBody(self._id, self._world.getSimConnection()))
+        self._id = stubbornTry(lambda : p.loadURDF(self._urdf, position, orientation, self._useMaximalCoordinates, self._useFixedBase, self._urdfFlags, self._globalScaling, self._world.getSimConnection()))
         self._jointName2Id = {}
         baseLinkIdx = 0
         if self._useMaximalCoordinates:
             baseLinkIdx = 1
-        self._linkName2Id = {p.getBodyInfo(self._id, self._world.getSimConnection())[baseLinkIdx].decode('ascii'): -1}
-        for k in range(p.getNumJoints(self._id, self._world.getSimConnection())):
-            info = p.getJointInfo(self._id, k, self._world.getSimConnection())
+        self._linkName2Id = {stubbornTry(lambda : p.getBodyInfo(self._id, self._world.getSimConnection()))[baseLinkIdx].decode('ascii'): -1}
+        for k in range(stubbornTry(lambda : p.getNumJoints(self._id, self._world.getSimConnection()))):
+            info = stubbornTry(lambda : p.getJointInfo(self._id, k, self._world.getSimConnection()))
             if info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
                 self._jointName2Id[info[1].decode('ascii')] = k
             self._linkName2Id[info[12].decode('ascii')] = k

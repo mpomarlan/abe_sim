@@ -1,5 +1,6 @@
 import pybullet as p
 import math
+from abe_sim.utils import stubbornTry
 
 class Mixing:
     def __init__(self, world, pobject, link, mixingRadius=0, inputSubstances=set([]), outputSubstance="", nextURDF="", mixDecrement=0.1, mixSpeed=0.1, maxMixing=0, mixKey="", nextMixDynamics=None, nearTypeFilter=None):
@@ -22,7 +23,7 @@ class Mixing:
     def _closeMixer(self, position):
         minC = [a - 0.15 for a in position]
         maxC = [a + 0.15 for a in position]
-        closePObjects = [x for x in list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)])) if x.getBodyProperty("fn", "canwhisk")]
+        closePObjects = [x for x in list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))])) if x.getBodyProperty("fn", "canwhisk")]
         retq = 0
         if 0 < len(closePObjects):
             retq = max([abs(x.getJointStates()["brr"][1]) for x in closePObjects])
@@ -33,7 +34,7 @@ class Mixing:
         ownSubstance = self._pobject.getBodyProperty((self._link,), "substance")
         minC = [a - self._mixingRadius for a in position]
         maxC = [a + self._mixingRadius for a in position]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in p.getOverlappingObjects(minC, maxC, self._simConnection)]))
+        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         closePObjects = [x for x in closePObjects if isinstance(x, self._nearTypeFilter)]
         for pob in closePObjects:
             bodyIdentifiers = pob.getBodyIdentifiers()
