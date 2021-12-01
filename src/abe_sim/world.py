@@ -18,6 +18,8 @@ class World():
             self._pybulletConnection = stubbornTry(lambda : p.connect(p.DIRECT, options=pybulletOptions))
     def getPObjectById(self, idx):
         return self._id2PObjects[idx]
+    def hasPObjectOfId(self, idx):
+        return idx in self._id2PObjects
     def getSimConnection(self):
         return self._pybulletConnection
     def _testPObjectPresence(self, name, command):

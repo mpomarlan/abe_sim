@@ -20,9 +20,18 @@ def quaternionProduct(qa, qb):
     return (a1*b2+b1*a2+c1*d2-d1*c2, a1*c2-b1*d2+c1*a2+d1*b2, a1*d2+b1*c2-c1*b2+d1*a2,a1*a2-b1*b2-c1*c2-d1*d2)
 
 def overlappingObjects(aabbMin, aabbMax, world):
-    retq = stubbornTry(lambda : p.getOverlappingObjects(aabbMin, aabbMax, world.getSimConnection()))
-    if None == retq:
-        retq = []
+    needGoodIds = True
+    retq = []
+    while needGoodIds:
+        retq = stubbornTry(lambda : p.getOverlappingObjects(aabbMin, aabbMax, world.getSimConnection()))
+        if None == retq:
+            retq = []
+        allGood = True
+        for x in retq:
+            if not world.hasPObjectOfId(x[0]):
+                allGood = False
+                break
+        needGoodIds = not allGood
     return list(set([world.getPObjectById(x[0]) for x in retq]))
 
 def overlappingObjectNames(aabbMin, aabbMax, world):
