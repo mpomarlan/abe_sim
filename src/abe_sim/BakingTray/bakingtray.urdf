@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="bakingtray">
+  <link name="bakingtray">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./bakingtray_visual.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./bakingtray_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+

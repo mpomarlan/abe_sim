@@ -117,7 +117,8 @@ class Garden:
                     print("    bpg", g, g.isFulfilled(), "threatened by", g.getThreats(self._processes))
                 if doProc:
                     bodyProcesses.append(proc)
-                continue
+                    continue
+                ###continue
             stopNow = False
             for g in proc.coherenceConditions():
                 if g.isFulfilled():

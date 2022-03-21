@@ -1,8 +1,8 @@
 # Blender MTL File: 'None'
 # Material Count: 2
 
-newmtl greyDark
-Ns 96.078431
+newmtl greyDark.001
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.529412 0.600000 0.666667
 Ks 0.500000 0.500000 0.500000
@@ -11,8 +11,8 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl white.001
-Ns 96.078431
+newmtl white.000
+Ns 94.117647
 Ka 1.000000 1.000000 1.000000
 Kd 0.945098 0.949020 0.964706
 Ks 0.500000 0.500000 0.500000

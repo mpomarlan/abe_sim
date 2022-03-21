@@ -10,7 +10,9 @@ class Whisk(pob.PObject):
         self._urdf = os.path.join(cDir, "./whisk.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"": {"type": "whisk"}, "whisk": {"graspable": True}, "fn": {"referenceOrthogonal": True, "uprightLocalReference": [1,0,0], "uprightGlobalReference": [1,0,0], "boards": [[[0.005,-0.082,-0.082],[0.363,0.082,0.082]],[[-0.362,-0.032,-0.01],[0.005,0.032,0.01]]], "canwhisk": True, "graspingradius": 0.2, "handle": [-0.226,0,0], "refpt": [0.341,0,0], "refaxis": [1,0,0]}}
+        self._customStateVariables = {"": {"type": "whisk"}, "whisk": {"graspable": True}, "fn": {"referenceOrthogonal": True, "uprightLocalReference": [1,0,0], "uprightGlobalReference": [1,0,0],
+ "boards": [[[0.008,-0.04,-0.04],[0.25,0.04,0.04]],[[-0.11,-0.02,-0.01],[0.008,0.02,0.01]]], 
+ "canwhisk": True, "graspingradius": 0.2, "handle": [-0.07,0,0], "refpt": [0.26,0,0], "refaxis": [1,0,0]}}
     def _customInitDynamicModels(self):
         graspable = gr.Grasping(self._world, self, "whisk", graspingRadius=self._customStateVariables["fn"]["graspingradius"])
         self._dynamics = {"graspable": graspable}
