@@ -143,8 +143,8 @@ def thread_function_flask():
             locType = request_data['type'].lower()
             with updating:
                 inputState = None
-                if "kitchen" in request_data:
-                    inputState = request_data["kitchen"]
+                if "kitchenStateIn" in request_data:
+                    inputState = request_data["kitchenStateIn"]
                 sws = False
                 if "setWorldState" in request_data:
                     sws = request_data["setWorldState"]
@@ -292,7 +292,7 @@ def thread_function_flask():
                     retq["response"] = {"outputContainer": storeName, "kitchenStateOut": cwd}
             else:
                 with updating:
-                    retq["response"] = {"containerWithIngredient": None, "kitchenStateOut": cwd}
+                    retq["response"] = {"outputContainer": None, "kitchenStateOut": cwd}
         except KeyError:
             retq['status'] = 'missing entries from state data'
         except SyntaxError:
