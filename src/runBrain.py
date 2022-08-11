@@ -61,10 +61,6 @@ c = w.addPObjectOfType("counterTop", CounterTop, [-0.051,4.813,0], [0,0,0,1])
 k = w.addPObjectOfType("kitchenCabinet", KitchenCabinet, [-1.667,-4.677,0.963], [0,0,0,1])
 mb1 = w.addPObjectOfType("mediumBowl1", MediumBowl, [4.278,0.687,0.999], [0,0,0,1])
 mb2 = w.addPObjectOfType("mediumBowl2", MediumBowl, [0.48,-4.17,1.305], [0,0,0,1])
-##
-mb2Txt = DebugText(mb2, 'Bowl2')
-mb2Cap = DebugCapsule(mb2, 'selected')
-##
 mb3 = w.addPObjectOfType("mediumBowl3", MediumBowl, [-0.07,-4.17,1.305], [0,0,0,1])
 mb4 = w.addPObjectOfType("mediumBowl4", MediumBowl, [-0.7,-4.17,1.305], [0,0,0,1])
 p1 = w.addPObjectOfType("pantry1", Pantry, [4.31,-1.793,1.054], [0,0,0.707,0.707])
@@ -110,6 +106,58 @@ def placeCamera(item):
     stubbornTry(lambda : p.resetDebugVisualizerCamera(4,yaw-90,-35, cP))
 
 def thread_function_flask():
+    @flask.route("/abe-sim-command/to-add-highlight", methods = ['POST'])
+    def to_add_hightlight():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if request_data['object'] in w._pobjects:
+                    doAction = True
+                    text = None
+                    label = None
+                    if 'text' in request_data:
+                        text = request_data['text']
+                    if 'label' in request_data:
+                        label = request_data['label']
+                    ccd = {'op': 'highlight', 'item': request_data['object'], 'text': text, 'label': label}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = "done"
+            else:
+                with updating:
+                    retq["response"] = "wrong name for object?"
+        except KeyError:
+            retq['status'] = 'missing entries from state data'
+        except SyntaxError:
+            retq['status'] = 'ill-formed json for command'
+        return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-remove-highlight", methods = ['POST'])
+    def to_remove_hightlight():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if request_data['object'] in w._pobjects:
+                    doAction = True
+                    ccd = {'op': 'remove_highlight', 'item': request_data['object']}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = "done"
+            else:
+                with updating:
+                    retq["response"] = "wrong name for object?"
+        except KeyError:
+            retq['status'] = 'missing entries from state data'
+        except SyntaxError:
+            retq['status'] = 'ill-formed json for command'
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-get-kitchen", methods = ['POST'])
     def to_get_kitchen():
         global cwd, cgr, ccd
@@ -490,7 +538,19 @@ while True:
         cwd = w.worldDump()
         if None != ccd:
             w._pobjects["abe"].setBodyProperty("fn", "done", False)
-            if 'fetch' == ccd['op']:
+            if ('highlight' == ccd['op']) or ('remove_highlight' == ccd['op']):
+               if 'highlight' == ccd['op']:
+                   if ccd['text']:
+                       DebugText(w._pobjects[ccd['item']], ccd['text'])
+                   if ccd['label']:
+                       DebugCapsule(w._pobjects[ccd['item']], ccd['label'])
+               else:
+                   for dobj in list(w._pobjects[ccd['item']]._debugObjects):
+                       dobj.remove()
+               w._pobjects["abe"].setBodyProperty("fn", "done", True)
+               with executingAction:
+                   executingAction.notify_all()
+            elif 'fetch' == ccd['op']:
                 item = w._pobjects[ccd['item']]
                 agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
                 g._processes = {}

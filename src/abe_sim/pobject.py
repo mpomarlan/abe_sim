@@ -15,7 +15,7 @@ class DebugObject:
         self._world._debugObjects.append(self)
     def remove(self):
         self._clearSelf()
-        self._parent.debugObjects.remove(self)
+        self._parent._debugObjects.remove(self)
         self._world._debugObjects.remove(self)
     def _addSelf(self, pos, quat):
         return
