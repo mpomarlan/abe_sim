@@ -24,7 +24,7 @@ class Slicing:
         refPt = [a+b for a,b in zip(position, p.rotateVector(orientation, slicePoints[0]))]
         minC = [a - self._sliceProcRadiusGrob for a in refPt]
         maxC = [a + self._sliceProcRadiusGrob for a in refPt]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
+        closePObjects = list(self._world.getPObjectSetByIds([x[0] for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         slicingAxis = p.rotateVector(orientation, self._sliceAxis)
         retq = None
         dt = stubbornTry(lambda : p.getPhysicsEngineParameters())['fixedTimeStep']

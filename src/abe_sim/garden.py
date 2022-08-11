@@ -131,7 +131,8 @@ class Garden:
                     else:
                         self.updateEstablisher(g, None)
                 else: ### goal not fulfilled
-                    print("    need", g, g.suggestProcess())
+                    print("    not fulfilled ", str(g))
+                    print("    need", g.suggestProcess())
                     self.updateEstablisher(g, g.suggestProcess())
                     stopNow = True
                 pa = g.getEstablishmentProc()

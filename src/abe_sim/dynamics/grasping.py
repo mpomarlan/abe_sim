@@ -15,7 +15,7 @@ class Grasping:
     def _closeGripper(self, position):
         minC = [a - self._graspingRadius for a in position]
         maxC = [a + self._graspingRadius for a in position]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
+        closePObjects = list(self._world.getPObjectSetByIds([x[0] for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         retq = None
         minD = self._graspingRadius*10.0
         for pob in closePObjects:

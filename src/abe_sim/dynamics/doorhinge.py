@@ -23,7 +23,7 @@ class DoorHinge:
         refPt = [a+b for a,b in zip(position, p.rotateVector(orientation, self._handlePoint))]
         minC = [a - self._handleRadius for a in refPt]
         maxC = [a + self._handleRadius for a in refPt]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
+        closePObjects = list(self._world.getPObjectSetByIds([x[0] for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         retq = None, None, None
         minD = self._handleRadius*10.0
         wrappedName = self._pobject.getName() + ":" + self._doorLink

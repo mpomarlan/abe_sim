@@ -28,11 +28,11 @@ def overlappingObjects(aabbMin, aabbMax, world):
             retq = []
         allGood = True
         for x in retq:
-            if not world.hasPObjectOfId(x[0]):
+            if (not world.hasPObjectOfId(x[0])) and (not world.hasDbgObjectOfId(x[0])):
                 allGood = False
                 break
         needGoodIds = not allGood
-    return list(set([world.getPObjectById(x[0]) for x in retq]))
+    return list(world.getPObjectSetByIds([x[0] for x in retq]))
 
 def overlappingObjectNames(aabbMin, aabbMax, world):
     return [x.getName() for x in overlappingObjects(aabbMin, aabbMax, world)]

@@ -725,7 +725,12 @@ class Grasped(Goal):
 
 class GraspingItem(Process):
     def __init__(self,item,hand):
-        super().__init__(coherence=[Accessible(item),BaseNear(item),HandNear(item,hand),SwitchedOnGrasping(item,hand)])
+        acc = Accessible(item)
+        bas = BaseNear(item)
+        hnd = HandNear(item,hand)
+        swo = SwitchedOnGrasping(item,hand)
+        super().__init__(coherence=[acc,bas,hnd,swo])
+        #super().__init__(coherence=[Accessible(item),BaseNear(item),HandNear(item,hand),SwitchedOnGrasping(item,hand)])
         self._item = item
         self._hand = hand
     def _strVarPart(self):

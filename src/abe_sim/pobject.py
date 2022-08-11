@@ -6,6 +6,71 @@ import math
 from abe_sim.geom import quaternionProduct, overlappingObjectNames
 from abe_sim.utils import stubbornTry
 
+class DebugObject:
+    def __init__(self, pobject):
+        self._parent = pobject
+        self._world = pobject._world
+        pobject._debugObjects.append(self)
+        self._id = -1
+        self._world._debugObjects.append(self)
+    def remove(self):
+        self._clearSelf()
+        self._parent.debugObjects.remove(self)
+        self._world._debugObjects.remove(self)
+    def _addSelf(self, pos, quat):
+        return
+    def _clearanceLambda(self):
+        return
+    def _clearSelf(self):
+        if -1 != self._id:
+            stubbornTry(self._clearanceLambda())
+        self._id = -1
+    def _moveSelf(self, pos, quat):
+        return
+    def _positionSelf(self):
+        return (0,0,0), (0,0,0,1)
+    def updateLocation(self):
+        if not self._world._debugVisualizationsEnabled:
+            return
+        if -1 == self._id:
+            self._addSelf(*self._positionSelf())
+        else:
+            self._moveSelf(*self._positionSelf())
+
+class DebugText(DebugObject):
+    def __init__(self, pobject, text):
+        super().__init__(pobject)
+        self._text = str(text)
+    def _addSelf(self, pos, quat):
+        self._id = stubbornTry(lambda : p.addUserDebugText(self._text, pos, textColorRGB=[0,0,0], textSize=1, lifeTime=0))
+    def _clearanceLambda(self):
+        return lambda : p.removeUserDebugItem(self._id, self._world.getSimConnection())
+    def _moveSelf(self, pos, quat):
+        self._addSelf(pos, quat)
+    def _positionSelf(self):
+        pos = list(self._parent.getBodyProperty((), "position"))
+        aabbMin, aabbMax = self._parent.getAABB(None)
+        zExt = aabbMax[2] - aabbMin[2]
+        pos[2] = pos[2] + 0.5*zExt + 0.005
+        return tuple(pos), (0,0,0,1)
+
+class DebugCapsule(DebugObject):
+    def __init__(self, pobject, label):
+        super().__init__(pobject)
+        self._visualShape = -1
+        if label in pobject._highlightCapsules:
+            self._visualShape = pobject._highlightCapsules[label]
+        elif '' in pobject._highlightCapsules:
+            self._visualShape = pobject._highlightCapsules['']
+    def _addSelf(self, pos, quat):
+        self._id = stubbornTry(lambda : p.createMultiBody(baseCollisionShapeIndex=-1,baseVisualShapeIndex=self._visualShape,basePosition=[0,0,1],baseOrientation=[0,0,0,1],physicsClientId=self._world.getSimConnection()))
+    def _clearanceLambda(self):
+        return lambda : p.removeBody(self._id, self._world.getSimConnection())
+    def _moveSelf(self, pos, quat):
+        stubbornTry(lambda : p.resetBasePositionAndOrientation(self._id, pos, quat, self._world.getSimConnection()))
+    def _positionSelf(self):
+        return self._parent.getBodyProperty((), "position"), self._parent.getBodyProperty((), "orientation")
+    
 class PObjectWrapper:
     def __init__(self, pobject, bodyName, parentJointName):
         self._pobject = pobject
@@ -50,6 +115,8 @@ class PObject():
         return self._name
     def __init__(self, world, name, initialBasePosition, initialBaseOrientation, *args, **kwargs):
         super().__init__()
+        self._debugObjects = []
+        self._highlightCapsules = {}
         self._args = args
         self._kwargs = kwargs
         # Prepare some member variables, and put some defaults in them. These defaults can, and in some cases must, be overwritten by more specialized classes of pobject.
@@ -129,7 +196,20 @@ class PObject():
             self._world._pobjects[cN[1]].removeRigidBodyConstraint(cN[0], self._name, cN[2])
         if None != self._id:
             stubbornTry(lambda : p.removeBody(self._id, self._world.getSimConnection()))
-        self._id = stubbornTry(lambda : p.loadURDF(self._urdf, position, orientation, self._useMaximalCoordinates, self._useFixedBase, self._urdfFlags, self._globalScaling, self._world.getSimConnection()))
+        self._id = stubbornTry(lambda : p.loadURDF(self._urdf, [0,0,0], [0,0,0,1], self._useMaximalCoordinates, self._useFixedBase, self._urdfFlags, self._globalScaling, self._world.getSimConnection()))
+        aabbMin, aabbMax = stubbornTry(lambda : p.getAABB(self._id, -1, self._world.getSimConnection()))
+        zExt = aabbMax[2] - aabbMin[2]
+        dx = 0.5*(aabbMax[0] - aabbMin[0])
+        dy = 0.5*(aabbMax[1] - aabbMin[1])
+        xyExt = math.sqrt(dx*dx + dy*dy)
+        self._highlightCapsules = {
+            '': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0.5,0.5,0.5,0.5],specularColor=[0,0,0]),
+            'danger': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[1,0,0,0.5],specularColor=[0,0,0]),
+            'selected': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0,1,0,0.5],specularColor=[0,0,0]),
+            'instrumental': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0,0,1,0.5],specularColor=[0,0,0]),
+            'instrumentalBackup': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0.2,1,1,0.5],specularColor=[0,0,0]),
+        }
+        stubbornTry(lambda: p.resetBasePositionAndOrientation(self._id, position, orientation, self._world.getSimConnection()))
         self._jointName2Id = {}
         baseLinkIdx = 0
         if self._useMaximalCoordinates:
@@ -204,6 +284,8 @@ class PObject():
     def getName(self):
         return str(self._name)
     def remove(self):
+        for dob in list(self._debugObjects):
+            dob.remove()
         self._world.removePObject(self._name)
     def getCustomDynamicModels(self):
         # Returns a list of functions which, when called, compute new values for custom state variables and then generate functions that update the variables with those new values.

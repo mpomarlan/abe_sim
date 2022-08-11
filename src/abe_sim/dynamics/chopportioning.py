@@ -27,7 +27,7 @@ class ChopPortioning:
         chopPoint = [a+b for a,b in zip(position, p.rotateVector(orientation, self._chopPoint))]
         minC = [a - self._chopRadiusGrob for a in chopPoint]
         maxC = [a + self._chopRadiusGrob for a in chopPoint]
-        closePObjects = list(set([self._world.getPObjectById(x[0]) for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
+        closePObjects = list(self._world.getPObjectSetByIds([x[0] for x in stubbornTry(lambda : p.getOverlappingObjects(minC, maxC, self._simConnection))]))
         chopAxis = p.rotateVector(orientation, self._chopAxis)
         retq = None
         dt = stubbornTry(lambda : p.getPhysicsEngineParameters())['fixedTimeStep']
