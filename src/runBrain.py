@@ -53,6 +53,16 @@ from abe_sim.BakingSheet.bakingsheet import BakingSheet
 from abe_sim.KitchenStove.kitchenstove import KitchenStove, KitchenStoveDoor
 from abe_sim.Shaker.shaker import Shaker
 
+from abe_sim.Wall.wall import Wall
+from abe_sim.GasStove.gasstove import GasStove, GasStoveDoor
+from abe_sim.KitchenSink.kitchensink import KitchenSink
+from abe_sim.Boiler.boiler import Boiler
+from abe_sim.SaucePan.saucepan import SaucePan
+from abe_sim.PlasticCup.plasticcup import PlasticCup
+from abe_sim.WoodenBeerMug.woodenbeermug import WoodenBeerMug
+
+w._typeMap = {'GasStove': GasStove, 'Floor': Floor, 'CounterTop': CounterTop, 'WoodenBeerMug': WoodenBeerMug, 'PlasticCup': PlasticCup, 'Abe': Abe, 'Boiler': Boiler, 'KitchenSink': KitchenSink, 'GasStoveDoor': GasStoveDoor, 'Wall': Wall, 'SaucePan': SaucePan}
+
 w._particleTypes = {"particle": prt.Particle, "sugarparticle": prt.SugarParticle, "butterparticle": prt.ButterParticle, "sweetbutterparticle": prt.SweetButterParticle, "bakingsheet": BakingSheet, "doughclump": DoughClump}
 
 a = w.addPObjectOfType("abe", Abe, [0,0,0], [0,0,0,1])
