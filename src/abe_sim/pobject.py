@@ -205,6 +205,7 @@ class PObject():
         self._highlightCapsules = {
             '': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0.5,0.5,0.5,0.5],specularColor=[0,0,0]),
             'danger': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[1,0,0,0.5],specularColor=[0,0,0]),
+            'warning': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[1,0.5,0,0.5],specularColor=[0,0,0]),
             'selected': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0,1,0,0.5],specularColor=[0,0,0]),
             'instrumental': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0,0,1,0.5],specularColor=[0,0,0]),
             'instrumentalBackup': p.createVisualShape(p.GEOM_CAPSULE,radius=xyExt*1.1,length=zExt*1.1,rgbaColor=[0.2,1,1,0.5],specularColor=[0,0,0]),
