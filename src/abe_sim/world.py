@@ -47,7 +47,13 @@ class World():
         for name in names:
             self.removePObject(name)
         for name, data in state.items():
-            pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *data["args"], **data["kwargs"])
+            args = data["args"]
+            kwargs = data["kwargs"]
+            if args is None:
+                args = []
+            if kwargs is None:
+                kwargs = {}
+            pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *args, **kwargs)
             pob._customStateVariables = data["customStateVariables"]
             pob.setJointStates(data["joints"])
         return None
