@@ -54,7 +54,11 @@ class World():
             if kwargs is None:
                 kwargs = {}
             pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *args, **kwargs)
+            if data["customStateVariables"] is None:
+                data["customStateVariables"] = {}
             pob._customStateVariables = data["customStateVariables"]
+            if data["joints"] is None:
+                data["joints"] = {}
             pob.setJointStates(data["joints"])
         return None
     # A PObject only exists embedded in exactly one world; names of PObjects are unique within a world.
