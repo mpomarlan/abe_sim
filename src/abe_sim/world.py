@@ -4,6 +4,13 @@
 import pybullet as p
 from abe_sim.utils import stubbornTry
 
+def ensureDictionary(data):
+    if data is None:
+        return {}
+    if isinstance(data, list):
+        data = {x[0]: x[1:] for x in data}
+    return data
+
 class World():
     def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld"):
         self._name = name
@@ -57,8 +64,7 @@ class World():
             if data["customStateVariables"] is None:
                 data["customStateVariables"] = {}
             pob._customStateVariables = data["customStateVariables"]
-            if data["joints"] is None:
-                data["joints"] = {}
+            data["joints"] = ensureDictionary(data["joints"])
             pob.setJointStates(data["joints"])
         return None
     # A PObject only exists embedded in exactly one world; names of PObjects are unique within a world.
