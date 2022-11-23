@@ -17,7 +17,7 @@ def ensureHandsOk(data):
             if e not in data['customStateVariables']:
                 continue
             for f in ("pushingclosed", "pullingopen", "uprighting", "pulling", "grasping"):
-                if f in data['customStateVariables'][e] is None:
+                if data['customStateVariables'][e][f] is None:
                     data['customStateVariables'][e][f] = []
 
 class World():
@@ -63,8 +63,6 @@ class World():
         for name in names:
             self.removePObject(name)
         for name, data in state.items():
-            if 'abe' == name:
-                print(data)
             if data['args'] is None:
                 data['args'] = []
             for e in ('customStateVariables', 'joints', 'kwargs'):
@@ -74,8 +72,6 @@ class World():
             ensureHandsOk(data)
             pob._customStateVariables = data["customStateVariables"]
             data["joints"] = ensureDictionary(data["joints"])
-            if 'abe' == name:
-                print(data)
             pob.setJointStates(data["joints"])
         return None
     # A PObject only exists embedded in exactly one world; names of PObjects are unique within a world.
