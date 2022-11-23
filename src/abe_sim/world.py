@@ -12,13 +12,12 @@ def ensureDictionary(data):
     return data
     
 def ensureHandsOk(data):
-    if 'customStateVariables' in data:
-        for e in ("hand_right_roll", "hand_left_roll"):
-            if e not in data['customStateVariables']:
-                continue
-            for f in ("pushingclosed", "pullingopen", "uprighting", "pulling", "grasping"):
-                if f in data['customStateVariables'][e] is None:
-                    data['customStateVariables'][e][f] = []
+    for e in ("hand_right_roll", "hand_left_roll"):
+        if e not in data:
+            continue
+        for f in ("pushingclosed", "pullingopen", "uprighting", "pulling", "grasping"):
+            if f in data[e] is None:
+                data[e][f] = []
 
 class World():
     def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld"):
