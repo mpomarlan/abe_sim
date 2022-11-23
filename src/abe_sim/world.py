@@ -74,6 +74,8 @@ class World():
             ensureHandsOk(data)
             pob._customStateVariables = data["customStateVariables"]
             data["joints"] = ensureDictionary(data["joints"])
+            if 'abe' == name:
+                print(data)
             pob.setJointStates(data["joints"])
         return None
     # A PObject only exists embedded in exactly one world; names of PObjects are unique within a world.
