@@ -10,6 +10,13 @@ def ensureDictionary(data):
     if isinstance(data, list):
         data = {x[0]: x[1:] for x in data}
     return data
+    
+def ensureHandsOk(data):
+    if 'customStateVariables' in data:
+        for e in ("hand_right_roll", "hand_left_roll"):
+            for f in ("pushingclosed", "pullingopen", "uprighting", "pulling", "grasping"):
+                if f in data[e][f] is None:
+                    data[e][f] = []
 
 class World():
     def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld"):
@@ -54,13 +61,13 @@ class World():
         for name in names:
             self.removePObject(name)
         for name, data in state.items():
-            args = data["args"]
-            kwargs = data["kwargs"]
-            if args is None:
-                args = []
-            if kwargs is None:
-                kwargs = {}
-            pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *args, **kwargs)
+            ensureHandsOk(data)
+            if data['args'] is None:
+                data['args'] = []
+            for e in ('customStateVariables', 'joints', 'kwargs'):
+                if e is None:
+                    data[e] = {}
+            pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *data['args'], **data['kwargs'])
             if data["customStateVariables"] is None:
                 data["customStateVariables"] = {}
             pob._customStateVariables = data["customStateVariables"]
