@@ -17,7 +17,7 @@ def ensureHandsOk(data):
             if e not in data['customStateVariables']:
                 continue
             for f in ("pushingclosed", "pullingopen", "uprighting", "pulling", "grasping"):
-                if f in data['customStateVariables'][e][f] is None:
+                if f in data['customStateVariables'][e] is None:
                     data['customStateVariables'][e][f] = []
 
 class World():
