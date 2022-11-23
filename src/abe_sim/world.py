@@ -66,7 +66,7 @@ class World():
             if data['args'] is None:
                 data['args'] = []
             for e in ('customStateVariables', 'joints', 'kwargs'):
-                if e is None:
+                if data[e] is None:
                     data[e] = {}
             pob = self.addPObjectOfType(name, self._typeMap[data["type"]], data["position"], data["orientation"], *data['args'], **data['kwargs'])
             ensureHandsOk(data)
