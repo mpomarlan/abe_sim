@@ -6,7 +6,7 @@ import signal
 import sys
 
 import threading
-from flask import Flask
+from flask import Flask, abort
 from flask import request
 import json
 
@@ -27,10 +27,11 @@ from abe_sim.procs import getContents
 
 isAMac = ('Darwin' == platform.system())
 ## WORLD CREATION line: adjust this as needed on your system.
+# TODO if you want to run headless: useGUI=False in World()
 if not isAMac:
-    w = World(pybulletOptions = "--opengl3") # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
+    w = World(pybulletOptions = "--opengl3", useGUI=False) # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
 else:
-    w = World(pybulletOptions = "") # Hardware-accelerated rendering. Seems necessary on newer Macs.
+    w = World(pybulletOptions = "", useGUI=False) # Hardware-accelerated rendering. Seems necessary on newer Macs.
 
 stubbornTry(lambda : p.setGravity(0,0,-5, w.getSimConnection()))
 stubbornTry(lambda : p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0]))
@@ -141,9 +142,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = "wrong name for object?"
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-remove-highlight", methods = ['POST'])
     def to_remove_hightlight():
@@ -164,9 +165,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = "wrong name for object?"
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-get-kitchen", methods = ['POST'])
     def to_get_kitchen():
@@ -175,12 +176,12 @@ def thread_function_flask():
         try:
             with updating:
                 request_data = request.get_json(force=True)
-                varName = request_data['kitchen']
+                varName = request_data['kitchenStateIn']
                 retq['response'] = {varName: cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            raise APIStateKeyError()
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            raise APIStateKeyError()
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
     def to_set_kitchen():
@@ -192,9 +193,9 @@ def thread_function_flask():
                 if None != request_data["kitchenStateIn"]:
                     cgr = request_data["kitchenStateIn"]
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-get-location", methods = ['POST'])
     def to_get_location():
@@ -202,6 +203,7 @@ def thread_function_flask():
         retq = {'status': 'ok', 'response': ''}
         try:
             request_data = request.get_json(force=True)
+            print(request_data)
             varName = request_data['availableLocation']
             locType = request_data['type'].lower()
             with updating:
@@ -218,9 +220,9 @@ def thread_function_flask():
                     objName = list(w._ontoTypes[locType])[0]
                 retq["response"] = {varName: objName}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-fetch", methods = ['POST'])
     def to_fetch():
@@ -230,6 +232,7 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
+                print(request_data)
                 inputState = None
                 if "kitchenStateIn" in request_data:
                     inputState = request_data["kitchenStateIn"]
@@ -251,9 +254,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"fetchedObject": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-transfer", methods = ['POST'])
     def to_transfer():
@@ -286,9 +289,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"containerWithRest": None, "containerWithAllIngredients": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-mix", methods = ['POST'])
     def to_mix():
@@ -320,9 +323,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"containerWithMixture": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-portion", methods = ['POST'])
     def to_portion():
@@ -357,9 +360,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"outputContainer": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-shape",methods=['POST'])
     def to_shape():
@@ -393,9 +396,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"shapedPortions": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-line",methods=['POST'])
     def to_line():
@@ -427,9 +430,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"linedBakingTray": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-bake",methods=['POST'])
     def to_bake():
@@ -464,9 +467,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"thingBaked": None, "outputDestinationContainer": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-sprinkle",methods=['POST'])
     def to_sprinkle():
@@ -498,9 +501,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"sprinkledObject": None, "kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-wait",methods=['POST'])
     def to_wait():
@@ -523,9 +526,9 @@ def thread_function_flask():
                 with updating:
                     retq["response"] = {"kitchenStateOut": cwd}
         except KeyError:
-            retq['status'] = 'missing entries from state data'
+            return 'missing entries from state data', 400
         except SyntaxError:
-            retq['status'] = 'ill-formed json for command'
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
         
     flask.run(port=54321, debug=True, use_reloader=False)
