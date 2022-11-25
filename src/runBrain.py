@@ -126,12 +126,8 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 if request_data['object'] in w._pobjects:
                     doAction = True
-                    text = None
-                    label = None
-                    if 'text' in request_data:
-                        text = request_data['text']
-                    if 'label' in request_data:
-                        label = request_data['label']
+                    text = request_data.get('text')
+                    label = request_data.get('label')
                     ccd = {'op': 'highlight', 'item': request_data['object'], 'text': text, 'label': label}
             if doAction:
                 with executingAction:
@@ -179,9 +175,9 @@ def thread_function_flask():
                 varName = request_data['kitchenStateIn']
                 retq['response'] = {varName: cwd}
         except KeyError:
-            raise APIStateKeyError()
+            return 'missing entries from state data', 400
         except SyntaxError:
-            raise APIStateKeyError()
+            return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-set-kitchen", methods = ['POST'])
     def to_set_kitchen():
@@ -207,12 +203,8 @@ def thread_function_flask():
             varName = request_data['availableLocation']
             locType = request_data['type'].lower()
             with updating:
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 objName = None
@@ -232,13 +224,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                print(request_data)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 name = request_data["object"]
@@ -266,12 +253,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 name = request_data["containerWithInputIngredients"]
@@ -301,12 +284,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 name = request_data["containerWithInputIngredients"]
@@ -335,12 +314,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 ### TODO: pick container based on contents concept, as expressed by a key 'ingredientConcept' in requests_data
@@ -372,12 +347,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 sourceContainer = request_data["containerWithDough"]
@@ -408,12 +379,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 inputContainer = request_data["bakingTray"]
@@ -442,12 +409,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 inputContainer = request_data["thingToBake"]
@@ -479,12 +442,8 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                inputState = None
-                if "kitchenStateIn" in request_data:
-                    inputState = request_data["kitchenStateIn"]
-                sws = False
-                if "setWorldState" in request_data:
-                    sws = request_data["setWorldState"]
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
                 if sws and (None != inputState):
                     cgr = inputState
                 inputTargetContainer = request_data["object"]
@@ -513,9 +472,7 @@ def thread_function_flask():
             doAction = False
             with updating:
                 request_data = request.get_json(force=True)
-                frames = None
-                if "frames" in request_data:
-                    frames = request_data["frames"]
+                frames = request_data.get("frames")
                 if frames:
                     doAction = True
                     ccd = {'op': "wait", 'frames': frames}
