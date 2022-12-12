@@ -48,7 +48,7 @@ class World():
         return self._pybulletConnection
     def _testPObjectPresence(self, name, command):
         if name not in self._pobjects:
-            print("WARNING: attempting to %s pobject %s from world %s, when such pobject does not exist there." % (command, name, self._name))
+            #print("WARNING: attempting to %s pobject %s from world %s, when such pobject does not exist there." % (command, name, self._name))
             return False
         return True
     def getName(self):

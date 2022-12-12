@@ -5,6 +5,7 @@ import os
 import signal
 import sys
 
+from pprint import pprint
 import threading
 from flask import Flask, abort
 from flask import request
@@ -199,7 +200,6 @@ def thread_function_flask():
         retq = {'status': 'ok', 'response': ''}
         try:
             request_data = request.get_json(force=True)
-            print(request_data)
             varName = request_data['availableLocation']
             locType = request_data['type'].lower()
             with updating:
@@ -209,7 +209,17 @@ def thread_function_flask():
                     cgr = inputState
                 objName = None
                 if (locType in w._ontoTypes) and (0 < len(w._ontoTypes[locType])):
+
+                    # TODO a way find first free item?
+                    # In get location or a new extra route?
+                    # for k, v in w._pobjects.items():
+                    #     if k in list(w._ontoTypes[locType]):
+                    #         #print(k, v.__dict__)
+                    #         print(v._customStateVariables)
+                            
+                    
                     objName = list(w._ontoTypes[locType])[0]
+                    
                 retq["response"] = {varName: objName}
         except KeyError:
             return 'missing entries from state data', 400
@@ -249,6 +259,7 @@ def thread_function_flask():
     def to_transfer():
         global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
+        print(request.get_json(force=True))
         try:
             doAction = False
             with updating:
@@ -310,6 +321,7 @@ def thread_function_flask():
     def to_portion():
         global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
+        print(request.get_json(force=True))
         try:
             doAction = False
             with updating:
@@ -589,7 +601,7 @@ while True:
                     with executingAction:
                         executingAction.notify_all()
             else:
-                #print("bps", bodyProcs)
+                ##print("bps", bodyProcs)
                 [x.bodyAction() for x in bodyProcs]
     if not isAMac:
         time.sleep(1.0/240.0)

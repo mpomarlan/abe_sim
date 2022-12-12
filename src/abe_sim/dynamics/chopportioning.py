@@ -44,7 +44,7 @@ class ChopPortioning:
                     refC = [a+b for a,b in zip(positionC, p.rotateVector(orientationC, refC))]
                     cutLen = ((velocityC[0]*chopAxis[0] + velocityC[1]*chopAxis[1] + velocityC[2]*chopAxis[2])*dt)
                     d = [a - b for a, b in zip(refC, chopPoint)]
-                    print(cutLen, self._chopRadius, refC, chopPoint)
+                    #print(cutLen, self._chopRadius, refC, chopPoint)
                     if (0 > cutLen) and (self._chopRadius > math.sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2])):
                         if None == retq:
                             retq = 0
@@ -56,7 +56,7 @@ class ChopPortioning:
         position = self._pobject.getBodyProperty((self._link,), "position")
         orientation = self._pobject.getBodyProperty((self._link,), "orientation")
         chopping = self._closeChopper(position, orientation)
-        print("_", chopping)
+        #print("_", chopping)
         if None != chopping:
             integrity = self._pobject.getBodyProperty((self._link,), "portioningIntegrity")
             integrity = integrity - chopping

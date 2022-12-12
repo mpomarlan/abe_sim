@@ -33,7 +33,7 @@ class SugarBag(Bag):
     def _portionTypeName(self):
         return "sugarparticle"
     def _ontoTypeName(self):
-        return "sugarbag"
+        return "sugarBag"
     def _urdfName(self):
         return "./sugarbag.urdf"
     def _getParticleType(self):
@@ -43,7 +43,7 @@ class ButterBag(Bag):
     def _portionTypeName(self):
         return "butterparticle"
     def _ontoTypeName(self):
-        return "butterbag"
+        return "butterBag"
     def _urdfName(self):
         return "./butterbag.urdf"
     def _getParticleType(self):

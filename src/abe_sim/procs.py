@@ -237,9 +237,9 @@ def getFreeTargetAroundAgent(agent, hand, corridor, samples=100):
             for x in staggeredX:
                 pointA = translateVector(positionBase, p.rotateVector(orientationBase, translateVector(refPos,[x,y,z])))
                 if validExtrusion(boxes, pointA, pointA, allowableCollisionFn, world):
-                    print("FOOF", hand, positionBase, orientationBase, [x,y,z], pointA)
+                    #print("FOOF", hand, positionBase, orientationBase, [x,y,z], pointA)
                     return pointA
-    print("BLUFF", hand, translateVector(positionBase, p.rotateVector(orientationBase, refPos)))
+    #print("BLUFF", hand, translateVector(positionBase, p.rotateVector(orientationBase, refPos)))
     return translateVector(positionBase, p.rotateVector(orientationBase, refPos))
 
 def stopHand(agent, hand):
@@ -824,7 +824,7 @@ class NavigateTo(BodyProcess):
                     retq = c
         return retq
     def bodyAction(self):
-        print("NAVIGATE")
+        #print("NAVIGATE")
         position = self._agent.getBodyProperty(("base_yaw",), "position")
         position = (position[0], position[1], 0)
         yaw = stubbornTry(lambda : p.getJointState(self._agent._id, self._agent._jointName2Id["base_y_to_base_yaw"],self._agent._world.getSimConnection()))[0]
@@ -835,10 +835,10 @@ class NavigateTo(BodyProcess):
                 needPark = True
                 freePos = getFreeTargetAroundAgent(self._agent, hand, self._corridors[hand])
                 self._corridors[hand], controls = planArmMotion(self._agent, hand, freePos, self._corridors[hand], controls, maxspeed=0.015)
-        print("    need park", needPark)
-        print("        freepos right", getFreeTargetAroundAgent(self._agent, "right", self._corridors["right"]))
-        print("        freepos left", getFreeTargetAroundAgent(self._agent, "left", self._corridors["left"]))
-        print("        agntpos", self._agent.getBodyProperty(("base_yaw",), "position"))
+        #print("    need park", needPark)
+        #print("        freepos right", getFreeTargetAroundAgent(self._agent, "right", self._corridors["right"]))
+        #print("        freepos left", getFreeTargetAroundAgent(self._agent, "left", self._corridors["left"]))
+        #print("        agntpos", self._agent.getBodyProperty(("base_yaw",), "position"))
         if needPark:
             controls.update({"world_to_base_x": (position[0], 0, 1.0), "base_x_to_base_y": (position[1], 0, 1.0), "base_y_to_base_yaw": (yaw, 0, 1.0)})
             self._agent.applyRigidBodyControls([controls])
@@ -869,12 +869,12 @@ class NavigateTo(BodyProcess):
                     orTH = quaternionProduct(targetOr, (orOiH[0], orOiH[1], orOiH[2], -orOiH[3]))
                     controls = getHandAngularJointControls(self._agent, h, controls, orTH)
             self._agent.setBodyProperty((hl,), "uprighting", aux)
-        print("    still uprighting", stillUprighting)
+        #print("    still uprighting", stillUprighting)
         if stillUprighting:
             controls.update({"world_to_base_x": (position[0], 0, 1.0), "base_x_to_base_y": (position[1], 0, 1.0), "base_y_to_base_yaw": (yaw, 0, 1.0)})
             self._agent.applyRigidBodyControls([controls])
             return
-        print("    going to dest")
+        #print("    going to dest")
         carryStuff = self._max(self._carryingRadius("left"), self._carryingRadius("right"))
         refPO = self._location
         if isinstance(refPO, Location):
@@ -913,8 +913,8 @@ class NavigateTo(BodyProcess):
             else:
                 d = vectorNormalize(vectorDifference(positionR, position))
                 yawT = math.atan2(d[1], d[0])
-        print("POS TARGET", positionT, position, refPO.getBodyProperty((), "position"), refPO.getAABB(None), refPO.getName(), refPO.at())
-        print("YAW TARGET", yawT)
+        #print("POS TARGET", positionT, position, refPO.getBodyProperty((), "position"), refPO.getAABB(None), refPO.getName(), refPO.at())
+        #print("YAW TARGET", yawT)
         if None != carryStuff:
             positionD = vectorDifference(positionT, position)
             yawD = angleDifference(yawT, yaw)
@@ -1105,7 +1105,7 @@ class PlacingItem(BodyProcess):
         stopHand(self._agent, self._hand)
         return None
     def bodyAction(self):
-        print("PLACING ...")
+        #print("PLACING ...")
         ### location: locationAt, locationIn, locationUpright, locationOver, locationTippedOver
         location = self._location
         if isinstance(location, pobject.PObject) or isinstance(location, pobject.PObjectWrapper):
@@ -1141,7 +1141,7 @@ class PlacingItem(BodyProcess):
         posTH = [a+b for a,b in zip(targetPos, p.rotateVector(targetOr, (-posOiH[0], -posOiH[1], -posOiH[2])))]
         orTH = quaternionProduct(targetOr, (orOiH[0], orOiH[1], orOiH[2], -orOiH[3]))
         controls = {"+constraints": [], "-constraints": [], "jointTargets": {}}
-        print("    aR/nU", abs(angleRemap(angle)), need2Upright)
+        #print("    aR/nU", abs(angleRemap(angle)), need2Upright)
         if 0.005 > abs(angleRemap(angle)):
             self._corridor, controls = planArmMotion(self._agent, self._hand, posTH, self._corridor, controls,maxspeed=0.015)
         if need2Upright:
@@ -1587,23 +1587,23 @@ class MixingStuff(BodyProcess):
         mixed = all([(self._substance == getSubstance(x)) for x in getContents(self._item)])
         if not mixed:
             if (-0.98 < refaxis[2]):
-                print("MIXING: 01 Tipping")
+                #print("MIXING: 01 Tipping")
                 targetPos = [positionI[0], positionI[1], 1.5]
             elif ((0.01 < xydist) and (0.38 < zdist)) or ((0.05 < xydist) and (0.4 > zdist)):
-                print("MIXING: 02 Aligning")
+                #print("MIXING: 02 Aligning")
                 targetPos = [positionI[0], positionI[1], 1.5]
             elif 0.41 < zdist:
-                print("MIXING: 03 Lowering")
+                #print("MIXING: 03 Lowering")
                 inc = -0.005
                 targetPos = [positionI[0], positionI[1], position[2]+inc]
             else:
-                print("MIXING: 04 Mixing")
+                #print("MIXING: 04 Mixing")
                 targetPos = [positionI[0], positionI[1], positionI[2]+0.365]
                 #targetOr = quaternionProduct(orientation, p.getQuaternionFromAxisAngle([1,0,0], 1*math.pi/180.0))
                 targetOr = orientation
                 self._tool.spin()
         else:
-            print("MIXING: 05 Returning")
+            #print("MIXING: 05 Returning")
             js = self._agent.getJointStates()
             if not self._flip:
                 self._flip = True
@@ -1761,7 +1761,7 @@ class LinedContainer(Goal):
         zIC = self._inputContainer.getBodyProperty((), "position")[2]
         zL = list(self._lining.getBodyProperty((), "position"))[2]
         ornL[3] = -ornL[3]
-        print("LINED??", self._inputContainer.getName(), self._lining.at(), quaternionProduct(ornIC, ornL))
+        #print("LINED??", self._inputContainer.getName(), self._lining.at(), quaternionProduct(ornIC, ornL))
         return (self._inputContainer.getName() == self._lining.at()) and (0.95 < abs(quaternionProduct(ornIC, ornL)[3])) and (0.04 > abs(zIC-zL))
     def suggestProcess(self):
         return LiningContainer(self._inputContainer, self._lining)
