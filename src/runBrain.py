@@ -187,7 +187,7 @@ def thread_function_flask():
         try:
             with updating:
                 request_data = request.get_json(force=True)
-                if None != request_data["kitchenStateIn"]:
+                if request_data["kitchenStateIn"] is not None:
                     cgr = request_data["kitchenStateIn"]
         except KeyError:
             return 'missing entries from state data', 400
@@ -205,21 +205,27 @@ def thread_function_flask():
             with updating:
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 objName = None
                 if (locType in w._ontoTypes) and (0 < len(w._ontoTypes[locType])):
-
                     # TODO a way find first free item?
                     # In get location or a new extra route?
                     # for k, v in w._pobjects.items():
                     #     if k in list(w._ontoTypes[locType]):
                     #         #print(k, v.__dict__)
                     #         print(v._customStateVariables)
-                            
-                    
-                    objName = list(w._ontoTypes[locType])[0]
-                    
+                    objName = None
+                    for e in list(w._ontoTypes[locType]):
+                        eAt = w._pobjects[e].at()
+                        eAtType = None
+                        if eAt in w._pobjects:
+                            eAtType = w._pobjects[eAt].getBodyProperty("", "type")
+                        if eAtType not in ["countertop", "counterTop"]:
+                            objName = e
+                            break
+                    if objName is None:
+                        objName = list(w._ontoTypes[locType])[0]                
                 retq["response"] = {varName: objName}
         except KeyError:
             return 'missing entries from state data', 400
@@ -236,7 +242,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 name = request_data["object"]
                 if name in w._pobjects:
@@ -266,7 +272,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 name = request_data["containerWithInputIngredients"]
                 storeName = request_data["targetContainer"]
@@ -297,7 +303,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 name = request_data["containerWithInputIngredients"]
                 tool = request_data["mixingTool"]
@@ -328,7 +334,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 ### TODO: pick container based on contents concept, as expressed by a key 'ingredientConcept' in requests_data
                 name = request_data["containerWithIngredient"]
@@ -361,7 +367,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 sourceContainer = request_data["containerWithDough"]
                 ### TODO: read shape data from 'shape', 'quantity', 'unit' keys in request_data
@@ -393,7 +399,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 inputContainer = request_data["bakingTray"]
                 lining = request_data["bakingPaper"]
@@ -423,7 +429,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 inputContainer = request_data["thingToBake"]
                 ### TODO: select oven and destination automatically
@@ -456,7 +462,7 @@ def thread_function_flask():
                 request_data = request.get_json(force=True)
                 inputState = request_data.get("kitchenStateIn")
                 sws = request_data.get("setWorldState")
-                if sws and (None != inputState):
+                if sws and (inputState is not None):
                     cgr = inputState
                 inputTargetContainer = request_data["object"]
                 inputToppingContainer = request_data["toppingContainer"]
@@ -514,11 +520,11 @@ waitingFor = 0
 
 while True:
     with updating:
-        if None != cgr:
+        if cgr is not None:
             w.greatReset(cgr)
             cgr = None
         cwd = w.worldDump()
-        if None != ccd:
+        if ccd is not None:
             w._pobjects["abe"].setBodyProperty("fn", "done", False)
             if ('highlight' == ccd['op']) or ('remove_highlight' == ccd['op']):
                if 'highlight' == ccd['op']:
@@ -592,10 +598,10 @@ while True:
             if 0 >= waitingFor:
                 with executingAction:
                     executingAction.notify_all()
-        if (None != g._commandProcess) and (0 < len(g._commandProcess._coherence)):
+        if (g._commandProcess is not None) and (0 < len(g._commandProcess._coherence)):
             bodyProcs = g.updateGarden()
             if all([x.isFulfilled() for x in g._commandProcess._coherence]):
-                if None != g._commandProcess:
+                if g._commandProcess is not None:
                     g._commandProcess = None
                     cwd = w.worldDump()
                     with executingAction:
