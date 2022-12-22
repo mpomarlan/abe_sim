@@ -7,5 +7,5 @@ class WoodenBeerMug(pob.PObject):
         self._urdf = os.path.join(cDir, "./woodenbeermug.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"":  {"type": "woodenbeermug"}, "fn": {"dfltype": "dfl:wooden_beer_mug.n.wn.artifact"}}
+        self._customStateVariables = {"type": "woodenbeermug", "fn": {"dfltype": "dfl:wooden_beer_mug.n.wn.artifact"}}
 

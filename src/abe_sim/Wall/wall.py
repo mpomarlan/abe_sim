@@ -7,5 +7,5 @@ class Wall(pob.PObject):
         self._urdf = os.path.join(cDir, "./wall.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"":  {"type": "wall"}, "fn": {"dfltype": "dfl:wall.n.wn.artifact..architecture"}}
+        self._customStateVariables = {"type": "wall", "fn": {"dfltype": "dfl:wall.n.wn.artifact..architecture"}}
 

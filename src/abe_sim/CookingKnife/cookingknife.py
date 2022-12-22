@@ -8,7 +8,7 @@ class CookingKnife(pob.PObject):
         self._urdf = os.path.join(cDir, "./cookingknife.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"knife": {"graspable": True, "canCut": True, "cuttingPoint": [-0.103, 0.0, -0.064]}}
+        self._customStateVariables = {"type": "knife", "knife": {"graspable": True, "canCut": True, "cuttingPoint": [-0.103, 0.0, -0.064]}}
     def _customInitDynamicModels(self):
         graspable = gr.Grasping(self._world, self, "knife", graspingRadius=0.3)
         self._dynamics = {"graspable": graspable}

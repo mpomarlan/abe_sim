@@ -8,7 +8,7 @@ class BakingTray(pob.PObject):
         self._urdf = os.path.join(cDir, "./bakingtray.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"bakingtray": {"graspable": True}, "": {"type": "bakingtray"}, "fn": {"cancontain": True, "graspingradius": 0.2, "supportbbs": [[(-0.204,-0.103,-0.003), (0.204,0.103,0.0)]]}}
+        self._customStateVariables = {"bakingtray": {"graspable": True}, "type": "bakingtray", "fn": {"cancontain": True, "graspingradius": 0.2, "supportbbs": [[(-0.204,-0.103,-0.003), (0.204,0.103,0.0)]]}}
     def _customInitDynamicModels(self):
         graspable = gr.Grasping(self._world, self, "bakingtray", graspingRadius=self._customStateVariables["fn"]["graspingradius"])
         self._dynamics = {"graspable": graspable}

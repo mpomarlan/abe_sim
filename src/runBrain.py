@@ -30,9 +30,9 @@ isAMac = ('Darwin' == platform.system())
 ## WORLD CREATION line: adjust this as needed on your system.
 # TODO if you want to run headless: useGUI=False in World()
 if not isAMac:
-    w = World(pybulletOptions = "--opengl3", useGUI=False) # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
+    w = World(pybulletOptions = "--opengl3", useGUI=True) # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
 else:
-    w = World(pybulletOptions = "", useGUI=False) # Hardware-accelerated rendering. Seems necessary on newer Macs.
+    w = World(pybulletOptions = "", useGUI=True) # Hardware-accelerated rendering. Seems necessary on newer Macs.
 
 stubbornTry(lambda : p.setGravity(0,0,-5, w.getSimConnection()))
 stubbornTry(lambda : p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0]))

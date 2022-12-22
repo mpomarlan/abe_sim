@@ -7,7 +7,7 @@ class GasStove(pob.PObject):
         self._urdf = os.path.join(cDir, "./gasstove.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"":  {"type": "gasstove"}, "fn": {"dfltype": "dfl:gas_oven.n.wn.artifact..domestic"}}
+        self._customStateVariables = {"type": "gasstove", "fn": {"dfltype": "dfl:gas_oven.n.wn.artifact..domestic"}}
 
 class GasStoveDoor(pob.PObject):
     def _customInitPreLoad(self, *args, **kwargs):
@@ -15,5 +15,5 @@ class GasStoveDoor(pob.PObject):
         self._urdf = os.path.join(cDir, "./gasstovedoor.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"":  {"type": "gasstovedoor"}, "fn": {}}
+        self._customStateVariables = {"type": "gasstovedoor", "fn": {}}
 

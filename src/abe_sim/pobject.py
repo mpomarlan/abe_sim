@@ -255,6 +255,8 @@ class PObject():
                 position, orientation = stubbornTry(lambda : p.getBasePositionAndOrientation(self._id, self._world.getSimConnection()))
                 linearVelocity, angularVelocity = stubbornTry(lambda : p.getBaseVelocity(self._id, self._world.getSimConnection()))
             return {"position": position, "orientation": orientation, "linearVelocity": linearVelocity, "angularVelocity": angularVelocity}[propertyId]
+        if ("" == identifier) and ("type" == propertyId):
+            return self._customStateVariables.get("type", None)
         if not (isinstance(identifier, tuple) and (() != identifier)):
             identifier = [identifier]
         if identifier[0] not in self._customStateVariables:
@@ -276,6 +278,8 @@ class PObject():
                 stubbornTry(lambda : p.resetBaseVelocity(self._id, aux["linearVelocity"], aux["angularVelocity"], self._world.getSimConnection()))
                 return True
             return False
+        if "" == identifier:
+            return None
         if not (isinstance(identifier, tuple) and (() != identifier)):
             identifier = [identifier]
         if identifier[0] not in self._customStateVariables:

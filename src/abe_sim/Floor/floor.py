@@ -7,5 +7,5 @@ class Floor(pob.PObject):
         self._urdf = os.path.join(cDir, "./floor.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"": {"type": "floor"}}
+        self._customStateVariables = {"type": "floor"}
 

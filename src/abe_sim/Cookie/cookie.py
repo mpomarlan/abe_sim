@@ -12,7 +12,7 @@ class DoughClump(pob.PObject):
         self._useFixedBase = False
         cDir = os.path.dirname(os.path.abspath(__file__))
         sugarToppedURDF = os.path.join(cDir, "./sugarsprinkledcookie.urdf")
-        self._customStateVariables = {"doughclump": {"graspable": True}, "": {"type": self._ontoTypeName()}, "fn": {"toppedurdfs": {"sugar": sugarToppedURDF}, "ingredient": True, "graspingradius": 0.3, "bakeable": True, "bakedurdf": os.path.join(cDir, "./cookie.urdf"), "bakinghp": 4000}}
+        self._customStateVariables = {"doughclump": {"graspable": True}, "type": self._ontoTypeName(), "fn": {"toppedurdfs": {"sugar": sugarToppedURDF}, "ingredient": True, "graspingradius": 0.3, "bakeable": True, "bakedurdf": os.path.join(cDir, "./cookie.urdf"), "bakinghp": 4000}}
     def _ontoTypeName(self):
         return "doughclump"
     def _urdfName(self):
@@ -28,7 +28,7 @@ class Cookie(pob.PObject):
         self._useFixedBase = False
         cDir = os.path.dirname(os.path.abspath(__file__))
         sugarToppedURDF = os.path.join(cDir, "./sugarsprinkledcookie.urdf")
-        self._customStateVariables = {"doughclump": {"graspable": True}, "": {"type": self._ontoTypeName()}, "fn": {"toppedurdfs": {"sugar": sugarToppedURDF}, "ingredient": True, "graspingradius": 0.3}}
+        self._customStateVariables = {"doughclump": {"graspable": True}, "type": self._ontoTypeName(), "fn": {"toppedurdfs": {"sugar": sugarToppedURDF}, "ingredient": True, "graspingradius": 0.3}}
     def _ontoTypeName(self):
         return "cookie"
     def _urdfName(self):
@@ -42,7 +42,7 @@ class SugarSprinkledCookie(pob.PObject):
         self._urdf = os.path.join(cDir, self._urdfName())
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"doughclump": {"graspable": True}, "": {"type": self._ontoTypeName()}, "fn": {"ingredient": True, "graspingradius": 0.3}}
+        self._customStateVariables = {"doughclump": {"graspable": True}, "type": self._ontoTypeName(), "fn": {"ingredient": True, "graspingradius": 0.3}}
     def _ontoTypeName(self):
         return "cookie"
     def _urdfName(self):

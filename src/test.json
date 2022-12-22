@@ -3,7 +3,7 @@
     "abe": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "agent" },
+        "type": "agent",
         "hand_right_roll": {
           "canPull": true,
           "pushingclosed": "None",
@@ -57,7 +57,7 @@
     "counterTop": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "countertop" },
+        "type": "countertop",
         "fn": {
           "boards": [
             [
@@ -94,7 +94,7 @@
     "kitchenCabinet": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "kitchencabinet" },
+        "type": "kitchencabinet",
         "fn": {
           "boards": [
             [
@@ -145,7 +145,7 @@
       "at": "fridge",
       "customStateVariables": {
         "mediumbowl": { "graspable": true },
-        "": { "type": "mediumbowl" },
+        "type": "mediumbowl",
         "fn": {
           "dripaxis": [0, 1, 0],
           "cancontain": true,
@@ -164,7 +164,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "mediumbowl": { "graspable": true },
-        "": { "type": "mediumbowl" },
+        "type": "mediumbowl",
         "fn": {
           "dripaxis": [0, 1, 0],
           "cancontain": true,
@@ -183,7 +183,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "mediumbowl": { "graspable": true },
-        "": { "type": "mediumbowl" },
+        "type": "mediumbowl",
         "fn": {
           "dripaxis": [0, 1, 0],
           "cancontain": true,
@@ -202,7 +202,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "mediumbowl": { "graspable": true },
-        "": { "type": "mediumbowl" },
+        "type": "mediumbowl",
         "fn": {
           "dripaxis": [0, 1, 0],
           "cancontain": true,
@@ -220,7 +220,7 @@
     "pantry1": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "pantry" },
+        "type": "pantry",
         "fn": {
           "cancontain": true,
           "facingdistance": 1,
@@ -252,7 +252,7 @@
     "pantry2": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "pantry" },
+        "type": "pantry",
         "fn": {
           "cancontain": true,
           "facingdistance": 1,
@@ -285,7 +285,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "bag": { "graspable": true, "pourPortioningDelay": 0 },
-        "": { "type": "sugarbag" },
+        "type": "sugarbag",
         "fn": {
           "dripaxis": [0, 1, 0],
           "refpt": [0, 0.089, 0.115],
@@ -304,7 +304,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "bag": { "graspable": true, "pourPortioningDelay": 0 },
-        "": { "type": "butterbag" },
+        "type": "butterbag",
         "fn": {
           "dripaxis": [0, 1, 0],
           "refpt": [0, 0.089, 0.115],
@@ -322,7 +322,7 @@
     "fridge": {
       "at": "freezer",
       "customStateVariables": {
-        "": { "type": "fridge" },
+        "type": "fridge",
         "fn": {
           "boards": [
             [
@@ -385,7 +385,7 @@
     "freezer": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "freezer" },
+        "type": "freezer",
         "fn": {
           "boards": [
             [
@@ -457,7 +457,7 @@
       "at": "freezer",
       "customStateVariables": {
         "fridge_door": { "pullable": true },
-        "": { "type": "fridgeDoor" },
+        "type": "fridgeDoor",
         "fn": {
           "pullabledoor": true,
           "doorhandlelink": "fridge_door",
@@ -481,7 +481,7 @@
       "at": "freezer",
       "customStateVariables": {
         "freezer_door": { "pullable": true },
-        "": { "type": "freezerDoor" },
+        "type": "freezerDoor",
         "fn": {
           "pullabledoor": true,
           "doorhandlelink": "freezer_door",
@@ -504,7 +504,7 @@
     "whisk": {
       "at": "kitchenCabinet",
       "customStateVariables": {
-        "": { "type": "whisk" },
+        "type": "whisk",
         "whisk": { "graspable": true },
         "fn": {
           "referenceOrthogonal": true,
@@ -538,7 +538,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "bakingtray": { "graspable": true },
-        "": { "type": "bakingtray" },
+        "type": "bakingtray",
         "fn": {
           "cancontain": true,
           "graspingradius": 0.2,
@@ -561,7 +561,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "bakingsheet": { "graspable": true },
-        "": { "type": "bakingsheet" },
+        "type": "bakingsheet",
         "fn": {
           "cancontain": "None",
           "graspingradius": 0.2,
@@ -583,7 +583,7 @@
     "kitchenStove": {
       "at": "None",
       "customStateVariables": {
-        "": { "type": "kitchenstove" },
+        "type": "kitchenstove",
         "fn": {
           "boards": [
             [
@@ -652,7 +652,7 @@
       "at": "kitchenStove",
       "customStateVariables": {
         "kitchenstove_door": { "pullable": true },
-        "": { "type": "kitchenStoveDoor" },
+        "type": "kitchenStoveDoor",
         "fn": {
           "pullabledoor": true,
           "doorhandlelink": "kitchenstove_door",
@@ -676,7 +676,7 @@
       "at": "kitchenCabinet",
       "customStateVariables": {
         "shaker": { "graspable": true },
-        "": { "type": "shaker" },
+        "type": "shaker",
         "fn": { "graspingradius": 0.2, "contents": "sugar" }
       },
       "args": "None",

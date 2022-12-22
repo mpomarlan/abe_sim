@@ -9,7 +9,7 @@ class Shaker(pob.PObject):
         self._urdf = os.path.join(cDir, self._urdfName())
         self._useMaximalCoordinates = False
         self._useFixedBase = False
-        self._customStateVariables = {"shaker": {"graspable": True}, "": {"type": self._ontoTypeName()}, "fn": {"graspingradius": 0.2, "contents": "sugar"}}
+        self._customStateVariables = {"shaker": {"graspable": True}, "type": self._ontoTypeName(), "fn": {"graspingradius": 0.2, "contents": "sugar"}}
     def _ontoTypeName(self):
         return "shaker"
     def _urdfName(self):

@@ -7,5 +7,5 @@ class PlasticCup(pob.PObject):
         self._urdf = os.path.join(cDir, "./plasticcup.urdf")
         self._useMaximalCoordinates = False
         self._useFixedBase = True
-        self._customStateVariables = {"":  {"type": "plasticcup"}, "fn": {"dfltype": "dfl:plastic_cup.n.wn.artifact"}}
+        self._customStateVariables = {"type": "plasticcup", "fn": {"dfltype": "dfl:plastic_cup.n.wn.artifact"}}
 
