@@ -33,6 +33,8 @@ if not isAMac:
     w = World(pybulletOptions = "--opengl3", useGUI=True) # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
 else:
     w = World(pybulletOptions = "", useGUI=True) # Hardware-accelerated rendering. Seems necessary on newer Macs.
+    
+p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
 stubbornTry(lambda : p.setGravity(0,0,-5, w.getSimConnection()))
 stubbornTry(lambda : p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0]))
@@ -588,6 +590,7 @@ while True:
             elif 'sprinkle' == ccd['op']:
                 inputTargetContainer = w._pobjects[ccd['inputTargetContainer']]
                 inputToppingContainer = w._pobjects[ccd['inputToppingContainer']]
+                cabinet = w._pobjects["kitchenCabinet"]
                 g._commandProcess = garden.Process(coherence=[procs.SprinkledContents(inputTargetContainer,inputToppingContainer),procs.ItemOnLocation(inputToppingContainer,cabinet)])
             elif 'wait' == ccd['op']:
                 waitingFor = ccd['frames']
