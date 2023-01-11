@@ -120,6 +120,31 @@ def placeCamera(item):
     stubbornTry(lambda : p.resetDebugVisualizerCamera(4,yaw-90,-35, cP))
 
 def thread_function_flask():
+    @flask.route("/abe-sim-command/to-go-to-pose", methods = ['POST'])
+    def to_go_to_pose():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if ('position' in request_data) and ('yaw' in request_data):
+                    doAction = True
+                    position = request_data.get('position')
+                    yaw = request_data.get('yaw')
+                    ccd = {'op': 'goToPose', 'pose': (position[0], position[1], yaw)}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = "done"
+            else:
+                with updating:
+                    retq["response"] = "where to go?"
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-add-highlight", methods = ['POST'])
     def to_add_hightlight():
         global cwd, cgr, ccd
@@ -540,6 +565,10 @@ while True:
                w._pobjects["abe"].setBodyProperty("fn", "done", True)
                with executingAction:
                    executingAction.notify_all()
+            elif 'goToPose' == ccd['op']:
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                g._processes = {}
+                g._commandProcess = garden.Process(coherence=[procs.BaseAt(ccd['pose'], agent)])
             elif 'fetch' == ccd['op']:
                 item = w._pobjects[ccd['item']]
                 agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
