@@ -738,6 +738,40 @@ class GraspingItem(Process):
     def _markForDeletionInternal(self, replacement=None):
         return ItemOnLocation(self._item, self._item._world._pobjects["kitchenCabinet"])
 
+class BaseAt(Goal):
+    def __init__(self, pose, agent):
+        super().__init__()
+        self._pose = pose
+        self._agent = agent
+    def _strVarPart(self):
+        return str(self._pose)
+    def _isFulfilled(self):
+        position = self._agent.getBodyProperty(("base_yaw",), "position")
+        _ ,_ , yaw = p.getEulerFromQuaternion(self._agent.getBodyProperty(("base_yaw",), "orientation"))
+        dTheta = self._pose[2] - yaw
+        dy = self._pose[1] - position[1]
+        dx = self._pose[0] - position[0]
+        d = math.sqrt(dx*dx + dy*dy + dTheta*dTheta)
+        return (0.05 > d)
+    def suggestProcess(self):
+        return NavigateToPose(self._pose, self._agent)
+
+class NavigateToPose(BodyProcess):
+    def __init__(self,pose,agent):
+        super().__init__(coherence=[])
+        self._pose = pose
+        self._agent = agent
+        self._corridors = {"right": None, "left": None}
+    def strVarPart(self):
+        return str(self._pose)
+    def _markForDeletionInternal(self, replacement=None):
+        self._coherence.append(Unwill())
+        return None
+    def bodyAction(self):
+        controls = {"+constraints": [], "-constraints": [], "jointTargets": {"world_to_base_x": (self._pose[0], 0, 1.0), "base_x_to_base_y": (self._pose[1], 0, 1.0), "base_y_to_base_yaw": (self._pose[2], 0, 1.0)}}
+        self._agent.applyRigidBodyControls([controls])
+        return        
+
 class BaseNear(Goal):
     def __init__(self,location):
         super().__init__()
