@@ -49,3 +49,44 @@ class ButterBag(Bag):
     def _getParticleType(self):
         return prt.ButterParticle
 
+class AlmondFlourBag(Bag):
+    def _portionTypeName(self):
+        return "almondflourparticle"
+    def _ontoTypeName(self):
+        return "almondFlourBag"
+    def _urdfName(self):
+        return "./almondflourbag.urdf"
+    def _getParticleType(self):
+        return prt.AlmondFlourParticle
+
+class FlourBag(Bag):
+    def _portionTypeName(self):
+        return "flourparticle"
+    def _ontoTypeName(self):
+        return "flourBag"
+    def _urdfName(self):
+        return "./flourbag.urdf"
+    def _getParticleType(self):
+        return prt.FlourParticle
+
+class VanillaExtractBag(Bag):
+    def _portionTypeName(self):
+        return "vanillaextractparticle"
+    def _ontoTypeName(self):
+        return "vanillaExtractBag"
+    def _urdfName(self):
+        return "./vanillaextractbag.urdf"
+    def _getParticleType(self):
+        return prt.VanillaExtractParticle
+    
+class AlmondExtractBag(Bag):
+    def _portionTypeName(self):
+        return "almondextractparticle"
+    def _ontoTypeName(self):
+        return "almondExtractBag"
+    def _urdfName(self):
+        return "./almondextractbag.urdf"
+    def _getParticleType(self):
+        return prt.AlmondExtractParticle
+
+
