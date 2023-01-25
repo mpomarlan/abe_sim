@@ -14,6 +14,12 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=
 response = json.loads(r.text)
 print(response)
 
+### Command "2.5": go to pose
+dgp = {'position': (-1, 1), 'yaw': -1.57}
+r = requests.post("http://localhost:54321/abe-sim-command/to-go-to-pose", data=bytes(json.dumps(dgp), "utf-8"))
+response = json.loads(r.text)
+print(response)
+
 ### Command 3: get location
 gc = {'availableLocation': '?available-bowl', 'type': 'mediumBowl', 'kitchen': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-get-location", data=bytes(json.dumps(gc), "utf-8"))

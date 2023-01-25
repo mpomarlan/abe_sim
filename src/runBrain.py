@@ -5,10 +5,8 @@ import os
 import signal
 import sys
 
-from pprint import pprint
 import threading
-from flask import Flask, abort
-from flask import request
+from flask import Flask, request
 import json
 
 import platform
@@ -30,9 +28,11 @@ isAMac = ('Darwin' == platform.system())
 ## WORLD CREATION line: adjust this as needed on your system.
 # TODO if you want to run headless: useGUI=False in World()
 if not isAMac:
-    w = World(pybulletOptions = "--opengl3", useGUI=True) # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
+    w = World(pybulletOptions = "--opengl3", useGUI=False) # Software-only "tiny" renderer. Should work on Linux and when support for graphical hardware acceleration is inconsistent.
 else:
-    w = World(pybulletOptions = "", useGUI=True) # Hardware-accelerated rendering. Seems necessary on newer Macs.
+    w = World(pybulletOptions = "", useGUI=False) # Hardware-accelerated rendering. Seems necessary on newer Macs.
+    
+p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
 stubbornTry(lambda : p.setGravity(0,0,-5, w.getSimConnection()))
 stubbornTry(lambda : p.resetDebugVisualizerCamera(10.8,-90.0,-37.566, [0,0,0]))
@@ -45,10 +45,11 @@ from abe_sim.CounterTop.countertop import CounterTop
 from abe_sim.KitchenCabinet.kitchencabinet import KitchenCabinet,KitchenCabinetLow
 from abe_sim.MediumBowl.mediumbowl import MediumBowl
 from abe_sim.Pantry.pantry import Pantry
-from abe_sim.Bag.bag import SugarBag, ButterBag
-from abe_sim.Particle.particle import Particle, SugarParticle, ButterParticle, SweetButterParticle
+from abe_sim.Bag.bag import SugarBag, ButterBag, FlourBag, VanillaExtractBag, AlmondExtractBag, AlmondFlourBag
+from abe_sim.Particle.particle import Particle, SugarParticle, ButterParticle, FlourParticle, AlmondFlourParticle, VanillaExtractParticle, AlmondExtractParticle, SweetButterParticle
 from abe_sim.Fridge.fridge import Fridge, Freezer, FridgeDoor, FreezerDoor
 from abe_sim.Whisk.whisk import Whisk
+from abe_sim.Spoon.spoon import Spoon
 from abe_sim.Cookie.cookie import DoughClump
 from abe_sim.BakingTray.bakingtray import BakingTray
 from abe_sim.BakingSheet.bakingsheet import BakingSheet
@@ -63,27 +64,68 @@ from abe_sim.SaucePan.saucepan import SaucePan
 from abe_sim.PlasticCup.plasticcup import PlasticCup
 from abe_sim.WoodenBeerMug.woodenbeermug import WoodenBeerMug
 
-w._typeMap = {'GasStove': GasStove, 'Floor': Floor, 'CounterTop': CounterTop, 'WoodenBeerMug': WoodenBeerMug, 'PlasticCup': PlasticCup, 'Abe': Abe, 'Boiler': Boiler, 'KitchenSink': KitchenSink, 'GasStoveDoor': GasStoveDoor, 'Wall': Wall, 'SaucePan': SaucePan}
 
-w._particleTypes = {"particle": prt.Particle, "sugarparticle": prt.SugarParticle, "butterparticle": prt.ButterParticle, "sweetbutterparticle": prt.SweetButterParticle, "bakingsheet": BakingSheet, "doughclump": DoughClump}
+w._typeMap = {'GasStove': GasStove, 
+            'Floor': Floor,
+            'CounterTop': CounterTop,
+            'WoodenBeerMug': WoodenBeerMug,
+            'PlasticCup': PlasticCup,
+            'Abe': Abe,
+            'Boiler': Boiler,
+            'KitchenSink': KitchenSink,
+            'GasStoveDoor': GasStoveDoor,
+            'Wall': Wall,
+            'SaucePan': SaucePan}
+
+w._particleTypes = {"particle": prt.Particle,
+                "sugarparticle": prt.SugarParticle,
+                "butterparticle": prt.ButterParticle,
+                "flourparticle": prt.FlourParticle,
+                "almondflourparticle":prt.AlmondFlourParticle,
+                "vanillaextractparticle":prt.VanillaExtractParticle,
+                "almondextractparticle":prt.AlmondExtractParticle,
+                "sweetbutterparticle": prt.SweetButterParticle,
+                "bakingsheet": BakingSheet,
+                "doughclump": DoughClump}
 
 a = w.addPObjectOfType("abe", Abe, [0,0,0], [0,0,0,1])
 f = w.addPObjectOfType("floor", Floor, [0,0,0], [0,0,0,1])
 c = w.addPObjectOfType("counterTop", CounterTop, [-0.051,4.813,0], [0,0,0,1])
 k = w.addPObjectOfType("kitchenCabinet", KitchenCabinet, [-1.667,-4.677,0.963], [0,0,0,1])
 mb1 = w.addPObjectOfType("mediumBowl1", MediumBowl, [4.278,0.687,0.999], [0,0,0,1])
-mb2 = w.addPObjectOfType("mediumBowl2", MediumBowl, [0.48,-4.17,1.305], [0,0,0,1])
-mb3 = w.addPObjectOfType("mediumBowl3", MediumBowl, [-0.07,-4.17,1.305], [0,0,0,1])
-mb4 = w.addPObjectOfType("mediumBowl4", MediumBowl, [-0.7,-4.17,1.305], [0,0,0,1])
+mb2 = w.addPObjectOfType("mediumBowl2", MediumBowl, [0.8,-4.17,1.305], [0,0,0,1])
+mb22 = w.addPObjectOfType("mediumBowl22", MediumBowl, [0.40,-4.17,1.305], [0,0,0,1])
+mb3 = w.addPObjectOfType("mediumBowl3", MediumBowl, [0,-4.17,1.305], [0,0,0,1])
+mb13 = w.addPObjectOfType("mediumBowl13", MediumBowl, [-0.4,-4.17,1.305], [0,0,0,1])
+mb4 = w.addPObjectOfType("mediumBowl4", MediumBowl, [-0.8,-4.17,1.305], [0,0,0,1])
+mb14 = w.addPObjectOfType("mediumBowl14", MediumBowl, [-1.2,-4.17,1.305], [0,0,0,1])
+
+# #mb5 = w.addPObjectOfType("mediumBowl5", MediumBowl, [4.2,-4.27,1.305], [0,0,0,1])
+# mb6 = w.addPObjectOfType("mediumBowl6", MediumBowl, [4.2,-3.87,1.305], [0,0,0,1])
+mb7 = w.addPObjectOfType("mediumBowl7", MediumBowl, [4.2,-3.47,1.305], [0,0,0,1])
+# mb8 = w.addPObjectOfType("mediumBowl8", MediumBowl, [4.2,-3.07,1.305], [0,0,0,1])
+
+
+# #mb9 = w.addPObjectOfType("mediumBowl9", MediumBowl, [4.2,-2.47,1.305], [0,0,0,1])
+# mb10 = w.addPObjectOfType("mediumBowl10", MediumBowl, [4.2,-2.07,1.305], [0,0,0,1])
+# mb11 = w.addPObjectOfType("mediumBowl11", MediumBowl, [4.2,-1.67,1.305], [0,0,0,1])
+# mb12 = w.addPObjectOfType("mediumBowl12", MediumBowl, [4.2,-1.27,1.305], [0,0,0,1])
+
+
 p1 = w.addPObjectOfType("pantry1", Pantry, [4.31,-1.793,1.054], [0,0,0.707,0.707])
 p2 = w.addPObjectOfType("pantry2", Pantry, [4.31,-3.683,1.054], [0,0,0.707,0.707])
 sg = w.addPObjectOfType("sugarBag", SugarBag, [-1.555,-4.174,1.45], [0,0,1,0])
 bg = w.addPObjectOfType("butterBag", ButterBag, [-1.7,-4.174,0.68], [0,0,1,0])
+fbg = w.addPObjectOfType("flourBag", FlourBag, [-0.7,-4.174,0.68], [0,0,1,0])
+afbg = w.addPObjectOfType("almondFlourBag", AlmondFlourBag, [-2.7,-4.174,0.68], [0,0,1,0])
+vebg = w.addPObjectOfType("vanillaExtractBag", VanillaExtractBag, [0.3,-4.174,0.68], [0,0,1,0])
+aebg = w.addPObjectOfType("almondExtractBag", AlmondExtractBag, [-0.2,-4.174,0.68], [0,0,1,0])
 fg = w.addPObjectOfType("fridge", Fridge, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fz = w.addPObjectOfType("freezer", Freezer, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fgd = w.addPObjectOfType("fridgeDoor", FridgeDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
 fzd = w.addPObjectOfType("freezerDoor", FreezerDoor, [4.781,0.05,0.691], [0,0,0.707,0.707])
 wh = w.addPObjectOfType("whisk", Whisk, [-3.956, -4.54, 1.247], [0.5, -0.5, -0.5, 0.5])
+spn = w.addPObjectOfType("spoon", Spoon, [-4.956, -4.54, 1.247], [0.5, -0.5, -0.5, 0.5])
 btr = w.addPObjectOfType("bakingTray1", BakingTray, [-3.258, -4.325, 1.305], [0,0,0.707,0.707])
 bsh = w.addPObjectOfType("bakingSheet1", BakingSheet, [-2.806, -4.296, 1.3], [0,0,0.707,0.707])
 ks = w.addPObjectOfType("kitchenStove", KitchenStove, [4.56, 3.3, 0.7], [0,0,0.707,0.707])
@@ -95,6 +137,14 @@ ks.setBodyProperty("fn", "door", "kitchenStoveDoor")
 aux = w.addPObjectOfType("aux", ButterParticle,[0,0,0],[0,0,0,1])
 w.removePObject("aux")
 aux = w.addPObjectOfType("aux", SugarParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
+aux = w.addPObjectOfType("aux", FlourParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
+aux = w.addPObjectOfType("aux", AlmondFlourParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
+aux = w.addPObjectOfType("aux", VanillaExtractParticle,[0,0,0],[0,0,0,1])
+w.removePObject("aux")
+aux = w.addPObjectOfType("aux", AlmondExtractParticle,[0,0,0],[0,0,0,1])
 w.removePObject("aux")
 aux = w.addPObjectOfType("aux", SweetButterParticle,[0,0,0],[0,0,0,1])
 w.removePObject("aux")
@@ -124,6 +174,31 @@ def thread_function_flask():
         try:
             request_data = request.get_json(force=True)
             retq["response"] = a.getBodyProperty("fn", "time")
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-go-to-pose", methods = ['POST'])
+    def to_go_to_pose():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if ('position' in request_data) and ('yaw' in request_data):
+                    doAction = True
+                    position = request_data.get('position')
+                    yaw = request_data.get('yaw')
+                    ccd = {'op': 'goToPose', 'pose': (position[0], position[1], yaw)}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = "done"
+            else:
+                with updating:
+                    retq["response"] = "where to go?"
         except KeyError:
             return 'missing entries from state data', 400
         except SyntaxError:
@@ -334,6 +409,38 @@ def thread_function_flask():
         except SyntaxError:
             return 'ill-formed json for command', 400
         return json.dumps(retq)
+    
+    @flask.route("/abe-sim-command/to-beat", methods = ['POST'])
+    def to_beat():
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            doAction = False
+            with updating:
+                request_data = request.get_json(force=True)
+                inputState = request_data.get("kitchenStateIn")
+                sws = request_data.get("setWorldState")
+                if sws and (inputState is not None):
+                    cgr = inputState
+                name = request_data["containerWithInputIngredients"]
+                tool = request_data["beatingTool"]
+                if (name in w._pobjects) and (tool in w._pobjects):
+                    doAction = True
+                    ccd = {'op': 'beat', 'item': name, 'tool': tool}
+            if doAction:
+                with executingAction:
+                    executingAction.wait()
+                with updating:
+                    retq["response"] = {"containerWithMixture": name, "kitchenStateOut": cwd}
+            else:
+                with updating:
+                    retq["response"] = {"containerWithMixture": None, "kitchenStateOut": cwd}
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
+    
     @flask.route("/abe-sim-command/to-portion", methods = ['POST'])
     def to_portion():
         global cwd, cgr, ccd
@@ -549,6 +656,10 @@ while True:
                w._pobjects["abe"].setBodyProperty("fn", "done", True)
                with executingAction:
                    executingAction.notify_all()
+            elif 'goToPose' == ccd['op']:
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                g._processes = {}
+                g._commandProcess = garden.Process(coherence=[procs.BaseAt(ccd['pose'], agent)])
             elif 'fetch' == ccd['op']:
                 item = w._pobjects[ccd['item']]
                 agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
@@ -582,6 +693,16 @@ while True:
                 substance = procs.getMixedSubstance(item)
                 g._commandProcess = garden.Process(coherence=[procs.MixedContents(item, tool, substance),procs.ItemOnLocation(tool,cabinet),procs.ParkedArms(agent)])
                 placeCamera(item)
+            elif 'beat' == ccd['op']:
+                item = w._pobjects[ccd['item']]
+                tool = w._pobjects[ccd['tool']]
+                agent = w._pobjects[list(w._ontoTypes["agent"])[0]]
+                counter = w._pobjects["counterTop"]
+                cabinet = w._pobjects["kitchenCabinet"]
+                g._processes = {}
+                substance = procs.getMixedSubstance(item)
+                g._commandProcess = garden.Process(coherence=[procs.MixedContents(item, tool, substance),procs.ItemOnLocation(tool,cabinet),procs.ParkedArms(agent)])
+                placeCamera(item)
             elif 'shape' == ccd['op']:
                 sourceContainer = w._pobjects[ccd['sourceContainer']]
                 particlesPerShape = 4 ## TODO
@@ -599,6 +720,7 @@ while True:
             elif 'sprinkle' == ccd['op']:
                 inputTargetContainer = w._pobjects[ccd['inputTargetContainer']]
                 inputToppingContainer = w._pobjects[ccd['inputToppingContainer']]
+                cabinet = w._pobjects["kitchenCabinet"]
                 g._commandProcess = garden.Process(coherence=[procs.SprinkledContents(inputTargetContainer,inputToppingContainer),procs.ItemOnLocation(inputToppingContainer,cabinet)])
             elif 'wait' == ccd['op']:
                 waitingFor = ccd['frames']
