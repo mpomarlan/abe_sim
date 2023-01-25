@@ -118,6 +118,17 @@ def placeCamera(item):
     stubbornTry(lambda : p.resetDebugVisualizerCamera(4,yaw-90,-35, cP))
 
 def thread_function_flask():
+    @flask.route("/abe-sim-command/to-get-time", methods = ['POST'])
+    def to_get_time():
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            request_data = request.get_json(force=True)
+            retq["response"] = a.getBodyProperty("fn", "time")
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-add-highlight", methods = ['POST'])
     def to_add_hightlight():
         global cwd, cgr, ccd
