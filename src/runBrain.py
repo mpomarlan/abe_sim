@@ -200,7 +200,7 @@ def getUpdates(cwd, oldWD):
         if name not in oldWD:
             updates[name] = {'position': position, 'orientation': orientation, 'at': at, 'mesh': mesh, 'customStateVariables': csv, 'joints': copy.deepcopy(joints)}
             if 'abe' == name:
-                updates[name]['heading'] = yaw
+                updates[name]['yaw'] = yaw
                 updates[name]['ccd'] = ccd
                 updates[name]['handPositionLeft'] = handPosL
                 updates[name]['handOrientationLeft'] = handOrientationL
@@ -212,8 +212,8 @@ def getUpdates(cwd, oldWD):
             positionOld, orientationOld, atOld, meshOld, csvOld = oldWD[name]['position'], oldWD[name]['orientation'], oldWD[name]['at'], oldWD[name]['mesh'], oldWD[name]['customStateVariables']
             jointsOld = oldWD[name].get('joints', {})
             if 'abe' == name:
-                if oldWD[name]['heading'] != yaw:
-                    updates[name]['heading'], oldWD[name]['heading'] = yaw, yaw
+                if oldWD[name]['yaw'] != yaw:
+                    updates[name]['yaw'], oldWD[name]['yaw'] = yaw, yaw
                 print('....')
                 if oldWD[name]['ccd'] != ccd:
                     updates[name]['ccd'], oldWD[name]['ccd'] = copy.deepcopy(ccd), copy.deepcopy(ccd)
@@ -267,6 +267,15 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-go-to-pose", methods = ['POST'])
     def to_go_to_pose():
+        def angleAdjust(dest, cr):
+            base = int(cr/(2*math.pi))*2*math.pi
+            dest = (dest%(2*math.pi)) + base
+            dif = dest - cr
+            if -math.pi > dif:
+                dif = dest+2*math.pi - cr
+            if math.pi < dif:
+                dif = dest-2*math.pi - cr
+            return cr + dif
         global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
@@ -276,6 +285,7 @@ def thread_function_flask():
                     doAction = True
                     position = request_data.get('position')
                     yaw = request_data.get('yaw')
+                    yaw = angleAdjust(yaw, cwd['abe']['joints']['base_y_to_base_yaw'][0])
                     ccd = {'op': 'goToPose', 'pose': [position[0], position[1], yaw]}
             if doAction:
                 with executingAction:
