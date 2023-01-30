@@ -338,6 +338,37 @@ def thread_function_flask():
         except SyntaxError:
             return 'ill-formed json for command', 400
         return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-set-custom-variable", methods = ['POST'])
+    def to_set_custom_variable():
+        global cwd, cgr, ccd, oldWD
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if ('object' not in request_data) or ('varname' not in request_data) or ('varvalue' not in request_data) or ('varpage' not in request_data):
+                    raise SyntaxError
+                w._pobjects[request_data['object']].setBodyProperty((request_data['varpage'],), request_data['varname'], request_data['varvalue'])
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-set-object-pose", methods = ['POST'])
+    def to_set_object_pose():
+        global cwd, cgr, ccd, oldWD
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if ('object' not in request_data) or ('position' not in request_data) or ('orientation' not in request_data) or (request_data['object'] not in w._pobjects):
+                    raise SyntaxError
+                w._pobjects[request_data['object']].setBodyProperty((), 'position', request_data['position'])
+                w._pobjects[request_data['object']].setBodyProperty((), 'orientation', request_data['orientation'])
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-get-state-updates", methods = ['POST'])
     def to_get_state_updates():
         global cwd, cgr, ccd, oldWD
