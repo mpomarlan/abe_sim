@@ -5,6 +5,8 @@ import os
 import signal
 import sys
 
+import copy
+
 import threading
 from flask import Flask, request
 import json
@@ -161,6 +163,90 @@ cgr = None
 cwd = {}
 ccd = None
 
+oldWD = {}
+def getUpdates(cwd, oldWD):
+    def far(a, b):
+        d = [x-y for x,y in zip(a,b)]
+        s = 0
+        for e in d:
+            s += e*e
+        return 0.001 < math.sqrt(s)
+    def differentJointValues(a, b):
+        for jname, jvals in a.items():
+            if (jname not in b) or (far(jvals, b[jname])):
+                return True
+        for jname in b.keys():
+            if jname not in a:
+                return True
+        return False
+    updates = {}
+    for name in cwd:
+        print('DO', name)
+        at = cwd[name]['at']
+        joints = cwd[name].get('joints', None)
+        if 'abe' == name:
+            position =  [joints['world_to_base_x'][0], joints['base_x_to_base_y'][0], 0]
+            yaw = joints['base_y_to_base_yaw'][0]
+            orientation = [0,0,math.sin(yaw/2),math.cos(yaw/2)]
+            handPosL = w._pobjects['abe'].getBodyProperty(('hand_left_roll',), 'position')
+            handOrientationL = w._pobjects['abe'].getBodyProperty(('hand_left_roll',), 'orientation')
+            handPosR = w._pobjects['abe'].getBodyProperty(('hand_right_roll',), 'position')
+            handOrientationR = w._pobjects['abe'].getBodyProperty(('hand_right_roll',), 'orientation')
+        else:
+            position, orientation = cwd[name]['position'], cwd[name]['orientation']
+        joints = cwd[name].get('joints', None)
+        csv = copy.deepcopy(cwd[name].get('customStateVariables', None))
+        mesh = stubbornTry(lambda : p.getVisualShapeData(w._pobjects[name].getId(), -1, w._pybulletConnection))[0][4].decode("utf-8")
+        if name not in oldWD:
+            updates[name] = {'position': position, 'orientation': orientation, 'at': at, 'mesh': mesh, 'customStateVariables': csv, 'joints': copy.deepcopy(joints)}
+            if 'abe' == name:
+                updates[name]['heading'] = yaw
+                updates[name]['ccd'] = ccd
+                updates[name]['handPositionLeft'] = handPosL
+                updates[name]['handOrientationLeft'] = handOrientationL
+                updates[name]['handPositionRight'] = handPosR
+                updates[name]['handOrientationRight'] = handOrientationR
+            oldWD[name] = updates[name]
+        else:
+            updates[name] = {}
+            positionOld, orientationOld, atOld, meshOld, csvOld = oldWD[name]['position'], oldWD[name]['orientation'], oldWD[name]['at'], oldWD[name]['mesh'], oldWD[name]['customStateVariables']
+            jointsOld = oldWD[name].get('joints', {})
+            if 'abe' == name:
+                if oldWD[name]['heading'] != yaw:
+                    updates[name]['heading'], oldWD[name]['heading'] = yaw, yaw
+                print('....')
+                if oldWD[name]['ccd'] != ccd:
+                    updates[name]['ccd'], oldWD[name]['ccd'] = copy.deepcopy(ccd), copy.deepcopy(ccd)
+                print('....')
+                if far(handPosL, oldWD[name]['handPositionLeft']):
+                    updates['handPositionLeft'], oldWD[name]['handPositionLeft'] = handPosL, handPosL
+                print('....')
+                if far(handOrientationL, oldWD[name]['handOrientationLeft']):
+                    updates['handOrientationLeft'], oldWD[name]['handOrientationLeft'] = handOrientationL, handOrientationL
+                print('....')
+                if far(handPosR, oldWD[name]['handPositionRight']):
+                    updates['handPositionRight'], oldWD[name]['handPositionRight'] = handPosR, handPosR
+                print('....')
+                if far(handOrientationR, oldWD[name]['handOrientationRight']):
+                    updates['handOrientationRight'], oldWD[name]['handOrientationRight'] = handOrientationR, handOrientationR
+                print('....')
+            if atOld != at:
+                updates[name]['at'], oldWD[name]['at'] = at, at
+            if meshOld != mesh:
+                updates[name]['mesh'], oldWD[name]['mesh'] = mesh, mesh
+            if csvOld != csv:
+                updates[name]['customStateVariables'], oldWD[name]['customStateVariables'] = csv, csv
+            if far(position, positionOld):
+                updates[name]['position'], oldWD[name]['position'] = position, position
+            if far(orientation, orientationOld):
+                updates[name]['orientation'], oldWD[name]['orientation'] = orientation, orientation
+            if differentJointValues(joints, jointsOld):
+                updates[name]['joints'], oldWD[name]['joints'] = joints, joints
+            if {} == updates[name]:
+                updates.pop(name)
+        print('       .... done.')
+    return oldWD, updates
+
 def placeCamera(item):
     iP = item.getBodyProperty((), "position")
     cP = w._pobjects["counterTop"].getBodyProperty((), "position")
@@ -190,7 +276,7 @@ def thread_function_flask():
                     doAction = True
                     position = request_data.get('position')
                     yaw = request_data.get('yaw')
-                    ccd = {'op': 'goToPose', 'pose': (position[0], position[1], yaw)}
+                    ccd = {'op': 'goToPose', 'pose': [position[0], position[1], yaw]}
             if doAction:
                 with executingAction:
                     executingAction.wait()
@@ -247,6 +333,19 @@ def thread_function_flask():
             else:
                 with updating:
                     retq["response"] = "wrong name for object?"
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-get-state-updates", methods = ['POST'])
+    def to_get_state_updates():
+        global cwd, cgr, ccd, oldWD
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                oldWD, updates = getUpdates(cwd, oldWD)
+                retq['response'] = {'updates': updates}
         except KeyError:
             return 'missing entries from state data', 400
         except SyntaxError:
