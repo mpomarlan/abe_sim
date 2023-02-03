@@ -267,7 +267,7 @@ def thread_function_flask():
             return 'ill-formed json for command', 400
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-set-joint", methods=['POST'])
-    def to_set_joint:
+    def to_set_joint():
         global cwd, cgr, ccd
         retq = {'status': 'ok', 'response': ''}
         try:
