@@ -386,7 +386,7 @@ def thread_function_flask():
         try:
             with updating:
                 oldWD, updates = getUpdates(cwd, oldWD)
-                retq['response'] = {'updates': updates}
+                retq['response'] = {'updates': updates, 'currentCommand': ccd}
         except KeyError:
             return 'missing entries from state data', 400
         except SyntaxError:
