@@ -165,7 +165,7 @@ ccd = None
 bodyProcs = []
 
 oldWD = {}
-def getUpdates(cwd, oldWD, bps):
+def getUpdates(cwd, oldWD):
     def far(a, b):
         d = [x-y for x,y in zip(a,b)]
         s = 0
