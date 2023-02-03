@@ -162,9 +162,10 @@ flask = Flask(__name__)
 cgr = None
 cwd = {}
 ccd = None
+bodyProcs = []
 
 oldWD = {}
-def getUpdates(cwd, oldWD):
+def getUpdates(cwd, oldWD, bps):
     def far(a, b):
         d = [x-y for x,y in zip(a,b)]
         s = 0
@@ -381,12 +382,12 @@ def thread_function_flask():
         return json.dumps(retq)
     @flask.route("/abe-sim-command/to-get-state-updates", methods = ['POST'])
     def to_get_state_updates():
-        global cwd, cgr, ccd, oldWD
+        global cwd, cgr, ccd, oldWD, bodyProcs
         retq = {'status': 'ok', 'response': ''}
         try:
             with updating:
                 oldWD, updates = getUpdates(cwd, oldWD)
-                retq['response'] = {'updates': updates, 'currentCommand': ccd}
+                retq['response'] = {'updates': updates, 'currentCommand': ccd, 'abeActions': [str(x) for x in bodyProcs]}
         except KeyError:
             return 'missing entries from state data', 400
         except SyntaxError:
