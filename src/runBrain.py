@@ -266,6 +266,21 @@ def thread_function_flask():
         except SyntaxError:
             return 'ill-formed json for command', 400
         return json.dumps(retq)
+    @flask.route("/abe-sim-command/to-set-joint", methods=['POST'])
+    def to_set_joint:
+        global cwd, cgr, ccd
+        retq = {'status': 'ok', 'response': ''}
+        try:
+            with updating:
+                request_data = request.get_json(force=True)
+                if ('object' in request_data) and ('joint' in request_data) and ('position' in request_data):
+                    if request_data['object'] in w._pobjects:
+                        w._pobjects[request_data['object']].setJointStates({request_data['joint']:[request_data['position'],0]})
+        except KeyError:
+            return 'missing entries from state data', 400
+        except SyntaxError:
+            return 'ill-formed json for command', 400
+        return json.dumps(retq)
     @flask.route("/abe-sim-command/to-go-to-pose", methods = ['POST'])
     def to_go_to_pose():
         def angleAdjust(dest, cr):
