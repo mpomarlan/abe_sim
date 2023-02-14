@@ -1,0 +1,18 @@
+{"type": "Floor", "simtype": "ktree", "filename": "3DObjects/Floor/floor.urdf", "immobile": true, "fn": {}, "customStateVariables": {}}
+{"type": "KitchenCounter", "simtype": "ktree", "filename": "3DObjects/KitchenCounter/kitchen_counter.urdf", "immobile": true, "fn": {"canContain": true, "canSupport": true, "supporting": {"links": ["countertop"]}}, "customStateVariables": {}}
+{"type": "EggInShell", "simtype": "ktree", "filename": "3DObjects/Egg/egg.urdf", "fn": {"crackable": true, "cracking": {"crackForce": 0.3}}, "customStateVariables": {}}
+{"type": "CrackedEggshellFlatHalf", "simtype": "ktree", "filename": "3DObjects/Egg/cracked_eggshell_flat_half.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "CrackedEggshellPointyHalf", "simtype": "ktree", "filename": "3DObjects/Egg/cracked_eggshell_pointy_half.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "EggWhiteParticle", "simtype": "ktree", "filename": "3DObjects/Egg/eggwhite_particle.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "EggYolkParticle", "simtype": "ktree", "filename": "3DObjects/Egg/eggyolk_particle.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "Potato", "simtype": "ktree", "filename": "3DObjects/Potato/potato.urdf", "fn": {"peelable": true, "peeling": {"peelableRadius": 0.1}}, "customStateVariables": {"peeling": {"hp": 10}}}
+{"type": "PeeledPotato", "simtype": "ktree", "filename": "3DObjects/Potato/peeled_potato.urdf", "fn": {"mashable": true, "mashing": {"masherVelocity": 0.1, "mashableRadius": 0.05}}, "customStateVariables": {"mashing": {"hp": 10}}}
+{"type": "PotatoPeel", "simtype": "ktree", "filename": "3DObjects/Potato/potato_peel.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "PotatoParticle", "simtype": "ktree", "filename": "3DObjects/Potato/potato_particle.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "Masher", "simtype": "ktree", "filename": "3DObjects/Masher/masher.urdf", "fn": {"canMash": true, "mashing": {"links": ["masher"], "axis": {"masher": [1,0,0]}}}, "customStateVariables": {}}
+{"type": "CookingKnife", "simtype": "ktree", "filename": "3DObjects/CookingKnife/cooking_knife.urdf", "fn": {"canCut": true, "cutting": {"links": ["blade"], "axis": {"blade": [0,0,-1]}}}, "customStateVariables": {}}
+{"type": "Apple", "simtype": "ktree", "filename": "3DObjects/Apple/apple.urdf", "fn": {"cuttable": true, "cutting": {"cuttingForce": 0.3}}, "customStateVariables": {}}
+{"type": "HalfApple", "simtype": "ktree", "filename": "3DObjects/Apple/half_apple.urdf", "fn": {"seedable": true, "seeding": {"seedableRadius": 0.1, "links": ["seeds"]}}, "customStateVariables": {"seeding": {"hp": 10}}}
+{"type": "SeededHalfApple", "simtype": "ktree", "filename": "3DObjects/Apple/seeded_half_apple.urdf", "fn": {}, "customStateVariables": {}}
+{"type": "AppleSeed", "simtype": "ktree", "filename": "3DObjects/Apple/apple_seed.urdf", "fn": {}, "customStateVariables": {}}
+

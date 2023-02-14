@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot name="masher">
+  <link name="handle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="shaft">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="shaft.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="shaft.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="masher">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="masher.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="masher.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="handle_to_shaft" type="fixed">
+    <parent link="handle"/>
+    <child link="shaft"/>
+    <origin rpy="0 0 0" xyz="0.24 0 0"/>
+  </joint>
+  <joint name="shaft_to_masher" type="fixed">
+    <parent link="shaft"/>
+    <child link="masher"/>
+    <origin rpy="0 0 0" xyz="0.12 0 0"/>
+  </joint>
+</robot>
+

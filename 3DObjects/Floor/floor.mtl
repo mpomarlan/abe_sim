@@ -1,0 +1,12 @@
+# Blender MTL File: 'abe_simkitchen_default.blend'
+# Material Count: 1
+
+newmtl _defaultMat.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.538225 0.538225 0.538225
+Ks 0.250000 0.250000 0.250000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
