@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="eggshell_flat_half">
-  <link name="eggshell_flat_half">
+  <link name="eggshell">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <mass value="0.0025"/>

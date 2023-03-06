@@ -1,0 +1,319 @@
+# An object absorbs some number of particles it comes in contact with and as a result
+# changes into something else.
+# Note: the thing it changes into should also have the canAbsorb disposition or else
+# the absorbed particle might not disappear.
+absorbing:
+  disposition: [self, fn, canAbsorb]
+  progress:
+    source: 
+      mode: contact
+    trajector:
+      disposition: [trajector, fn, absorbable]
+  resource: [self, customStateVariables, absorbing, [trajector, type], hp]
+  accumulators:
+    - variable: [self, customStateVariables, consuming, accumulator]
+      value: $trajector
+  completion:
+    process: absorbing
+    absorbed: [trajector, type]
+# Something bakes if left for long enough in a container that can bake.
+baking:
+  disposition: [self, fn, bakeable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canBake]
+    source:
+      mode: transitive-at
+  resource: [self, customStateVariables, baking, hp]
+  completion:
+    process: baking
+    instrument: [trajector, type]
+# Something gets replaced by parts if something that can cut hits it
+# with sufficient force and blade first.
+chopping:
+  disposition: [self, fn, cuttable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canCut]
+      part: [trajector, fn, cutting, links]
+    source:
+      mode: contact
+      constraints:
+        - mode: alignment
+          axis: [world, contact-normal]
+          reference: [trajector, fn, cutting, axis, $trajector-part]
+          threshold: 0.8
+      minforce: [self, fn, cutting, force]
+  completion:
+    process: chopping
+    instrument: [trajector, type]
+# A particle disappears when near something that consumed it.
+consuming:
+  disposition: [self, fn, consumable]
+  progress:
+    trajector:
+      resources:
+        - resource:
+          variable: [trajector, customStateVariables, consuming, accumulator]
+          reference: [self, name]
+          mode: includes
+    source:
+      mode: contact
+  completion:
+    process: consuming
+# Something cracks -- is replaced by shards -- if it hits anything with sufficient force.
+cracking:
+  disposition: [self, fn, crackable]
+  progress:
+    source: 
+      mode: contact
+      minforce: [self, fn, cracking, force]
+  completion:
+    process: cracking
+# Something diffuses -- accumulates types of neighbors who can also diffuse.
+diffusing:
+  disposition: [self, fn, diffusable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, diffusable]
+    source:
+      mode: close
+      radius: [self, fn, diffusing, radius]
+  accumulators: 
+    - variable: [self, customStateVariables, diffusing, accumulator]
+      value: [trajector, type]
+# Something gets mashed -- replaced with shards -- if a masher moves in an appropriate way long enough.
+mashing:
+  disposition: [self, fn, mashable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canMash]
+      part: [trajector, fn, mashing, links]
+    source:
+      mode: close
+      radius: [self, fn, mashing, radius]
+    path:
+      mode: alignment
+      reference: [trajector, fn, mashing, axis, $trajector-part]
+      threshold: 0.8
+    goal: 
+      direction: towards
+      threshold: 0.8
+  resource: [self, customStateVariables, mashing, hp]
+  completion:
+      process: mashing
+      instrument: [trajector, type]
+# Something mixes -- gets replaced by something else -- if it accumulated enough diffusable types and a mixer
+# is moving nearby
+mixing:
+  disposition: [self, fn, mixable]
+  progress:
+    relatum:
+      resources:
+        - variable: [self, customStateVariables, diffusing, accumulator]
+          reference: [processKnowledge, copatients, mixing, $relatum-type]
+          mode: wholeSubsumesSomeElement
+    trajector:
+      disposition: [trajector, fn, canMix]
+      part: [trajector, fn, mixing, links]
+    source:
+      mode: close
+      radius: [self, mixing, radius]
+    path:
+      mode: minmagnitude
+      threshold: [self, fn, mixing, velocity]
+  resource: [self, customStateVariables, mixing, hp]
+  completion:
+    process: mixing
+    instrument: [trajector, type]
+    substances: [self, customStateVariables, diffusing, accumulator]
+# Something gets peeled -- replaced by a core and peels -- when a peeling instrument passes by, with its 
+# velocity aligned to its peeling axis
+peeling:
+  disposition: [self, fn, peelable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canPeel]
+      part: [trajector, fn, peeling, links]
+    source:
+      mode: close
+      radius: [self, fn, peeling, radius]
+    path:
+      mode: alignment
+      reference: [trajector, fn, peeling, axis, $trajector-part]
+      threshold: 0.8
+    goal:
+      direction: around
+      threshold: 0.2
+  resource: [self, customStateVariables, peeling, hp]
+  completion:
+    process: peeling
+    instrument: [trajector, type]
+# When tipped over, an object produces other particles
+pouring:
+  disposition: [self, fn, pourable]
+  progress:
+    relatum:
+      part: [self, fn, pouring, links]
+    source:
+      mode: pose
+      constraints:
+        - mode: counter-alignment
+          axis: [self, fn, pouring, axis, $relatum-part]
+          reference: [world, upAxis]
+          threshold: 0.9
+  resource: [self, customStateVariables, pouring, hp, $relatum-part]
+  reset: 
+    value: [self, fn, pouring, hp, $relatum-part]
+    lives: [self, customStateVariables, pouring, capacity]
+  completion:
+    process: pouring
+    part: $relatum-part
+# Something gets seeded -- replaced by core and seeds -- when a cutting instrument moves away, while
+# keeping the cutting axis orthogonal to the velocity
+seeding:
+  disposition: [self, fn, seedable]
+  progress:
+    relatum:
+      part: [self, fn, seeding, links]
+    trajector:
+      disposition: [trajector, fn, canCut]
+      part: [trajector, fn, cutting, links]
+    source:
+      mode: close
+      radius: [self, fn, seeding, radius]
+    path:
+      mode: orthogonal
+      reference: [trajector, fn, cutting, axis, $trajector-part]
+      threshold: 0.8
+    goal:
+      direction: away
+      threshold: 0.6
+  resource: [self, customStateVariables, seeding, hp]
+  completion:
+    process: seeding
+    instrument: [trajector, type]
+# Something shakes -- gets replaced by something else -- if it accumulated enough diffusable types and moves.
+shaking:
+  disposition: [self, fn, shakable]
+  progress:
+    relatum:
+      resources:
+        - variable: [self, customStateVariables, diffusing, accumulator]
+          reference: [processKnowledge, copatients, mixing, $relatum-type]
+          mode: wholeSubsumesSomeElement
+    path:
+      mode: minmagnitude
+      threshold: [self, fn, shaking, velocity]
+  resource: [self, customStateVariables, shaking, hp]
+  completion:
+    process: shaking
+    instrument: [trajector, type]
+    substances: [self, customStateVariables, diffusing, accumulator]
+# An object collects some appropriate close ones and then creates a new one when it has enough.
+shaping:
+  disposition: [self, fn, canShape]
+  progress:
+    relatum:
+      part: [self, fn, shaping, links]
+      resources:
+        - variable: [self, customStateVariables, shaping, substance, $relatum-part]
+          reference: [trajector, type]
+          mode: equal
+    trajector:
+      disposition: [trajector, fn, shapeable]
+    source:
+      mode: close
+      radius: [self, fn, shaping, radius]
+  accumulators:
+    - variable: [self, customStateVariables, consuming, accumulator]
+      value: $trajector
+    - variable: [self, customStateVariables, shaping, actualAmount]
+      value: 1
+      condition:
+        variable: [self, customStateVariables, consuming, accumulator]
+        reference: $trajector
+        mode: notInclude
+      capacity: [self, customStateVariables, shaping, desiredAmount, $relatum-part]
+  completion:
+    process: shaping
+    substance: [self, customStateVariables, shaping, substance, $relatum-part]
+    shape: [self, customStateVariables, shaping, shape, $relatum-part]
+# An item skims a little from some substance and then carries it
+skimming:
+  disposition: [self, fn, canSkim]
+  progress:
+    relatum:
+      part: [self, fn, skimming, links]
+    trajector:
+      disposition: [trajector, fn, skimmable]
+    source:
+      mode: close
+      radius: [self, fn, skimming, radius]
+  accumulators:
+    - variable: [self, customStateVariables, wiping, carrying, hp, $relatum-part]
+      value: 20
+    - variable: [self, customStateVariables, wiping, carrying, substances, $relatum-part]
+      value: [trajector, type]
+  # An item accumulates a substance stored by another item that moves around in close proximity
+spreading:
+  disposition: [self, fn, canSpread]
+  progress:
+    relatum:
+      part: [self, fn, wiping, links]
+      substance: [self, customStateVariables, wiping, carrying, substances, $relatum-part]
+    trajector:
+      disposition: [trajector, fn, canBeSpreadUpon]
+    source:
+      mode: close
+      radius: [self, fn, spreading, radius]
+    path:
+      mode: orthogonal
+      reference: [self, fn, spreading, axis, $relatum-part]
+      threshold: 0.2
+    goal:
+      direction: around
+      threshold: 0.2
+  resource: [self, customStateVariables, wiping, carrying, hp, $relatum-part]
+  clear:
+    - [self, customStateVariables, wiping, carrying, substances, $relatum-part, $relatum-substance]
+gettingSpreadUpon:
+  disposition: [self, fn, canBeSpreadUpon]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canSpread]
+      part: [trajector, fn, spreading, links]
+      substance: [trajector, customStateVariables, wiping, carrying, substances, $trajector-part]
+    source:
+      mode: close
+      radius: [self, fn, spreading, radius]
+    path:
+      mode: orthogonal
+      reference: [trajector, fn, spreading, axis, $trajector-part]
+      threshold: 0.2
+    goal:
+      direction: around
+      threshold: 0.2
+  resource: [self, customStateVariables, spreading, $trajector-substance, hp]
+  completion:
+    process: gettingSpreadUpon
+    instrument: [trajector, type]
+    substance: $trajector-substance
+# An item absorbs then carries a substance it contacts
+wiping:
+  disposition: [self, fn, canWipe]
+  progress:
+    relatum:
+      part: [self, fn, wiping, links]
+    trajector:
+      disposition: [trajector, fn, wipable]
+    source:
+      mode: contact
+  accumulators:
+    - variable: [self, customStateVariables, consuming, accumulator]
+      value: $trajector
+    - variable: [self, customStateVariables, wiping, carrying, hp, $relatum-part]
+      value: 20
+    - variable: [self, customStateVariables, wiping, carrying, substances, $relatum-part]
+      value: [trajector, type]
+  

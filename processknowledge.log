@@ -1,9 +1,12 @@
 {"outcome": 
     {
+"absorbing":
+        {"ButteredBreadSlice": {"default": {"toReplace": "PepperedButteredBreadSlice"}}},
+"consuming": {"PepperParticle": {"default": {"toDelete": true}}},
 "cracking": 
         {"EggInShell": {"default":
                            {"toReplace": "CrackedEggshellFlatHalf",
-                            "toAdd": [["CrackedEggshellPointyHalf", [[[0,0,0.01], [0,0,0,1]]]],
+                            "toAdd": [["CrackedEggshellPointyHalf", [[[0,0,0.02], [0,0,0,1]]]],
                                       ["EggYolkParticle", [[[0, 0.015, 0], [0, 0, 0, 1]],
                                                            [[0.015, -0.01, 0], [0, 0, 0, 1]],
                                                            [[-0.015, -0.01, 0], [0, 0, 0, 1]],
@@ -14,6 +17,9 @@
                                                             [[0.025, 0.015, -0.02], [0, 0, 0, 1]],
                                                             [[-0.025, 0.015, -0.02], [0, 0, 0, 1]],
                                                             [[0, -0.03, -0.02], [0, 0, 0, 1]]]]]}}},
+"gettingSpreadUpon":
+        {"BreadSlice": {"default":
+                         {"toReplace": "ButteredBreadSlice"}}},
 "mashing":
         {"PeeledPotato": {"default":
                              {"toDelete": true,
@@ -40,7 +46,19 @@
         {"Apple": {"default":
                       {"toDelete": true,
                        "toAdd": [["HalfApple", [[[0.022,  0, 0], [0,0,0,1]],
-                                                [[-0.022, 0, 0], [0,0,1,0]]]]]}}},
+                                                [[-0.022, 0, 0], [0,0,1,0]]]]]}},
+         "Bread": {"default":
+                      {"toAdd": [["BreadSlice", [[[0.15,  0, 0], [0.094,0,0.996,0]]]]]}}},
+"chopping":
+        {"Apple": {"default":
+                      {"toDelete": true,
+                       "toAdd": [["HalfApple", [[[0.022,  0, 0], [0,0,0,1]],
+                                                [[-0.022, 0, 0], [0,0,1,0]]]]]}},
+         "Bread": {"default":
+                      {"toAdd": [["BreadSlice", [[[0.15,  0, 0], [0.094,0,0.996,0]]]]]}}},
+"pouring":
+        {"PepperShaker": {"default":
+                             {"toAdd": [["PepperParticle", [[[0,0,0.07], [0,0,0,1]]]]]}}},
 "seeding":
         {"HalfApple": {"default":
                           {"toReplace": "SeededHalfApple",
