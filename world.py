@@ -78,8 +78,8 @@ import copy
 #
 #      Kinematic trees
 #
-#    links: dictionary containing key-value pairs of variables associated to links: idx; invisible to getObjectProperty
-#    joints: dictionary containing key-value pairs of variables associated to joints: idx; invisible to getObjectProperty
+#    links: dictionary containing key-value pairs of variables associated to links: idx; getObjectProperty only returns key list, not writable by setObjectProperty
+#    joints: dictionary containing key-value pairs of variables associated to joints: idx; getObjectProperty only returns key list, not writable by setObjectProperty
 #    idx2Link: dictionary mapping pybullet link ids to link names; not reported by worldDump, instead is generated whenever an object is loaded or a greatReset happens, invisible to getObjectProperty
 #    idx2Joint: dictionary mapping pybullet link ids to link names; not reported by worldDump, instead is generated whenever an object is loaded or a greatReset happens, invisible to getObjectProperty
 #    baseLinkName: name of the base link; not reported by worldDump, not writable
@@ -158,8 +158,11 @@ class World():
           'checkClosestPoints': (lambda x,y, maxDistance=None, hypotheticalPoses=None : self.checkClosestPoints(x, y, maxDistance=maxDistance, hypotheticalPoses=hypotheticalPoses)), 
           'getCameraImage': (lambda cameraPosition=None, cameraTarget=None, cameraUpAxis=None, fovInDegrees=60.0, aspectRatio=1.0, near=0.1, far=15, xSize=240, ySize=240: self.getCameraImage(cameraPosition=cameraPosition, cameraTarget=cameraTarget, cameraUpAxis=cameraUpAxis, fovInDegrees=fovInDegrees, aspectRatio=aspectRatio, near=near, far=far, xSize=xSize, ySize=ySize)), 
           'adjustAABBRadius': (lambda x,y: self.adjustAABBRadius(x, y)), 
+          'addAABBRadius': (lambda x,y: self.addAABBRadius(x, y)), 
+          'objectPoseRelativeToObject': (lambda x, y, z, w: self.objectPoseRelativeToObject(x, y, z, w)), 
           'objectPoseRelativeToWorld': (lambda x, y, z, w: self.objectPoseRelativeToWorld(x, y, z, w)), 
           'orientationDifferenceAA': (lambda x, y: self.orientationDifferenceAA(x, y)), 
+          'handPoseToBringObjectToPose': (lambda x, y, z, w: self.handPoseToBringObjectToPose(x, y, z, w)), 
           'distance': (lambda x,y: self.distance(x, y)), 
           'getNewObjectCounter': (lambda : self.getNewObjectCounter()), 
           'getGravity': (lambda : self.getGravity()), 
@@ -179,6 +182,8 @@ class World():
     def adjustAABBRadius(self, aabb, radius):
         center = [(x+y)/2 for x,y in zip(aabb[0], aabb[1])]
         return tuple([tuple([x-radius for x in center]), tuple([x+radius for x in center])])
+    def addAABBRadius(self, aabb, radius):
+        return tuple([tuple([x-radius for x in aabb[0]]), tuple([x+radius for x in aabb[1]])])
     def getGravity(self):
         return self._gravity
     def getDown(self):
@@ -230,6 +235,8 @@ class World():
         if adjustments is None:
             adjustments = {'toAdd': {}, 'toReplace': {}}
         outcome = self.getProcessOutcome(processDescription)
+        if 'consuming' == processDescription['process']:
+            print(processDescription, outcome)
         identifier = (name,)
         if link is not None:
             identifier = (name, link)
@@ -389,9 +396,11 @@ class World():
                     stubbornTry(lambda : pybullet.changeDynamics(objData['idx'], objData['links'][l]['idx'], **newDynamics))
         for e in objData['links']:
             if (fname, e) not in self._collisionShapes:
-                _, _, _, _, meshFilename, localPosition, localOrientation = stubbornTry(lambda : pybullet.getCollisionShapeData(objData['idx'], objData['links'][e]['idx'], self._pybulletConnection))[0]
-                meshFilename = meshFilename.decode('utf-8')
-                self._collisionShapes[(fname, e)] = stubbornTry(lambda : pybullet.createCollisionShape(pybullet.GEOM_MESH, fileName=meshFilename, collisionFramePosition=localPosition, collisionFrameOrientation=localOrientation, physicsClientId=self._pybulletConnection))
+                ans = stubbornTry(lambda : pybullet.getCollisionShapeData(objData['idx'], objData['links'][e]['idx'], self._pybulletConnection))
+                if 0 < len(ans):
+                    _, _, _, _, meshFilename, localPosition, localOrientation = ans[0]
+                    meshFilename = meshFilename.decode('utf-8')
+                    self._collisionShapes[(fname, e)] = stubbornTry(lambda : pybullet.createCollisionShape(pybullet.GEOM_MESH, fileName=meshFilename, collisionFramePosition=localPosition, collisionFrameOrientation=localOrientation, physicsClientId=self._pybulletConnection))
             mass = stubbornTry(lambda : pybullet.getDynamicsInfo(objData['idx'], objData['links'][e]['idx'], self._pybulletConnection))[0]
             if 0 < mass:
                 _setDictionaryEntry(objData, ('fn', 'mass', '_previousNonzeroMass', e), mass)
@@ -403,6 +412,7 @@ class World():
         self._idx2KinematicTree[objData['idx']] = name
         objData['at'] = self.at((name,))
         for e in toRestore:
+            print("RESTORE", e)
             self._addKinematicConstraint(e)
         return True
     def _addMarker(self, description):
@@ -447,8 +457,10 @@ class World():
             return retq
         self._customDynamicsAPI[simtype][name] = _makeCustomDynamicsAPI(self._customDynamicsAPIBase, name)
         self._customDynamicsUpdaters[simtype][name] = []
-        for isApplicable, updateFn in self._customDynamics:
-            if isApplicable(lambda x, y=None: self.getObjectProperty((name,), x, y)):
+        #for isApplicable, updateFn in self._customDynamics:
+        #    if isApplicable(lambda x, y=None: self.getObjectProperty((name,), x, y)):
+        for disposition, updateFn in self._customDynamics:
+            if self.getObjectProperty((name,), disposition):
                 self._customDynamicsUpdaters[simtype][name].append(updateFn)    
     def addNewObject(self, description):
         if ('name' not in description) or ('simtype' not in description):
@@ -624,11 +636,15 @@ class World():
                 if 1 == len(identifier):
                     retq = {}
                     for j in objData['joints']:
-                        pos, vel, ref, tor = stubbornTry(lambda : pybullet.getJointState(obj['idx'], objData['joints'][j]['idx']))
+                        pos, vel, ref, tor = stubbornTry(lambda : pybullet.getJointState(objData['idx'], objData['joints'][j]['idx']))
                         retq[j] = {'jointPositions': pos, 'jointVelocities': vel, 'jointReactionForces': ref, 'jointAppliedTorques': tor}[propertyIdentifier]
                     return retq
                 return None
-            elif propertyIdentifier in ['idx', 'idx2Joint', 'idx2Link', 'links', 'joints']:
+            elif 'links' == propertyIdentifier:
+                return list(self._kinematicTrees[identifier[0]]['links'].keys())
+            elif 'joints' == propertyIdentifier:
+                return list(self._kinematicTrees[identifier[0]]['joints'].keys())
+            elif propertyIdentifier in ['idx', 'idx2Joint', 'idx2Link']:
                 return None
         if isinstance(propertyIdentifier, str):
             if 1 < len(identifier):
@@ -1229,6 +1245,8 @@ class World():
             retq['child'] = objData['child']
             retq['parentLink'] = objData['parentLink']
             retq['childLink'] = objData['childLink']
+            retq['fn'] = objData.get('fn', {})
+            retq['customStateVariables'] = objData.get('customStateVariables', {})
         elif retq['simtype'] in ['ktree', 'marker']:
             retq['at'] = self.at((name,))
             pos, orn = stubbornTry(lambda : pybullet.getBasePositionAndOrientation(objData['idx'], self._pybulletConnection))
