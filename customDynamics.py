@@ -305,7 +305,7 @@ def customDynamic(name, customDynamicsAPI, progressDescription, resourceDescript
                     clearVariable(name, customDynamicsAPI, clearDescription, roleBdgs)
 
 def buildSpecs(processDescriptionFilename):
-    procs = yaml.load(open(processDescriptionFilename).read())
+    procs = yaml.safe_load(open(processDescriptionFilename).read())
     retq = []
     for dynname, description in procs.items():
         disposition = tuple(description['disposition'][1:])
