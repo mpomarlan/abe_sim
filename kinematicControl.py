@@ -19,7 +19,7 @@ def computeError(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrien
     adj = 1.0
     if linearDSq < lenPE:
         adj = math.sqrt(linearDSq/lenPE)
-    positionE = adj*positionE
+    positionE = 10*adj*positionE
     axis, angle = customDynamicsAPI['orientationDifferenceAA'](targetOrientation, efOrientation)
     angle = min(angularD, angle)
     orientationE = numpy.array([angle*x for x in axis])
@@ -92,9 +92,6 @@ def jacobianPseudoinverseDLS(customDynamicsAPI, robotName, efLink, efPositionInL
     JJt = numpy.matmul(J, Jt)
     invMat = numpy.linalg.inv(JJt + dampingSq*numpy.eye(len(JJt)))
     return numpy.matmul(Jt, numpy.matmul(invMat, e))
-
-def isAKinematicControllableThing(getFn):
-    return getFn(('fn', 'kinematicallyControlable'), None) is True
 
 def updateKinematicControl(name, customDynamicsAPI):
     fnKinematicControl = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl'), {})

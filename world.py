@@ -55,7 +55,8 @@ import copy
 #    orientation: (x,y,z,w) tuple describing orientation in world frame; writable only for base link
 #    linearVelocity: (x,y,z) tuple describing linear velocity in world frame; writable only for base link
 #    angularVelocity: (x,y,z) tuple describing angular velocity in world frame; writable only for base link
-#    aabb: ((xmin,ymin,zmin), (xmax,ymax,zmax)) tuple describing the axis-aligned bounding box; not reported by WorldDump, not writable
+#    aabb: ((xmin,ymin,zmin), (xmax,ymax,zmax)) tuple describing the axis-aligned bounding box in world frame; not reported by WorldDump, not writable
+#    local-aabb: ((xmin,ymin,zmin), (xmax,ymax,zmax)) tuple describing the axis-aligned bounding box in object base local frame; not reported by WorldDump, not writable
 #
 #      Common to Kinematic trees, links
 #
@@ -137,6 +138,7 @@ class World():
             self._pybulletConnection = stubbornTry(lambda : pybullet.connect(pybullet.DIRECT, options=pybulletOptions))
         stubbornTry(lambda : pybullet.setAdditionalSearchPath(pybullet_data.getDataPath()))
         self._byssos = stubbornTry(lambda : pybullet.loadURDF('plane.urdf', (0,0,-100), (0,0,0,1)))
+        self._colliderProbe = stubbornTry(lambda : pybullet.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'collider_probe.urdf'), (0,0,-110), (0,0,0,1)))
         if gravity is None:
             gravity = (0, 0, 0)
         self._down = (0,0,-1)
@@ -153,6 +155,7 @@ class World():
           'addObject': (lambda x : self.addNewObject(x)), 
           'getObjectProperty': (lambda x,y,defaultValue=None: self.getObjectProperty(x,y,defaultValue=defaultValue)),
           'getDistance': (lambda x,y,z,hypotheticalPoses=None: self.getDistance(x,y,z,hypotheticalPoses=hypotheticalPoses)), 
+          'probeClosestPoints': (lambda x, pos, maxDistance=None: self.probeClosestPoints(x, pos, maxDistance=maxDistance)),
           'checkCollision': (lambda x, identifierB=None, hypotheticalPoses=None : self.checkCollision(x, identifierB=identifierB, hypotheticalPoses=hypotheticalPoses)), 
           'checkOverlap': (lambda x, hypotheticalPoses=None: self.checkOverlap(x, hypotheticalPoses=hypotheticalPoses)), 
           'checkClosestPoints': (lambda x,y, maxDistance=None, hypotheticalPoses=None : self.checkClosestPoints(x, y, maxDistance=maxDistance, hypotheticalPoses=hypotheticalPoses)), 
@@ -346,8 +349,7 @@ class World():
         ufb = {False: 0, True: 1}[objData.get('immobile', False)]
         flags = 0
         fname = objData.get('filename', '')
-        objData['idx'] = stubbornTry(lambda : pybullet.loadURDF(fname, basePosition=pos, baseOrientation=orn, useFixedBase=ufb, flags=flags, physicsClientId=self._pybulletConnection))
-        stubbornTry(lambda : pybullet.resetBaseVelocity(objData['idx'], linearVelocity=lin, angularVelocity=ang, physicsClientId=self._pybulletConnection))
+        objData['idx'] = stubbornTry(lambda : pybullet.loadURDF(fname, basePosition=(0,0,0), baseOrientation=(0,0,0,1), useFixedBase=ufb, flags=flags, physicsClientId=self._pybulletConnection))
         objData['links'] = {}
         objData['joints'] = {}
         objData['idx2Link'] = {}
@@ -375,6 +377,20 @@ class World():
                 maxForce = jdata[10]
                 _setDictionaryEntry(objData, ('fn', 'maxForce', lname), maxForce)
             stubbornTry(lambda : pybullet.setJointMotorControl2(objData['idx'], k, pybullet.TORQUE_CONTROL, force=maxForce, physicsClientId=self._pybulletConnection))
+        objData['local-aabb'] = {}
+        mcs = None
+        Mcs = None
+        for e in objData['links']:
+            objData['local-aabb'][e] = stubbornTry(lambda : pybullet.getAABB(objData['idx'], objData['links'][e]['idx'], self._pybulletConnection))
+            if mcs is None:
+                mcs = list(objData['local-aabb'][e][0])
+            if Mcs is None:
+                Mcs = list(objData['local-aabb'][e][1])
+            mcs = [min(x,y) for x,y in zip(mcs, objData['local-aabb'][e][0])]
+            Mcs = [max(x,y) for x,y in zip(Mcs, objData['local-aabb'][e][1])]
+        objData['local-aabb'][0] = tuple([tuple(mcs), tuple(Mcs)])
+        stubbornTry(lambda : pybullet.resetBasePositionAndOrientation(objData['idx'], pos, orn, self._pybulletConnection))
+        stubbornTry(lambda : pybullet.resetBaseVelocity(objData['idx'], linearVelocity=lin, angularVelocity=ang, physicsClientId=self._pybulletConnection))
         objData['dofList'] = [(x[1], x[2]) for x in sorted(objData['dofList'])]
         for k,v in objData['joints'].items():
             pos = objData.get('jointPositions', {k: 0.0}).get(k, 0.0)
@@ -627,6 +643,13 @@ class World():
                 return self.at(identifier)
             elif 'aabb' == propertyIdentifier:
                 return self.getAABB(identifier)
+            elif ('local-aabb' == propertyIdentifier) or ('local-aabb' == propertyIdentifier):
+                link = 0
+                if 1 < len(identifier):
+                    link = identifier[1]
+                elif (not isinstance(propertyIdentifier, str)) and (1 < len(propertyIdentifier)):
+                    link = propertyIdentifier[1]
+                return objData['local-aabb'].get(link, None)
             elif propertyIdentifier in ['jointPosition', 'jointVelocity', 'jointReactionForce', 'jointAppliedTorque']:
                 if (1 < len(identifier)) and (identifier[1] in objData['links']) and (-1 != objData['links'][identifier[1]]):
                     pos, vel, ref, tor = stubbornTry(lambda : pybullet.getJointState(obj['idx'], objData['links'][identifier[1]]['idx']))
@@ -700,7 +723,7 @@ class World():
                 self._addKinematicConstraintInternal(copy.deepcopy(objData))
                 self._setCustomUpdaters('kcon', objData['name'])
         elif objData['simtype'] in ['ktree', 'marker']:
-            if propertyIdentifier in ['name', 'simtype', 'idx', 'type', 'links', 'joints', 'idx2Joint', 'idx2Link', 'baseLinkName', 'dofList', 'aabb', 'at', 'jointReactionForces', 'jointReactionForce', 'jointAppliedTorques', 'jointAppliedTorque', 'localInertiaPosition', 'localInertiaOrientation', 'upperLimit', 'lowerLimit', 'jointPositions', 'jointVelocities', 'immobile']:
+            if propertyIdentifier in ['name', 'simtype', 'idx', 'type', 'links', 'joints', 'idx2Joint', 'idx2Link', 'baseLinkName', 'dofList', 'aabb', 'local-aabb', 'at', 'jointReactionForces', 'jointReactionForce', 'jointAppliedTorques', 'jointAppliedTorque', 'localInertiaPosition', 'localInertiaOrientation', 'upperLimit', 'lowerLimit', 'jointPositions', 'jointVelocities', 'immobile']:
                 return None
             elif ('filename' == propertyIdentifier):
                 return (newValue == objData['filename']) or self.reloadObject(objData['name'], objData['type'], newValue)
@@ -1059,6 +1082,26 @@ class World():
         if (closestPoints is None) or (0 == len(closestPoints)):
             return 10*maxDistance
         return min([x[-1] for x in closestPoints])
+    def probeClosestPoints(self, identifier, position, maxDistance=None):
+        def _reportClosestPoint(closestPoint):
+            _, _, bidB, _, lnkB, _, posB, normal, distance, _, _, _, _, _ = closestPoint
+            obName = self._idx2KinematicTree[bidB]
+            linkName = self._kinematicTrees[obName]['idx2Link'][lnkB]
+            return (obName, linkName), posB, normal, distance
+        if not self._isKinematicTreeOrLinkIdentifier(identifier):
+            return []
+        if maxDistance is None:
+            maxDistance = self._worldSize
+        objId = self._kinematicTrees[identifier[0]]['idx']
+        kwargs = {'linkIndexA': -1, 'physicsClientId': self._pybulletConnection}
+        if 1 < len(identifier):
+            if identifier[1] not in self._kinematicTrees[identifier[0]]['links']:
+                return []
+            linkIndexB=self._kinematicTrees[identifier[0]]['links'][identifier[1]]['idx']
+        stubbornTry(lambda : pybullet.resetBasePositionAndOrientation(self._colliderProbe, position, (0,0,0,1), self._pybulletConnection))
+        answers = stubbornTry(lambda : pybullet.getClosestPoints(self._colliderProbe, objId, maxDistance, **kwargs))
+        stubbornTry(lambda : pybullet.resetBasePositionAndOrientation(self._colliderProbe, (0,0,-110), (0,0,0,1), self._pybulletConnection))
+        return [_reportClosestPoint(x) for x in answers]
     def checkClosestPoints(self, regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance=None, hypotheticalPoses=None):
         def _parseRegionSpecOrIdentifier(regionSpecOrIdentifier):
             if self._isRegionSpec(regionSpecOrIdentifier):

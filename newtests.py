@@ -7,6 +7,7 @@ import sys
 
 import world
 
+from motionPlanning import updateMotionPlanning
 from kinematicControl import updateKinematicControl
 from grasping import updateGrasping, updateGraspingConstraint
 
@@ -21,6 +22,8 @@ from grasping import updateGrasping, updateGraspingConstraint
 import customDynamics as cd
 
 customDynamics = cd.buildSpecs('procdesc.log') + [[('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint]]
+
+#customDynamics = cd.buildSpecs('procdesc.log') + [[('fn', 'canMotionPlan'), updateMotionPlanning], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint]]
 
 def addObjectInstance(w, otype, objKnowledge, position, orientation, linearVelocity=None, angularVelocity=None):
     if linearVelocity is None:
@@ -55,10 +58,36 @@ def getOfType(w, otype):
         if otype == v['type']:
             return k
 
+def plannedMoveTo(w, name, ef, pos, orn, posInLink=None, ornInLink=None):
+    efLink = w.getObjectProperty((name,), ('fn', 'kinematicControl', 'efLink', ef))
+    w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'goal', efLink), [pos, orn])
+    w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'visitedVertices', efLink), {})
+    w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'openVertices', efLink), [])
+    w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'obstacles', efLink), {})
+    w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'startDistance', efLink), {})
+    w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'partialGoal', efLink), None)
+    if posInLink is None:
+        posInLink = [0,0,0]
+    if ornInLink is None:
+        ornInLink = [0,0,0,1]
+    w.setObjectProperty((name,), ('customStateVariables', 'kinematicControl', 'positionInLink', ef), posInLink)
+    w.setObjectProperty((name,), ('customStateVariables', 'kinematicControl', 'orientationInLink', ef), ornInLink)
+    while True:
+        timestepWorld(w,0.01)
+        posL = w.getObjectProperty((name, efLink), 'position')
+        ornL = w.getObjectProperty((name, efLink), 'orientation')
+        posW, ornW = w.objectPoseRelativeToWorld(posL, ornL, posInLink, ornInLink)
+        if ((ornL[3] < 0) and (ornW[3] > 0)) or ((ornL[3] > 0) and (ornW[3] < 0)):
+            ornW = [-x for x in ornW]
+        d = [a-b for a,b in zip(posW, pos)]
+        dq = [a-b for a,b in zip(ornW, orn)]
+        v = w.getObjectProperty((name, efLink), 'linearVelocity')
+        if ((0.0002 > numpy.dot(d,d)) and (0.0003 > numpy.dot(dq,dq))) or ((0.001 > numpy.dot(d,d)) and (0.0001 > numpy.dot(v,v))):
+            break
+
 def moveTo(w, name, ef, pos, orn, stopOnContact=False, contacter=None, posInLink=None, ornInLink=None):
     w.setObjectProperty((name,), ('customStateVariables', 'kinematicControl', 'target', ef), [pos, orn])
     efLink = w.getObjectProperty((name,), ('fn', 'kinematicControl', 'efLink', ef))
-    v = w.getObjectProperty((name, efLink), 'linearVelocity')
     if contacter is None:
         contacter = name
     if posInLink is None:
@@ -80,7 +109,8 @@ def moveTo(w, name, ef, pos, orn, stopOnContact=False, contacter=None, posInLink
             ornW = [-x for x in ornW]
         d = [a-b for a,b in zip(posW, pos)]
         dq = [a-b for a,b in zip(ornW, orn)]
-        if ((0.00005 > numpy.dot(d,d)) and (0.0003 > numpy.dot(dq,dq))) or ((0.0001 > numpy.dot(d,d)) and (0.000005 > numpy.dot(v,v))):
+        v = w.getObjectProperty((name, efLink), 'linearVelocity')
+        if ((0.0001 > numpy.dot(d,d)) and (0.0003 > numpy.dot(dq,dq))):# or ((0.001 > numpy.dot(d,d)) and (0.0001 > numpy.dot(v,v))):
             break
 
 objectTypeKnowledge = [json.loads(x) for x in open('objectknowledge.log').read().splitlines() if x.strip()]
@@ -106,11 +136,24 @@ for oType, name, position in toPreload:
 w.setGravity((0,0,-10))
 
 floor = addObjectInstance(w, 'Floor', objectTypeKnowledge, (0,0,0), (0,0,0,1))
+kitchenCabinet = addObjectInstance(w, 'KitchenCabinet', objectTypeKnowledge, (0,3,0), (0,0,1,0))
 kitchenCounter = addObjectInstance(w, 'KitchenCounter', objectTypeKnowledge, (0,-3,0), (0,0,0,1))
 aabbKitchenCounter = w.getObjectProperty((kitchenCounter,), 'aabb')
 
 abe = addObjectInstance(w, 'Abe', objectTypeKnowledge, (0,0,0), (0,0,0,1))
+
+input('Press Enter to continue ...')
+
 moveTo(w, abe, 'base', [0,-3,0], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=[1,0,0], ornInLink=[0,0,0,1])
+
+#moveTo(w, abe, 'base', [0,2.5,0], [0,0,0.707,0.707], stopOnContact=False, contacter=None, posInLink=[1,0,0], ornInLink=[0,0,0,1])
+#w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'goal', 'hand_right_roll'), [[0, 3, 0.5], [0,0,0,1]])
+#timestepWorld(w,0.010)
+#plannedMoveTo(w, abe, 'hand_right', [0,3,0.5], [0,0,0,1], posInLink=None, ornInLink=None)
+#plannedMoveTo(w, abe, 'hand_right', [0,3,1.5], [0,0,0,1], posInLink=None, ornInLink=None)
+
+#w._kinematicTrees[abe]['customStateVariables']['kinematicControl']['target']['hand_right']
+#w.getObjectProperty((abe,'hand_right_roll'), 'position')
 
 input('Press Enter to continue ...')
 
@@ -149,7 +192,9 @@ w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp'
 positionHandle[2] += 0.9
 moveTo(w, abe, 'hand_right', positionHandle, [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
 positionPotato = list(w.getObjectProperty((potato,), 'position'))
-positionPotato[2] += 0.12
+positionPotato[2] += 0.25
+moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+positionPotato[2] -= 0.1
 moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
 w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_left_roll'), [potato])
 positionPotato[2] += 0.3
@@ -196,7 +241,7 @@ moveTo(w, abe, 'hand_left', positionTarget, [0,0,0,1], stopOnContact=False, cont
 posMH, ornMH = w.objectPoseRelativeToObject(w.getObjectProperty((abe, 'hand_left_roll'), 'position'), w.getObjectProperty((abe, 'hand_left_roll'), 'orientation'), w.getObjectProperty((masher, 'masher'), 'position'), w.getObjectProperty((masher, 'masher'), 'orientation'))
 w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_left_roll'), [masher])
 positionTarget[1] += 0.2
-positionTarget[2] += 0.2
+positionTarget[2] += 0.3
 moveTo(w, abe, 'hand_left', positionTarget, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
 positionTarget[2] += 0.3
 moveTo(w, abe, 'hand_left', positionTarget, [0,0.707,0,0.707], stopOnContact=False, contacter=None, posInLink=posMH, ornInLink=ornMH)
