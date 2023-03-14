@@ -56,7 +56,7 @@ class World():
     def worldDump(self):
         retq = {}
         for name, pob in self._pobjects.items():
-            retq[name] = {"at": pob.at(), "customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates()}
+            retq[name] = {"at": pob.at(), "_urdf": pob._urdf, "customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates()}
         return retq
     def greatReset(self, state):
         names = list(self._pobjects.keys())
