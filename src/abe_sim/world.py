@@ -56,7 +56,14 @@ class World():
     def worldDump(self):
         retq = {}
         for name, pob in self._pobjects.items():
-            retq[name] = {"at": pob.at(), "_urdf": pob._urdf, "customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates()}
+            mesh = stubbornTry(lambda : p.getVisualShapeData(self._pobjects[name].getId(), -1, self._pybulletConnection))[0][4].decode("utf-8")
+            retq[name] = {"at": pob.at(), "_urdf": pob._urdf, "customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates(), "mesh": mesh}
+#
+#            retq[name] = {"at": pob.at(), "_urdf": pob._urdf, "customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates()}
+#=
+#            mesh = stubbornTry(lambda : p.getVisualShapeData(self._pobjects[name].getId(), -1, self._pybulletConnection))[0][4].decode("utf-8")
+#            retq[name] = {"at": pob.at(), "customStateVariables": pob._customStateVariables, "args": pob._args, "kwargs": pob._kwargs, "type": type(pob).__name__, "position": pob.getBodyProperty((), "position"), "orientation": pob.getBodyProperty((), "orientation"), "joints": pob.getJointStates(), "mesh": mesh}
+#
         return retq
     def greatReset(self, state):
         names = list(self._pobjects.keys())
