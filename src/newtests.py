@@ -91,6 +91,7 @@ def plannedMoveTo(w, name, ef, pos, orn, posInLink=None, ornInLink=None):
 def moveTo(w, name, ef, pos, orn, stopOnContact=False, contacter=None, posInLink=None, ornInLink=None):
     w.setObjectProperty((name,), ('customStateVariables', 'kinematicControl', 'target', ef), [pos, orn])
     efLink = w.getObjectProperty((name,), ('fn', 'kinematicControl', 'efLink', ef))
+    print("MOVETO", efLink, pos, orn, w.getObjectProperty((name,), ('fn', 'kinematicallyControlable')))
     if contacter is None:
         contacter = name
     if posInLink is None:

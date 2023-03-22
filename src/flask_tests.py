@@ -2,6 +2,7 @@ import json
 import os
 import requests
 import sys
+import time
 
 ### Command _: get current simulation time
 req = {}
@@ -22,12 +23,11 @@ response = json.loads(r.text)['response']
 print("GO TO POSE (parameters missing):", response)
 
 ### Command _: go to specified pose. Note: returns immediately, does not wait for robot to get there.
-req = {"position":[0,-2,0], "yaw": -1.57}
+req = {"position":[0,-2], "yaw": -1.57}
 r = requests.post("http://localhost:54321/abe-sim-command/to-go-to-pose", data=bytes(json.dumps(req), "utf-8"))
 response = json.loads(r.text)['response']
-print("GO TO POSE (parameters missing):", response)
-
-sys.exit()
+print("GO TO POSE (parameters ok):", response)
+time.sleep(5)
 
 ### Command 1: get the kitchen state
 dws = {'kitchenStateIn': '?kitchen-state-1'}
@@ -35,17 +35,27 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-get-kitchen", data=
 worldState = json.loads(r.text)['response']
 print(worldState)
 
+### Command _: go to specified pose. Note: returns immediately, does not wait for robot to get there.
+req = {"position":[0,2], "yaw": 1.57}
+r = requests.post("http://localhost:54321/abe-sim-command/to-go-to-pose", data=bytes(json.dumps(req), "utf-8"))
+response = json.loads(r.text)['response']
+print("GO TO POSE (parameters ok):", response)
+time.sleep(5)
+
 ### Command 2: set the kitchen state
 dgr = {'kitchenStateIn': worldState["?kitchen-state-1"]}
 r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=bytes(json.dumps(dgr), "utf-8"))
 response = json.loads(r.text)
 print(response)
 
-### Command "2.5": go to pose
-dgp = {'position': (-1, 1), 'yaw': -1.57}
-r = requests.post("http://localhost:54321/abe-sim-command/to-go-to-pose", data=bytes(json.dumps(dgp), "utf-8"))
-response = json.loads(r.text)
-print(response)
+### Command _: go to specified pose. Note: returns immediately, does not wait for robot to get there.
+req = {"position":[0,2], "yaw": 1.57}
+r = requests.post("http://localhost:54321/abe-sim-command/to-go-to-pose", data=bytes(json.dumps(req), "utf-8"))
+response = json.loads(r.text)['response']
+print("GO TO POSE (parameters ok):", response)
+time.sleep(5)
+
+sys.exit()
 
 ### Command 3: get location
 gc = {'availableLocation': '?available-bowl', 'type': 'mediumBowl', 'kitchen': None, 'setWorldState': False}

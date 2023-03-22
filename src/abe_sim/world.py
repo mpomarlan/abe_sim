@@ -1321,6 +1321,7 @@ class World():
             retq['orientation'] = orn
             retq['linearVelocity'] = lin
             retq['angularVelocity'] = ang
+            retq['immobile'] = objData.get('immobile', False)
             if 'ktree' == retq['simtype']:
                 #retq['links'] = {k: {} for k, v in objData['links'].items()}
                 #retq['joints'] = {k: {} for k, v in objData['joints'].items()}

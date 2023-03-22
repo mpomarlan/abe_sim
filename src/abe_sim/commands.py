@@ -64,6 +64,10 @@ def toGoToPose(requestData, w, agentName, todos):
                         [yaw, "Request lacks yaw parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    tp = [x for x in position if type(x) in [int, float]]
+    if (2 != len(tp)) or (type(yaw) not in [int, float]):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': 'Pose data is malformed: either the position is not a vector of 2 numbers or the yaw is not a number.'}
+    position = [position[0], position[1], 0]
     mobileBaseLink = w.getObjectProperty((agentName,), ('fn', 'kinematicControl', 'mobileBaseLink'))
     baseOrientation = w.getObjectProperty((agentName, mobileBaseLink), 'orientation')
     _, _, crYaw = stubbornTry(lambda : pybullet.getEulerFromQuaternion(baseOrientation))
