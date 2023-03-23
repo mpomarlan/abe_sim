@@ -7,7 +7,11 @@
         {"DoughClump": {"default": {"toReplace": "Cookie"}}},
 "consuming": {"PepperParticle": {"default": {"toDelete": true}}},
 "cracking": 
-        {"EggInShell": {"default":
+        {"Tomato": {"default": {"toReplace": "TomatoSplat",
+                                "toAdd": [["TomatoGoop", [[[-0.051, 0.034, 0.021], [0,0,0.977,-0.213]],
+                                                          [[0.057, 0.034, 0.021], [0,0,0.835,0.55]],
+                                                          [[0, -0.064, 0.021], [0,0,0,1]]]]]}},
+         "EggInShell": {"default":
                            {"toReplace": "CrackedEggshellFlatHalf",
                             "toAdd": [["CrackedEggshellPointyHalf", [[[0,0,0.02], [0,0,0,1]]]],
                                       ["EggYolkParticle", [[[0, 0.015, 0], [0, 0, 0, 1]],
@@ -66,7 +70,7 @@
 "pouring":
         {"ButterBag": {"default":
                              {"toAdd": [["ButterParticle", [[[0, 0.085, 0.08], [0,0,0,1]]]]]}},
-         "SguarBag": {"default":
+         "SugarBag": {"default":
                              {"toAdd": [["SugarParticle", [[[0, 0.085, 0.08], [0,0,0,1]]]]]}},
          "PepperShaker": {"default":
                              {"toAdd": [["PepperParticle", [[[0,0,0.07], [0,0,0,1]]]]]}}},

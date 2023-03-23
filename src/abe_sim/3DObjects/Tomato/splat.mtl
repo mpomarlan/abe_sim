@@ -1,7 +1,7 @@
-# Blender 3.4.1 MTL File: 'None'
+# Blender 3.4.1 MTL File: 'tomato.blend'
 # www.blender.org
 
-newmtl Splat
+newmtl Splat.001
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.290026 0.241483
