@@ -3,6 +3,7 @@ import sys
 import json
 import math
 import numpy as np
+import platform
 import pybullet
 import pybullet_data
 import copy
@@ -1387,14 +1388,18 @@ def getDictionaryEntry(objData, propertyIdentifier, defaultValue):
 # A hack to make this somewhat more stable on M1 MacOSX.
 # Turns out, ANY call to the simulation engine (or perhaps just the OpenGL part?) has the potential to fail on the M1.
 # However, just repeating the attempt seems to get the system back on track.
-def stubbornTry(fn):
-    doing = True
-    retq = None
-    while doing:
-        try:
-            retq = fn()
-            doing = False
-        except:
-            continue
-    return retq
+if ('Darwin' == platform.system()):
+    def stubbornTry(fn):
+        doing = True
+        retq = None
+        while doing:
+            try:
+                retq = fn()
+                doing = False
+            except:
+                continue
+        return retq
+else:
+    def stubbornTry(fn):
+        return fn()
 

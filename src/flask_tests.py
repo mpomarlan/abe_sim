@@ -4,6 +4,7 @@ import requests
 import sys
 import time
 
+'''
 ### Command _: get current simulation time
 req = {}
 r = requests.post("http://localhost:54321/abe-sim-command/to-get-time", data=bytes(json.dumps(req), "utf-8"))
@@ -46,7 +47,7 @@ time.sleep(5)
 dgr = {'kitchenStateIn': worldState["?kitchen-state-1"]}
 r = requests.post("http://localhost:54321/abe-sim-command/to-set-kitchen", data=bytes(json.dumps(dgr), "utf-8"))
 response = json.loads(r.text)
-print(response)
+print("SET KITCHEN STATE:", response)
 
 ### Command _: go to specified pose. Note: returns immediately, does not wait for robot to get there.
 req = {"position":[0,2], "yaw": 1.57}
@@ -55,10 +56,15 @@ response = json.loads(r.text)['response']
 print("GO TO POSE (parameters ok):", response)
 time.sleep(5)
 
-sys.exit()
+### Command _: get updates. A more concise WorldDump.
+req = {}
+r = requests.post("http://localhost:54321/abe-sim-command/to-get-state-updates", data=bytes(json.dumps(req), "utf-8"))
+response = json.loads(r.text)['response']
+print("GET STATE UPDATE:", response)
 
+'''
 ### Command 3: get location
-gc = {'availableLocation': '?available-bowl', 'type': 'mediumBowl', 'kitchen': None, 'setWorldState': False}
+gc = {'availableLocation': '?available-bowl', 'type': 'MediumBowl', 'kitchen': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-get-location", data=bytes(json.dumps(gc), "utf-8"))
 response = json.loads(r.text)
 print(response)
@@ -74,6 +80,8 @@ dpo = {'containerWithIngredient': 'sugarBag', 'targetContainer': 'mediumBowl1', 
 r = requests.post("http://localhost:54321/abe-sim-command/to-portion", data=bytes(json.dumps(dpo), "utf-8"))
 response = json.loads(r.text)
 print(response)
+
+sys.exit()
 
 ### Command 6: proportion 134g of butterBag in mediumBowl2
 dpo = {'containerWithIngredient': 'butterBag', 'targetContainer': 'mediumBowl2', 'quantity': 226, 'kitchenStateIn': None, 'setWorldState': False}

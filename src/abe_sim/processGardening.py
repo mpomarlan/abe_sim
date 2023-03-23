@@ -35,23 +35,23 @@ def getFacingYaw(customDynamicsAPI, item, itemPosition):
 
 def poseXYYawDistance(positionA, yawA, positionB, yawB, posThreshold, yawThreshold):
     d = [x-y for x,y in zip(positionA[:2], positionB[:2])]
-    if posThreshold*posThreshold < numpy.dot(d,d):
+    if bool(posThreshold*posThreshold < numpy.dot(d,d)):
         return False
     aV = stubbornTry(lambda : pybullet.rotateVector(pybullet.getQuaternionFromEuler((0,0,yawA)), (1, 0, 0)))
     bV = stubbornTry(lambda : pybullet.rotateVector(pybullet.getQuaternionFromEuler((0,0,yawB)), (1, 0, 0)))
-    if yawThreshold >= numpy.dot(aV, bV):
+    if bool(yawThreshold >= numpy.dot(aV, bV)):
         return False
     return True
 
 def pose6DDistance(positionA, orientationA, positionB, orientationB, posThreshold, ornThreshold):
     d = [x-y for x,y in zip(positionA, positionB)]
-    if posThreshold*posThreshold < numpy.dot(d,d):
+    if bool(posThreshold*posThreshold < numpy.dot(d,d)):
         return False
     aX = stubbornTry(lambda : pybullet.rotateVector(orientationA, (1, 0, 0)))
     bX = stubbornTry(lambda : pybullet.rotateVector(orientationB, (1, 0, 0)))
     aY = stubbornTry(lambda : pybullet.rotateVector(orientationA, (0,1,0)))
     bY = stubbornTry(lambda : pybullet.rotateVector(orientationB, (0,1,0)))
-    if (ornThreshold >= numpy.dot(aX, bX)) or (ornThreshold >= numpy.dot(aY, bY)):
+    if bool(ornThreshold >= numpy.dot(aX, bX)) or bool(ornThreshold >= numpy.dot(aY, bY)):
         return False
     return True
 
@@ -104,10 +104,10 @@ def getParkedPose(customDynamicsAPI, name, hand):
     maxO = None
     for overlap in overlaps:
         aabbsOverlap = [(x, customDynamicsAPI['getObjectProperty']((overlap, x), 'aabb')) for x in customDynamicsAPI['getObjectProperty']((overlap,), ('fn', 'containment', 'links'), [])]
-        valid = [(x[1][1][2], overlap, x[0]) for x in aabbsOverlap if x[1][1][2] < handPosition[2]]
+        valid = [(x[1][1][2], overlap, x[0]) for x in aabbsOverlap if bool(x[1][1][2] < handPosition[2])]
         if 0 < len(valid):
             maxC = max(valid)
-            if (maxO is None) or (maxO[0] < maxC[0]):
+            if (maxO is None) or bool(maxO[0] < maxC[0]):
                 maxO = maxC
     if maxO is not None:
         height = getComponentHeight(customDynamicsAPI, maxO[1], maxO[2]) + maxO[0]
@@ -129,7 +129,7 @@ def getParkingTarget(customDynamicsAPI, name, hand):
     if height is None:
         previousXY = None
     else:
-        if 0.02 < abs(handPosition[2] - height):
+        if bool(0.02 < abs(handPosition[2] - height)):
             if previousXY is None:
                 previousXY = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')[:2]
             parkedPosition = [previousXY[0], previousXY[1], height]
@@ -204,7 +204,7 @@ def getLocations(customDynamicsAPI, container, component, aabb, canLine):
             v = [d*arrangementAxis[0]+referencePosition[0], d*arrangementAxis[1]+referencePosition[1], referencePosition[2]]
             vx, vX = v[0]+aabb[0][0], v[0]+aabb[1][0]
             vy, vY = v[1]+aabb[0][1], v[1]+aabb[1][1]
-            if (vx < aabbC[0][0]) or (vX > aabbC[1][0]) or (vy < aabbC[0][1]) or (vY > aabbC[1][1]):
+            if bool(vx < aabbC[0][0]) or bool(vX > aabbC[1][0]) or bool(vy < aabbC[0][1]) or bool(vY > aabbC[1][1]):
                 break
             else:
                 retq.append(v)
@@ -253,7 +253,7 @@ def getSprinklee(customDynamicsAPI, name, item, sprinkledType, previous):
     return None
 
 def checkUpright(itemOrientation, pouringAxis):
-    return 0.2 > (numpy.dot(stubbornTry(lambda : pybullet.rotateVector(itemOrientation, pouringAxis)), [0,0,-1]))
+    return bool(0.2 > (numpy.dot(stubbornTry(lambda : pybullet.rotateVector(itemOrientation, pouringAxis)), [0,0,-1])))
 
 #def checkUpright(customDynamicsAPI, name, item, previous):
 #    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
@@ -454,7 +454,7 @@ def checkGoal(customDynamicsAPI, name, node):
             openMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMin', door), None)
             openMaxThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMax', door), None)
             jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
-            return ((openMinThreshold is None) or (openMinThreshold < jointValue)) and ((openMaxThreshold is None) or (openMaxThreshold > jointValue))
+            return ((openMinThreshold is None) or bool(openMinThreshold < jointValue)) and ((openMaxThreshold is None) or bool(openMaxThreshold > jointValue))
     elif 'closed' == goal:
         container = description.get('container', None)
         component = description.get('component', None)
@@ -463,7 +463,7 @@ def checkGoal(customDynamicsAPI, name, node):
             closedMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'closedMin', door), None)
             closedMaxThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'closedMax', door), None)
             jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
-            return ((closedMinThreshold is None) or (closedMinThreshold < jointValue)) and ((closedMaxThreshold is None) or (closedMaxThreshold > jointValue))
+            return ((closedMinThreshold is None) or bool(closedMinThreshold < jointValue)) and ((closedMaxThreshold is None) or bool(closedMaxThreshold > jointValue))
     elif 'broughtNear' == goal:
         trajector = description.get('trajector', None)
         hand = description.get('hand', None)
@@ -555,13 +555,13 @@ def getProcesses(customDynamicsAPI, name, description, node):
         ZThresh = 0.0025
         if previousZ:
             ZThresh = 0.01
-        closeZ = (ZThresh > dZ)
+        closeZ = bool(ZThresh > dZ)
         node['previousPlacingZ'] = closeZ
         previousXY = node.get('previousPlacingXY', False)
         XYThresh = 0.0025
         if previousXY:
             XYThresh = 0.01
-        closeXY = (XYThresh > dXY)
+        closeXY = bool(XYThresh > dXY)
         node['previousPlacingXY'] = closeXY
         if closeXY:
             target = {hand: {'target': [[targetPosition[0], targetPosition[1], itemPosition[2]-0.005], handOrientation], 'positionInLink': itemPositionInHand, 'orientationInLink': None, 'clopeningAction': None}}
@@ -617,7 +617,7 @@ def getProcesses(customDynamicsAPI, name, description, node):
             ZThresh = 0.0025
             if previousZ:
                 ZThresh = 0.01
-            closeZ = (ZThresh > dZ)
+            closeZ = bool(ZThresh > dZ)
             node['previousZ'] = closeZ
             dXY = [handPosition[0]-handlePosition[0], handPosition[1]-handlePosition[1]]
             dXY = numpy.dot(dXY, dXY)
@@ -625,7 +625,7 @@ def getProcesses(customDynamicsAPI, name, description, node):
             XYThresh = 0.0025
             if previousXY:
                 XYThresh = 0.01
-            closeXY = (XYThresh > dXY)
+            closeXY = bool(XYThresh > dXY)
             node['previousXY'] = closeXY
             if closeZ:
                 heightOk = True
@@ -823,7 +823,7 @@ def getProcesses(customDynamicsAPI, name, description, node):
         ZThresh = 0.0025
         if previousZ:
             ZThresh = 0.01
-        closeZ = (ZThresh > dZ)
+        closeZ = bool(ZThresh > dZ)
         node['previousZ'] = closeZ
         dXY = [pouringPointWorld[0]-containerEntry[0], pouringPointWorld[1]-containerEntry[1]]
         dXY = numpy.dot(dXY, dXY)
@@ -831,7 +831,7 @@ def getProcesses(customDynamicsAPI, name, description, node):
         XYThresh = 0.0025
         if previousXY:
             XYThresh = 0.01
-        closeXY = (XYThresh > dXY)
+        closeXY = bool(XYThresh > dXY)
         node['previousXY'] = closeXY
 # if closeZ and closeXY: tip
 # if not closeZ: get to closeZ, stay upright
@@ -893,7 +893,7 @@ def getProcesses(customDynamicsAPI, name, description, node):
         XYThresh = 0.0025
         if previousXY:
             XYThresh = 0.01
-        closeXY = (XYThresh > dXY)
+        closeXY = bool(XYThresh > dXY)
         node['previousXY'] = closeXY
         if closeXY and (not checkSprinkled(customDynamicsAPI, name, item, sprinkledType)):
             targetOrientation = customDynamicsAPI['getObjectProperty']((shaker,), ('fn', 'containment', 'pouring', 'outof', 'tipped'))

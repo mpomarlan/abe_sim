@@ -145,6 +145,11 @@ kitchenCounter = addObjectInstance(w, 'KitchenCounter', objectTypeKnowledge, (0,
 fridge = addObjectInstance(w, 'Fridge', objectTypeKnowledge, (-3,0,0.1), (0,0,-0.707,0.707))
 aabbKitchenCounter = w.getObjectProperty((kitchenCounter,), 'aabb')
 
+tomato=addObjectInstance(w, 'Tomato', objectTypeKnowledge, (0,0,3), (0,0,0,1))
+tomato2=addObjectInstance(w, 'Tomato', objectTypeKnowledge, (0,1,0.5), (0,0,0,1))
+tomato3=addObjectInstance(w, 'Tomato', objectTypeKnowledge, (0,1,15.5), (0,0,0,1))
+timestepWorld(w,7)
+
 abe = addObjectInstance(w, 'Abe', objectTypeKnowledge, (0,0,0), (0,0,0,1))
 
 timingS = w.getObjectProperty((abe,), ('customStateVariables', 'timing', 'timer'))

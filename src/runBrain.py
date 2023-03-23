@@ -6,6 +6,7 @@ import numpy
 import os
 import platform
 import pybullet
+import requests
 import signal
 import sys
 import threading
@@ -19,6 +20,7 @@ from abe_sim.motionPlanning import updateMotionPlanning
 from abe_sim.kinematicControl import updateKinematicControl
 from abe_sim.grasping import updateGrasping, updateGraspingConstraint
 from abe_sim.timing import updateTiming
+from abe_sim.processGardening import updateGarden
 
 from abe_sim.customDynamics import buildSpecs
 from abe_sim.commands import commandFns
@@ -28,7 +30,7 @@ def startProcessCommand(command, requestData, w, agentName, todos):
     #return doingAction, status, response
     
 def stopProcessCommand(command, requestData, w, agentName):
-    _, status, response = commandFns[command][2](requestData, w, agentName)
+    status, response = commandFns[command][2](requestData, w, agentName)
     return False, status, response
 
 def placeCamera(w, item, relatum):
@@ -39,14 +41,14 @@ def placeCamera(w, item, relatum):
     
 def serviceRequest(command, request, requestDictionary, responseDictionary, updating, executingAction):
     if command not in commandFns:
-        return False, requests.status_codes.codes.NOT_IMPLEMENTED, {'response': 'Unrecognized command.'}
+        return {'response': 'Unrecognized command.'}, requests.status_codes.codes.NOT_IMPLEMENTED
     with updating:
         commandId = str(time.time())
         answeringRequest = threading.Condition()
         try:
             requestDictionary[commandId] = [answeringRequest, command, request.get_json(force=True)]
         except SyntaxError:
-            return False, requests.status_codes.codes.BAD_REQUEST, {'response': 'Malformed json.'}
+            return {'response': 'Malformed json.'}, requests.status_codes.codes.BAD_REQUEST
     with answeringRequest:
         answeringRequest.wait()
     doingAction = False
@@ -81,7 +83,7 @@ def runBrain():
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation]')
     arguments = parser.parse_args()
-    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint]]
+    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden]]
 
     objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
     objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}
@@ -150,17 +152,21 @@ def runBrain():
                     todos["currentAction"] = commandId
                     todos["requestData"] = requestData
                     todos["command"] = command
+                    todos["cancelled"] = False
                 else:
                     if todos["currentAction"] is None:
                         todos["goals"] = []
+                        todos["cancelled"] = False
                     requestDictionary.pop(commandId)
                 responseDictionary[commandId] = doingAction, status, response
                 with answeringRequest:
                     answeringRequest.notify_all()
             w.update()
+            #print(todos)
+            #print(w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {}))
             if todos["currentAction"] is not None:
                 garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
-                if (0 not in garden) or (garden[0].get('previousState', False)):
+                if (0 not in garden) or (garden[0].get('previousStatus', False)):
                     if 0 == len(todos["goals"]):
                         requestDictionary.pop(todos["currentAction"])
                         if todos["cancelled"]:
