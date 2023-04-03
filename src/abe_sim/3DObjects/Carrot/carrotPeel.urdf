@@ -13,7 +13,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="carrotPeel.obj"/>
+        <mesh filename="carrotPeelCollider.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>

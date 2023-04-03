@@ -1,6 +1,6 @@
 # Blender 3.4.1
 # www.blender.org
-mtllib bellPepper.mtl
+mtllib bellPepperSlice.mtl
 o paprikaSlice
 v 0.032121 0.030000 -0.032121
 v 0.032121 0.000000 -0.032121
