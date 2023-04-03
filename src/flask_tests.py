@@ -62,12 +62,36 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-get-state-updates",
 response = json.loads(r.text)['response']
 print("GET STATE UPDATE:", response)
 
-'''
 ### Command 3: get location
 gc = {'availableLocation': '?available-bowl', 'type': 'MediumBowl', 'kitchen': None, 'setWorldState': False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-get-location", data=bytes(json.dumps(gc), "utf-8"))
 response = json.loads(r.text)
 print(response)
+'''
+
+crOp = 0
+if 1 < len(sys.argv):
+    crOp = int(sys.argv[1])
+
+commands = [
+        ["http://localhost:54321/abe-sim-command/to-fetch", {'object': 'mediumBowl1', 'kitchenStateIn': None, 'setWorldState': False}, None, "./WS1.log"],
+        ["http://localhost:54321/abe-sim-command/to-portion", {'containerWithIngredient': 'sugarBag', 'targetContainer': 'mediumBowl1', 'quantity': 134, 'kitchenStateIn': None, 'setWorldState': False}, "./WS1.log", "./WS2.log"],
+    ]
+
+for k, e in enumerate(commands[crOp:]):
+    command, req, pathIn, pathOut = e
+    kSI = None
+    if (0 == k) and (pathIn is not None):
+        kSI = json.loads(open(pathIn).read())
+        req['setWorldState'] = True
+    req['kitchenStateIn'] = kSI
+    r = requests.post(command, data=bytes(json.dumps(req), "utf-8"))
+    response = json.loads(r.text)
+    if (pathOut is not None) and ('response' in response) and ('kitchenStateOut' in response['response']):
+        with open(pathOut, "w") as outfile:
+            _ = outfile.write("%s\n" % json.dumps(response['response']['kitchenStateOut']))
+
+sys.exit()
 
 ### Command 4: fetch bowl to countertop
 dpo = {'object': 'mediumBowl1', 'kitchenStateIn': None, 'setWorldState': False}

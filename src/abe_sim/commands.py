@@ -248,7 +248,7 @@ def toPortionStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Nowhere to return containerWithIngredient to.'}
     if pouredType is None:
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'containerWithIngredient is not portionable.'}
-    garden = {0: {'type': 'G', 'description': {'goal': 'transferred', 'item': oname, 'hand': 'hand_right', 'container': storeName, 'storage': storage, 'amount': amount, 'pouredType': pouredType}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'transferredAndStored', 'item': oname, 'hand': 'hand_right', 'container': storeName, 'storage': storage, 'amount': amount, 'pouredType': pouredType}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
