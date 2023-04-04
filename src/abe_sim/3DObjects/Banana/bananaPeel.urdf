@@ -13,7 +13,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="bananaPeel.obj"/>
+        <mesh filename="peelCollider.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>
