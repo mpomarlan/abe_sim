@@ -1437,7 +1437,11 @@
                             "radius": 0.15
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
        },
        {
               "type": "BananaPeel",
@@ -1561,7 +1565,11 @@
                             "radius": 0.1
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
        },
        {
               "type": "CarrotPeel",
@@ -2844,7 +2852,11 @@
                             "radius": 0.1
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
        },
        {
               "type": "ShallotPeel",
@@ -2888,7 +2900,11 @@
                             "radius": 0.1
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
        },
        {
               "type": "OnionPeel",
@@ -2932,7 +2948,11 @@
                             "radius": 0.1
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
        },
        {
               "type": "RedOnionPeel",
@@ -2964,5 +2984,280 @@
                      "graspable": true
               },
               "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedBroccoli",
+              "simtype": "ktree",
+              "filename": "3DObjects/Broccoli/choppedBroccoli.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BroccoliStem",
+              "simtype": "ktree",
+              "filename": "3DObjects/Broccoli/broccoliStem.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedBacon",
+              "simtype": "ktree",
+              "filename": "3DObjects/Bacon/choppedBacon.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "FrozenCorn",
+              "simtype": "ktree",
+              "filename": "3DObjects/FrozenCornBag/frozen_corn.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "FrozenCornBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/FrozenCornBag/frozen_corn_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "GratedMozzarella",
+              "simtype": "ktree",
+              "filename": "3DObjects/GratedMozzarellaBag/grated_mozzarella.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GratedMozzarellaBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/GratedMozzarellaBag/grated_mozzarella_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "LimeJuiceParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/LimeJuice/limeJuiceParticle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "LimeJuice",
+              "simtype": "ktree",
+              "filename": "3DObjects/LimeJuice/limeJuiceBottle.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "body"
+                            ],
+                            "hp": {
+                                   "body": 240
+                            },
+                            "axis": {
+                                   "body": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0.24845
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "body": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "MayonnaiseParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Mayonnaise/mayonnaiseParticle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Mayonnaise",
+              "simtype": "ktree",
+              "filename": "3DObjects/Mayonnaise/mayonnaise.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "body"
+                            ],
+                            "hp": {
+                                   "body": 240
+                            },
+                            "axis": {
+                                   "body": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0.393121
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "body": 240
+                            }
+                     }
+              }
        }
 ]

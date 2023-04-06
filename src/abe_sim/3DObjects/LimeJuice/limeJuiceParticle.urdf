@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
-<robot name="mustard">
+<robot name="limeJuiceParticle">
   <link name="body">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <mass value="0.01"/>
+        <mass value="0.02"/>
         <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="mustard.obj"/>
+        <mesh filename="limeJuiceParticle.obj"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="mustardCollider.obj"/>
+        <mesh filename="limeJuiceParticle.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>
