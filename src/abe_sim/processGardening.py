@@ -2063,8 +2063,8 @@ def updateGarden(name, customDynamicsAPI):
         if nodeIdx not in toKeep:
             garden.pop(nodeIdx)
 
-    for k in sorted(garden.keys()):
-        print(k, garden[k]['description'], garden[k].get('children'), garden[k].get('previousStatus'))
+    #for k in sorted(garden.keys()):
+    #    print(k, garden[k]['description'], garden[k].get('children'), garden[k].get('previousStatus'))
 
     # customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'processGardening', 'garden'), garden)
     for actuator, processes in bodyProcesses.items():
