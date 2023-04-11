@@ -10,6 +10,47 @@ from abe_sim.world import getDictionaryEntry, stubbornTry
 
 baseFwdOffset = (1.5, 0, 0)
 
+def rotationMatrixToQuaternion1(m):
+    #q0 = qw
+    t = numpy.matrix.trace(m)
+    q = numpy.asarray([0.0, 0.0, 0.0, 0.0], dtype=numpy.float64)
+
+    if(t > 0):
+        t = numpy.sqrt(t + 1)
+        q[3] = 0.5 * t
+        t = 0.5/t
+        q[0] = (m[2,1] - m[1,2]) * t
+        q[1] = (m[0,2] - m[2,0]) * t
+        q[2] = (m[1,0] - m[0,1]) * t
+    else:
+        i = 0
+        if (m[1,1] > m[0,0]):
+            i = 1
+        if (m[2,2] > m[i,i]):
+            i = 2
+        j = (i+1)%3
+        k = (j+1)%3
+
+        t = numpy.sqrt(m[i,i] - m[j,j] - m[k,k] + 1)
+        q[i] = 0.5 * t
+        t = 0.5 / t
+        q[3] = (m[k,j] - m[j,k]) * t
+        q[j] = (m[j,i] + m[i,j]) * t
+        q[k] = (m[k,i] + m[i,k]) * t
+    # PYBULLET convention: qw last
+    return [q[1], q[2], q[3], q[0]]
+
+def quatFromVecPairs(pA, pB):
+    vAI, vAO = pA
+    vBI, vBO = pB
+    vCI = numpy.cross(vAI, vBI)
+    vCO = numpy.cross(vAO, vBO)
+    RI = numpy.array([vAI, vBI, vCI])
+    RORI = numpy.array([vAO, vBO, vCO])
+    print(RI, RORI)
+    RO = numpy.matmul(RORI, numpy.linalg.inv(RI))
+    return rotationMatrixToQuaternion1(RO)
+
 def pointCloseness(a, b, t):
     d = [x-y for x,y in zip(a, b)]
     return bool(t > numpy.dot(d, d))
@@ -726,7 +767,6 @@ def _getMixingAndUprightingConditions(customDynamicsAPI, name, description, node
     containerEntryInContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'pouring', 'into', 'point'))
     containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerP, containerQ, containerEntryInContainer, [0,0,0,1])
     entryHeightMixPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, mixPointInHand))[2]
-    tippedOrientation = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'tipped'), [-0.707,0,0,0.707])
     #For uprighting:
     #  we want P/U: hand parked
     #  We can achieve P/U by a lowering process that maintains xy/U: handXY at parked XY, hand parked orientation
@@ -750,7 +790,7 @@ def _getMixingAndUprightingConditions(customDynamicsAPI, name, description, node
     wpxyU = [[handParkedP[0], handParkedP[1], entryHeight], handParkedQ, None, None, None, None, None]
     wpUZ = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], handParkedQ, None, mixPointInHand, None, None, None]
     wpUZXY = wpUZ
-    wpZXY = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], tippedOrientation, None, mixPointInHand, toolOrientationInHand, None, None]
+    wpZXY = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], toolQ, None, mixPointInHand, toolOrientationInHand, None, None]
     waypoints = [wpPU, wpxyU, wpUZ, wpUZXY, wpZXY]
     tolerances = [[tolP, tolU], [tolxy, tolU], [tolU, tolZ], [tolU, tolZ, tolXY], [tolZ, tolXY]]
     entities = {'handP': handP, 'handQ': handQ, 'handParkedP': handParkedP, 'handParkedQ': handParkedQ, 'entryHeight': entryHeight, 'mixPoint': mixPoint, 'containerEntry': containerEntry}
@@ -775,6 +815,7 @@ def _getMixingConditions(customDynamicsAPI, name, description, node): # containe
     entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': container}, {})
     mixAxisInTool = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'axis', toolLink), [1,0,0])
     mixAxis = stubbornTry(lambda : pybullet.rotateVector(toolQ, mixAxisInTool))
+    mixAxisInHand = stubbornTry(lambda : pybullet.rotateVector(toolOrientationInHand, mixAxisInTool))
     mixPointInTool = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'mixPoint', toolLink), [0,0,0])
     mixPointInHand = customDynamicsAPI['objectPoseRelativeToWorld'](toolPositionInHand, toolOrientationInHand, mixPointInTool, [0,0,0,1])[0]
     mixPoint = customDynamicsAPI['objectPoseRelativeToWorld'](handP, handQ, mixPointInHand, [0,0,0,1])[0]
@@ -783,7 +824,14 @@ def _getMixingConditions(customDynamicsAPI, name, description, node): # containe
     containerEntryInContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'pouring', 'into', 'point'))
     containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerP, containerQ, containerEntryInContainer, [0,0,0,1])
     entryHeightMixPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, mixPointInHand))[2]
-    tippedOrientation = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'tipped'), [-0.707,0,0,0.707])
+    if tool in getHeld(customDynamicsAPI, name, hand):
+        fwdInHand = [1,0,0]
+        facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
+        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        tippedOrientation = quatFromVecPairs((fwdInHand, fwd), (mixAxisInHand, down))
+    else:
+        tippedOrientation = [0,0,0,1]
+    #tippedOrientation = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'tipped'), [-0.707,0,0,0.707])
     #For mixing:
     #  we want pc/ad: mixpoint at containerEntry and mixaxis down
     #  we can achieve pc/ad by a lowering process that maintains ad/xy: mixaxis down and mixpointXY at containerEntryXY
