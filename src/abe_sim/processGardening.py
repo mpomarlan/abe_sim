@@ -825,10 +825,12 @@ def _getMixingConditions(customDynamicsAPI, name, description, node): # containe
     containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerP, containerQ, containerEntryInContainer, [0,0,0,1])
     entryHeightMixPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, mixPointInHand))[2]
     if tool in getHeld(customDynamicsAPI, name, hand):
-        fwdInHand = [1,0,0]
-        facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
-        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
-        tippedOrientation = quatFromVecPairs((fwdInHand, fwd), (mixAxisInHand, down))
+        #fwdInHand = [1,0,0]
+        #facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
+        #fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        axis = numpy.cross(mixAxisInHand, down)
+        angle = math.acos(numpy.dot(mixAxisInHand, down))
+        tippedOrientation = stubbornTry(lambda : pybullet.getQuaternionFromAxisAngle(axis, angle)) #quatFromVecPairs((fwdInHand, fwd), (mixAxisInHand, down))
     else:
         tippedOrientation = [0,0,0,1]
     #tippedOrientation = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'tipped'), [-0.707,0,0,0.707])

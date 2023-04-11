@@ -156,7 +156,7 @@ def toGetStateUpdates(requestData, w, agentName, todos):
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
-        updates[name] = {'filename': str(data['filename']), 'position': list(data['position']), 'orientation': list(data['orientation']), 'at': str(data['at']), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data[.get('customStateVariables', {})), 'joints': copy.deepcopy(data.get('joints', None))}
+        updates[name] = {'filename': str(data['filename']), 'position': list(data['position']), 'orientation': list(data['orientation']), 'at': str(data['at']), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': copy.deepcopy(data.get('joints', None))}
     return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "currentCommand": str(todos["command"]), "abeActions": bps}}
 
 def toGetLocation(requestData, w, agentName, todos):
