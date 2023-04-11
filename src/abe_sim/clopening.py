@@ -27,7 +27,7 @@ def updateClopening(name, customDynamicsAPI):
                     actionCandidate = customDynamicsAPI['getObjectProperty']((candidate,), ('customStateVariables', 'clopening', 'action', clopenerEF), None)
                     if (action is None) or (actionCandidate is not None):
                         action = actionCandidate
-        customDynamicsAPI['setObjectProperty']((name,), ('customStateVariables', 'clopening', 'action', link), action)
+        customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'clopening', 'action', link), action)
         angle = None
         if 'open' == action:
             angle = getDictionaryEntry(fnClopening, ('openingAngle', link), 0)

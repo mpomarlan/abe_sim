@@ -175,8 +175,11 @@ class World():
           'getGravity': (lambda : self.getGravity()), 
           'getDown': (lambda : self.getDown()), 
           'getUp': (lambda : self.getUp()), 
+          'getObjectTypeKnowledge': (lambda x : self.getObjectTypeKnowledge(x)),
           'getProcessOutcome': (lambda x : self.getProcessOutcome(x)), 
           'getProcessResource': (lambda x: self.getProcessResource(x))}
+    def getObjectTypeKnowledge(self, otype):
+        return copy.deepcopy(self._objectKnowledge.get(otype, None))
     def copy(self):
         worldState = self.worldDump()
         retq = World(pybulletOptions=self._pybulletOptions, useGUI=False, name=("copy(%s)" % self._name), worldSize=self._worldSize)
@@ -234,7 +237,10 @@ class World():
     def getProcessOutcome(self, processDescription):
         return self._getProcessRoleKnowledge(processDescription, 'outcome')
     def getProcessResource(self, processDescription):
-        return self._getProcessRoleKnowledge(processDescription, 'resource')
+        if ('process' not in processDescription) or ('patient' not in processDescription) or ('resource' not in self._processKnowledge):
+            return None
+        return self._processKnowledge['resource'][processDescription['process']][processDescription['patient']]
+        #return self._getProcessRoleKnowledge(processDescription, 'resource')
     def concludeProcess(self, processDescription, name, link=None, adjustments=None):
         retq = {'added': [], 'deleted': [], 'replaced': []}
         if name not in self._kinematicTrees:
@@ -242,8 +248,6 @@ class World():
         if adjustments is None:
             adjustments = {'toAdd': {}, 'toReplace': {}}
         outcome = self.getProcessOutcome(processDescription)
-        #if 'consuming' == processDescription['process']:
-        #    print(processDescription, outcome)
         identifier = (name,)
         if link is not None:
             identifier = (name, link)
@@ -954,7 +958,9 @@ class World():
         for objType, objRecs in [('ktree', self._kinematicTrees), ('kcon', self._kinematicConstraints)]:
             for name in list(objRecs.keys()):
                 if name in objRecs:
-                    for updateFn in self._customDynamicsUpdaters[objType][name]:
+                    for updateFn in list(self._customDynamicsUpdaters[objType][name]):
+                        if name not in objRecs:
+                            break
                         updateFn(name, self._customDynamicsAPI[objType][name])
         stubbornTry(lambda : pybullet.stepSimulation(self._pybulletConnection))
         self._computedCollisions = True
@@ -1282,7 +1288,7 @@ class World():
         if (identifier is None) or (not self._isIdentifier(identifier)) or (identifier[0] not in self._kinematicTrees):
             return None
         retq = [self._kinematicTrees[identifier[0]]['idx']]
-        if (0 < len(identifier)) and (identifier[1] in self._kinematicTrees[identifier[0]]['links']):
+        if (1 < len(identifier)) and (identifier[1] in self._kinematicTrees[identifier[0]]['links']):
             retq.append(self._kinematicTrees[identifier[0]]['links'][identifier[1]]['idx'])
         return retq
     def _getCollisionShape(self, path):

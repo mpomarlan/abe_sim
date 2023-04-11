@@ -116,6 +116,126 @@ def moveTo(w, name, ef, pos, orn, stopOnContact=False, contacter=None, posInLink
         if ((0.0002 > numpy.dot(d,d)) and cq) or ((0.001 > numpy.dot(d,d)) and acq and (0.0001 > numpy.dot(v,v)) and (0.0001 > numpy.dot(omega,omega))):
             break
 
+def placeOnTable(w, table, otype, objKnowledge, position, orientation, letStabilize=False):
+    retq = addObjectInstance(w, otype, objectTypeKnowledge, position, orientation)
+    aabb = w.getObjectProperty((retq,), 'aabb')
+    aabbT = w.getObjectProperty((table,), 'aabb')
+    gap = aabb[0][2] - aabbT[1][2]
+    w.setObjectProperty((retq,), 'position', (position[0], position[1], position[2] - gap))
+    if letStabilize:
+        timeStepWorld(2)
+    return retq
+    
+def grabItem(w, agent, item, hand, handTQ, handle=None):
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    moveTo(w, agent, hand, [handP[0], handP[1], 1.9], handQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, hand, [handP[0], handP[1], 1.9], handTQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    if handle is None:
+        handle = w.getObjectProperty((item,), 'baseLinkName')
+    aabb = w.getObjectProperty((item, handle), 'aabb')
+    handleP = w.getObjectProperty((item, handle), 'position')
+    moveTo(w, agent, hand, [handleP[0], handleP[1], 1.9], handTQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, hand, [handleP[0], handleP[1], aabb[1][2]+0.1], handTQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    w.setObjectProperty((agent,), ('customStateVariables', 'grasping', 'intendToGrasp', hand), [item])
+
+def releaseItem(w, agent, table, item, hand, handTQ, itemTP):
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    itemP = w.getObjectProperty((item,), 'position')
+    itemQ = w.getObjectProperty((item,), 'orientation')
+    itemHP, itemHQ = w.objectPoseRelativeToObject(handP, handQ, itemP, itemQ)
+    moveTo(w, agent, 'hand_left', [handP[0], handP[1], 1.9], handQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, 'hand_left', [handP[0], handP[1], 1.9], handTQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, 'hand_left', [itemTP[0], itemTP[1], 1.9], handTQ, stopOnContact=False, contacter=None, posInLink=itemHP, ornInLink=[0,0,0,1])
+    aabb = w.getObjectProperty((item,), 'aabb')
+    aabbT = w.getObjectProperty((table,), 'aabb')
+    TZ = itemTP[2] - (aabb[0][2] - aabbT[1][2]) + 0.04
+    moveTo(w, agent, 'hand_left', [itemTP[0], itemTP[1], TZ], handTQ, stopOnContact=True, contacter=None, posInLink=itemHP, ornInLink=[0,0,0,1])
+    w.setObjectProperty((agent,), ('customStateVariables', 'grasping', 'intendToGrasp', hand), [])
+    moveTo(w, agent, 'hand_left', [itemTP[0], itemTP[1], 1.9], handTQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    
+def liftHand(w, agent, hand, height, handTQ):
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    moveTo(w, agent, hand, [handP[0], handP[1], height], handQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, hand, [handP[0], handP[1], height], handTQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+
+def hammerMotion(w, agent, hand, positionLow):
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    moveTo(w, agent, hand, [handP[0], handP[1], 1.9], handQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, hand, [positionLow[0], positionLow[1], 1.9], handQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, hand, positionLow, handQ, stopOnContact=True, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    moveTo(w, agent, hand, [positionLow[0], positionLow[1], 1.9], handQ, stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    
+def peelManeuver(w, agent, hand, item, posInLink):
+    itemP = w.getObjectProperty((item,), 'position')
+    aabbItem = w.getObjectProperty((item,), 'aabb')
+    moveTo(w, abe, hand, [itemP[0], aabbItem[0][1]-0.05, aabbItem[0][2]], [0.707,0,0,0.707], posInLink=posInLink, ornInLink=[0,0,0,1])
+    moveTo(w, abe, hand, [itemP[0], aabbItem[0][1]-0.05, aabbItem[1][2]], [0.707,0,0,0.707], posInLink=posInLink, ornInLink=[0,0,0,1])
+    moveTo(w, abe, hand, [itemP[0]-1, aabbItem[0][1]-0.05, aabbItem[1][2]], [0.707,0,0,0.707], posInLink=posInLink, ornInLink=[0,0,0,1])
+    
+def mashManeuver(w, agent, hand, item, tool, toolLink, toolTQ):
+    itemP = w.getObjectProperty((item,), 'position')
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    toolP = w.getObjectProperty((tool, toolLink), 'position')
+    toolQ = w.getObjectProperty((tool, toolLink), 'orientation')
+    posInLink, ornInLink = w.objectPoseRelativeToObject(handP, handQ, toolP, toolQ)
+    moveTo(w, abe, hand, [handP[0], handP[1], 1.9], handQ, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+    toolP = w.getObjectProperty((tool, toolLink), 'position')
+    moveTo(w, abe, hand, [toolP[0], toolP[1], 1.9], toolTQ, posInLink=posInLink, ornInLink=ornInLink)
+    moveTo(w, abe, hand, [itemP[0], itemP[1], 1.9], toolTQ, posInLink=posInLink, ornInLink=ornInLink)
+    aabbItem = w.getObjectProperty((item,), 'aabb')
+    aabbTool = w.getObjectProperty((tool, toolLink), 'aabb')
+    gap = aabbTool[0][2] - aabbItem[1][2]
+    toolP = w.getObjectProperty((tool, toolLink), 'position')
+    moveTo(w, abe, hand, [itemP[0], itemP[1], toolP[2]-gap+0.03], toolTQ, posInLink=posInLink, ornInLink=ornInLink)
+    moveTo(w, abe, hand, [itemP[0], itemP[1], 1.9], toolTQ, posInLink=posInLink, ornInLink=ornInLink)
+    moveTo(w, abe, hand, [itemP[0], itemP[1], 1.9], handQ, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+
+def sideChop(w, agent, hand, item, tool, toolLink, toolTQ):
+    itemP = w.getObjectProperty((item,), 'position')
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    toolP = w.getObjectProperty((tool, toolLink), 'position')
+    toolQ = w.getObjectProperty((tool, toolLink), 'orientation')
+    posInLink, ornInLink = w.objectPoseRelativeToObject(handP, handQ, toolP, toolQ)
+    moveTo(w, abe, hand, [-1.4, handP[1], 1.9], handQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    moveTo(w, abe, hand, [-1.4, handP[1], 1.9], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    moveTo(w, abe, hand, [-1.4, handP[1], itemP[2]], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    aabbItem = w.getObjectProperty((item,), 'aabb')
+    aabbTool = w.getObjectProperty((tool, toolLink), 'aabb')
+    gap = aabbTool[1][0] - aabbItem[0][0]
+    toolP = w.getObjectProperty((tool, toolLink), 'position')
+    moveTo(w, abe, hand, [toolP[0]-gap+0.02, itemP[1], itemP[2]], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1], stopOnContact=True)
+    moveTo(w, abe, hand, [-1.4, itemP[1], itemP[2]], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    
+def topChop(w, agent, hand, item, tool, toolLink, toolTQ):
+    itemP = w.getObjectProperty((item,), 'position')
+    handLink = {'hand_right': 'hand_right_roll', 'hand_left': 'hand_left_roll'}[hand]
+    handP = w.getObjectProperty((agent, handLink), 'position')
+    handQ = w.getObjectProperty((agent, handLink), 'orientation')
+    toolP = w.getObjectProperty((tool, toolLink), 'position')
+    toolQ = w.getObjectProperty((tool, toolLink), 'orientation')
+    posInLink, ornInLink = w.objectPoseRelativeToObject(handP, handQ, toolP, toolQ)
+    moveTo(w, abe, hand, [handP[0], handP[1], 1.7], handQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    moveTo(w, abe, hand, [handP[0], handP[1], 1.7], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    moveTo(w, abe, hand, [itemP[0], itemP[1], 1.7], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1])
+    aabbItem = w.getObjectProperty((item,), 'aabb')
+    aabbTool = w.getObjectProperty((tool, toolLink), 'aabb')
+    gap = aabbTool[0][2] - aabbItem[1][2]
+    moveTo(w, abe, hand, [itemP[0], itemP[1], toolP[2]-gap-0.01], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1], stopOnContact=True)
+    moveTo(w, abe, hand, [itemP[0], itemP[1], 1.7], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1], stopOnContact=True)
+    moveTo(w, abe, hand, [-1.4, handP[1], 1.7], toolTQ, posInLink=posInLink, ornInLink=[0,0,0,1], stopOnContact=True)
+
 #objectTypeKnowledge = [json.loads(x) for x in open('objectknowledge.log').read().splitlines() if x.strip()]
 objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
 objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}
@@ -172,30 +292,11 @@ input('Press Enter to continue ...')
 
 moveTo(w, abe, 'base', [0,-3,0], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=[1,0,0], ornInLink=[0,0,0,1])
 
-#moveTo(w, abe, 'base', [0,2.5,0], [0,0,0.707,0.707], stopOnContact=False, contacter=None, posInLink=[1,0,0], ornInLink=[0,0,0,1])
-#w.setObjectProperty((abe,), ('customStateVariables', 'motionPlanning', 'goal', 'hand_right_roll'), [[0, 3, 0.5], [0,0,0,1]])
-#timestepWorld(w,0.010)
-#plannedMoveTo(w, abe, 'hand_right', [0,3,0.5], [0,0,0,1], posInLink=None, ornInLink=None)
-#plannedMoveTo(w, abe, 'hand_right', [0,3,1.5], [0,0,0,1], posInLink=None, ornInLink=None)
+egg = placeOnTable(w, kitchenCounter, 'EggInShell', objectTypeKnowledge, (0,-2.7,1), (0.707,0,0,0.707), letStabilize=False)
+eggP = w.getObjectProperty((egg,), 'position')
 
-#w._kinematicTrees[abe]['customStateVariables']['kinematicControl']['target']['hand_right']
-#w.getObjectProperty((abe,'hand_right_roll'), 'position')
-
-input('Press Enter to continue ...')
-
-
-egg = addObjectInstance(w, 'EggInShell', objectTypeKnowledge, (0,-2.7,1), (0.707,0,0,0.707))
-aabbEgg = w.getObjectProperty((egg,), 'aabb')
-gap = aabbEgg[0][2] - aabbKitchenCounter[1][2]
-w.setObjectProperty((egg,), 'position', (0,-2.7,1-gap))
-moveTo(w, abe, 'hand_right', [0,-2.7,1-gap+0.13], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_right'), [egg])
-moveTo(w, abe, 'hand_right', [0,-2.7,1.6], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-moveTo(w, abe, 'hand_right', [0,-2.7,1-gap+0.04], [0,0,-0.707,0.707], stopOnContact=True, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-moveTo(w, abe, 'hand_right', [0,-2.7,1-gap+0.13], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-moveTo(w, abe, 'hand_right', [0,-2.7,1.2], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-#moveTo(w, abe, 'hand_right', [0,-2.7,1.2], [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-#moveTo(w, abe, 'hand_right', [0,-2.7,1.4], [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+grabItem(w, abe, egg, 'hand_right', [0,0,-0.707,0.707], handle=None)
+hammerMotion(w, abe, 'hand_right', [eggP[0], eggP[1], eggP[2] + 0.04])
 
 input('Press Enter to continue ...')
 
@@ -205,49 +306,18 @@ for n in list(w._kinematicTrees.keys()):
 
 w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_right'), [])
 
-cookingKnife = addObjectInstance(w, 'CookingKnife', objectTypeKnowledge, (-0.5,-3,1), (0.707,0,0,0.707))
-aabbCookingKnife = w.getObjectProperty((cookingKnife,), 'aabb')
-gap = aabbCookingKnife[0][2] - aabbKitchenCounter[1][2]
-w.setObjectProperty((cookingKnife,), 'position', (-0.5,-3,1-gap))
+cookingKnife = placeOnTable(w, kitchenCounter, 'CookingKnife', objectTypeKnowledge, (-0.5,-3,1), (0.707,0,0,0.707), letStabilize=False)
+grabItem(w, abe, cookingKnife, 'hand_right', [0,0,0,1], handle='handle')
+liftHand(w, abe, 'hand_right', 1.9, [0.707,0,0,0.707])
 
-
-positionHandle = list(w.getObjectProperty((cookingKnife, 'handle'), 'position'))
-positionHandle[2] += 0.07
-moveTo(w, abe, 'hand_right', positionHandle, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_right'), [cookingKnife])
-positionHandle[2] += 0.9
-moveTo(w, abe, 'hand_right', positionHandle, [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
 positionBlade, orientationBlade = w.objectPoseRelativeToObject(w.getObjectProperty((abe, 'hand_right_roll'), 'position'), w.getObjectProperty((abe, 'hand_right_roll'), 'orientation'), w.getObjectProperty((cookingKnife, 'blade'), 'position'), w.getObjectProperty((cookingKnife, 'blade'), 'orientation'))
 
-potato = addObjectInstance(w, 'Potato', objectTypeKnowledge, (0,-3,1), (0,0,0,1))
-aabbPotato = w.getObjectProperty((potato,), 'aabb')
-gap = aabbPotato[0][2] - aabbKitchenCounter[1][2]
-w.setObjectProperty((potato,), 'position', (0,-2.7,1-gap))
+potato = placeOnTable(w, kitchenCounter, 'Potato', objectTypeKnowledge, (0,-2.5,1), (0,0,0,1), letStabilize=False)
 
-positionPotato = list(w.getObjectProperty((potato,), 'position'))
-positionPotato[2] += 0.25
-moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-positionPotato[2] -= 0.1
-moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_left'), [potato])
-positionPotato[2] += 0.3
-positionPotato[0] += 0.5
-moveTo(w, abe, 'hand_left', positionPotato, [-0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+grabItem(w, abe, potato, 'hand_left', [0,0,0,1], handle=None)
+moveTo(w, abe, 'hand_left', [0.3, -2.5, 1.5], [-0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
 
-aabbPotato = w.getObjectProperty((potato,), 'aabb')
-aabbBlade = w.getObjectProperty((cookingKnife, 'blade'), 'aabb')
-bladeWidth = (aabbBlade[1][1] - aabbBlade[0][1])*0.5
-
-positionTarget = [aabbPotato[0][0], aabbPotato[0][1]-bladeWidth+0.02, aabbPotato[1][2]]
-positionBlade, orientationBlade = w.objectPoseRelativeToObject(w.getObjectProperty((abe, 'hand_right_roll'), 'position'), w.getObjectProperty((abe, 'hand_right_roll'), 'orientation'), w.getObjectProperty((cookingKnife, 'blade'), 'position'), w.getObjectProperty((cookingKnife, 'blade'), 'orientation'))
-moveTo(w, abe, 'hand_right', positionTarget, [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget = [aabbPotato[0][0], aabbPotato[0][1]-bladeWidth+0.02, aabbPotato[0][2]]
-moveTo(w, abe, 'hand_right', positionTarget, [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget = [aabbPotato[0][0], aabbPotato[0][1]-bladeWidth+0.02, aabbPotato[1][2]]
-moveTo(w, abe, 'hand_right', positionTarget, [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[0] -= 0.7
-positionTarget[1] -= 0.15
-moveTo(w, abe, 'hand_right', positionTarget, [0.707,0,0,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
+peelManeuver(w, abe, 'hand_right', potato, positionBlade)
 
 input('Press Enter to continue ...')
 
@@ -255,82 +325,23 @@ for n in list(w._kinematicTrees.keys()):
     if w._kinematicTrees[n]['type'] in set(['PotatoPeel']):
         w.removeObject((n,), sendToLimbo=True)
 
-moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-positionPotato[2] -= 0.2 
-moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_left'), [])
-positionPotato[2] += 0.4 
-moveTo(w, abe, 'hand_left', positionPotato, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
+releaseItem(w, abe, kitchenCounter, potato, 'hand_left', [0,0,0,1], [0,-2.7,1])
 
-masher = addObjectInstance(w, 'Masher', objectTypeKnowledge, (0.1,-3,1), (0,0,-0.707,0.707))
-aabbMasher = w.getObjectProperty((masher,), 'aabb')
-gap = aabbMasher[0][2]-aabbKitchenCounter[1][2]
-w.setObjectProperty((masher,), 'position', (0.1,-3,1-gap))
-positionHandle = list(w.getObjectProperty((masher, 'handle'), 'position'))
-positionMasher = list(w.getObjectProperty((masher, 'masher'), 'position'))
-orientationMasher = list(w.getObjectProperty((masher, 'masher'), 'orientation'))
-positionTarget = [positionHandle[0], positionHandle[1], positionHandle[2]+0.05]
-moveTo(w, abe, 'hand_left', positionTarget, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=[0,0,0], ornInLink=[0,0,0,1])
-posMH, ornMH = w.objectPoseRelativeToObject(w.getObjectProperty((abe, 'hand_left_roll'), 'position'), w.getObjectProperty((abe, 'hand_left_roll'), 'orientation'), w.getObjectProperty((masher, 'masher'), 'position'), w.getObjectProperty((masher, 'masher'), 'orientation'))
-w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_left'), [masher])
-positionTarget[1] += 0.2
-positionTarget[2] += 0.3
-moveTo(w, abe, 'hand_left', positionTarget, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
-positionTarget[2] += 0.3
-moveTo(w, abe, 'hand_left', positionTarget, [0,0.707,0,0.707], stopOnContact=False, contacter=None, posInLink=posMH, ornInLink=ornMH)
-positionTarget = list(w.getObjectProperty((potato,), 'position'))
-positionTarget[2] += 0.9
-moveTo(w, abe, 'hand_left', positionTarget, [0,0.707,0,0.707], stopOnContact=False, contacter=None, posInLink=posMH, ornInLink=ornMH)
-positionTarget[2] -= 0.75
-positionTarget[1] -= 0.02
-moveTo(w, abe, 'hand_left', positionTarget, [0,0.707,0,0.707], stopOnContact=False, contacter=None, posInLink=posMH, ornInLink=ornMH)
+masher = placeOnTable(w, kitchenCounter, 'Masher', objectTypeKnowledge, (0.1,-3,1), (0,0,-0.707,0.707), letStabilize=False)
 
-timestepWorld(w,1)
+grabItem(w, abe, masher, 'hand_left', [0,0,0,1], handle='handle')
+mashManeuver(w, abe, 'hand_left', potato, masher, 'masher', [0,0.707,0,0.707])
 
 input('Press Enter to continue ...')
+
 
 for n in list(w._kinematicTrees.keys()):
     if w._kinematicTrees[n]['type'] in set(['PotatoParticle', 'PotatoPeel', 'Masher']):
         w.removeObject((n,), sendToLimbo=True)
 
+avocado = placeOnTable(w, kitchenCounter, 'Avocado', objectTypeKnowledge, (0,-3,1), (0,0,0,1), letStabilize=False)
 
-avocado = addObjectInstance(w, 'Avocado', objectTypeKnowledge, (0, -3, 1), (0,0,0,1))
-aabbAvocado = w.getObjectProperty((avocado,), 'aabb')
-gap = aabbAvocado[0][2] - aabbKitchenCounter[1][2]
-w.setObjectProperty((avocado,), 'position', (0, -3, 1-gap))
-positionTarget = list(w.getObjectProperty((avocado,), 'position'))
-aabbAvocado = w.getObjectProperty((avocado,), 'aabb')
-positionTarget[2] = aabbAvocado[1][2] + 0.06
-auxP = list(w.getObjectProperty((abe, 'hand_left_roll'), 'position'))
-auxP[2] += 0.02
-moveTo(w, abe, 'hand_left', auxP, [0,0,0,1], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
-moveTo(w, abe, 'hand_left', auxP, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
-moveTo(w, abe, 'hand_left', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
-w.setObjectProperty((abe,), ('customStateVariables', 'grasping', 'intendToGrasp', 'hand_left'), [avocado])
-positionTarget[2] += 0.2
-moveTo(w, abe, 'hand_left', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
-
-positionTarget = list(w.getObjectProperty((avocado,), 'position'))
-positionTarget[0] -= 0.5
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[0] += 0.4
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[0] -= 0.25
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[0] += 0.25
-positionTarget[2] -= 0.03
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[1] -= 0.2
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[1] += 0.2
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[1] -= 0.2
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[1] += 0.2
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-positionTarget[1] -= 0.2
-moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=positionBlade, ornInLink=[0,0,0,1])
-timestepWorld(w, 2)
+topChop(w, abe, 'hand_right', avocado, cookingKnife, 'blade', [-0.707,0,0,0.707])
 
 input('Press Enter to continue ...')
 
@@ -338,10 +349,21 @@ for n in list(w._kinematicTrees.keys()):
     if w._kinematicTrees[n]['type'] in set(['Avocado', 'AvocadoHalf', 'AvocadoHalfSeeded', 'AvocadoSeed']):
         w.removeObject((n,), sendToLimbo=True)
 
-bread = addObjectInstance(w, 'Bread', objectTypeKnowledge, (0,-3,1), (0,0,1,0))
-aabbBread = w.getObjectProperty((bread,), 'aabb')
-gap = aabbBread[0][2] - aabbKitchenCounter[1][2]
-w.setObjectProperty((bread,), 'position', (0, -3, 1-gap))
+avocado = placeOnTable(w, kitchenCounter, 'Avocado', objectTypeKnowledge, (0,-3,1), (0,0,0,1), letStabilize=False)
+avocadoP = list(w.getObjectProperty((avocado,), 'position'))
+
+grabItem(w, abe, avocado, 'hand_left', [0,0,-0.707,0.707], handle=None)
+moveTo(w, abe, 'hand_left', [avocadoP[0], avocadoP[1], 1.5], [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
+
+sideChop(w, abe, 'hand_right', avocado, cookingKnife, 'blade', [0,0,-0.707,0.707])
+
+input('Press Enter to continue ...')
+
+for n in list(w._kinematicTrees.keys()):
+    if w._kinematicTrees[n]['type'] in set(['Avocado', 'AvocadoHalf', 'AvocadoHalfSeeded', 'AvocadoSeed']):
+        w.removeObject((n,), sendToLimbo=True)
+
+bread = placeOnTable(w, kitchenCounter, 'Bread', objectTypeKnowledge, (0,-3,1), (0,0,1,0), letStabilize=False)
 
 positionL = list(w.getObjectProperty((abe, 'hand_left_roll'), 'position'))
 positionL[0] += 0.4
@@ -382,10 +404,9 @@ for n in list(w._kinematicTrees.keys()):
 
 positionTarget[2] += 0.5
 moveTo(w, abe, 'hand_left', positionTarget, [0,0,-0.707,0.707], stopOnContact=False, contacter=None, posInLink=None, ornInLink=None)
-butter = addObjectInstance(w, 'Butter', objectTypeKnowledge, (-0.6,-3,1), (0,0,0,1))
-aabbButter = w.getObjectProperty((butter,), 'aabb')
-gap = aabbButter[0][2] - aabbKitchenCounter[1][2]
-w.setObjectProperty((butter,), 'position', (-0.6,-3,1-gap))
+
+butter = placeOnTable(w, kitchenCounter, 'Butter', objectTypeKnowledge, (-0.6,-3,1), (0,0,0,1), letStabilize=False)
+
 aabbButter = w.getObjectProperty((butter,), 'aabb')
 positionTarget = list(w.getObjectProperty((butter,), 'position'))
 
@@ -417,11 +438,9 @@ moveTo(w, abe, 'hand_right', positionTarget, [0,0,-0.707,0.707], stopOnContact=F
 positionTarget = list(w.getObjectProperty((breadSlice,), 'position'))
 positionTarget[0] += 0.7
 positionTarget[2] = 1
-pepperShaker = addObjectInstance(w, 'PepperShaker', objectTypeKnowledge, positionTarget, (0,0,0,1))
-aabbPepperShaker = w.getObjectProperty((pepperShaker,), 'aabb')
-gap = aabbPepperShaker[0][2] - aabbKitchenCounter[1][2]
-positionTarget[2] -= gap
-w.setObjectProperty((pepperShaker,), 'position', positionTarget)
+
+pepperShaker = placeOnTable(w, kitchenCounter, 'PepperShaker', objectTypeKnowledge, (0.9,-3,1), (0,0,0,1), letStabilize=False)
+
 positionTarget = list(w.getObjectProperty((pepperShaker,), 'position'))
 positionTarget[1] += 0.15
 positionTarget[2] += 0.04

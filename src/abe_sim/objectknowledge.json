@@ -10,6 +10,7 @@
                      "canMotionPlan": true,
                      "kinematicallyControlable": true,
                      "processGardener": true,
+                     "canShape": true,
                      "canTime": true,
                      "clopening": {
                             "clopeningEFs": [
@@ -35,6 +36,16 @@
                                    "hand_right_roll": "hand_right"
                             }
                      },
+                     "shaping": {
+                           "actuators": [
+                                   "hand_left",
+                                   "hand_right"
+                           ],
+                           "radius": {
+                                   "hand_left":0.5, 
+                                   "hand_right": 0.5
+                           }
+                     },
                      "processGardening": {
                             "actuator": {
                                    "mode": {
@@ -44,9 +55,34 @@
                                           },
                                           "base": {},
                                           "hand_right": {},
-                                          "hand_left": {}
+                                          "hand_left": {},
+                                          "shapingIngredients": {
+                                                 "hand_left": "set", 
+                                                 "hand_right": "set"
+                                          },
+                                          "shapingOutcome": {
+                                                 "hand_left": "value", 
+                                                 "hand_right": "value"
+                                          }
                                    },
                                    "variablePath": {
+                                          "shapingIngredients": {
+                                                 "hand_left": [
+                                                        "customStateVariables", 
+                                                        "shaping", 
+                                                        "ingredients", 
+                                                        "hand_left"
+                                                 ],
+                                                 "hand_right": [
+                                                        "customStateVariables", 
+                                                        "shaping", 
+                                                        "ingredients", 
+                                                        "hand_right"
+                                                 ]
+                                          },
+                                          "shapingOutcome": {"hand_left": ["customStateVariables", "shaping", "outcome", "hand_left"],
+                                                                             "hand_right": ["customStateVariables", "shaping", "outcome", "hand_right"]},
+
                                           "grasping": {
                                                  "hand_left": [
                                                         "customStateVariables",
@@ -339,7 +375,19 @@
               "fn": {
                      "graspable": true,
                      "canLine": true,
-                     "transportable": true
+                     "transportable": true,
+                     "lining": {
+                            "axis": [
+                                   1,
+                                   0,
+                                   0
+                            ], 
+                            "point": [
+                                   0,
+                                   0,
+                                   0
+                            ]
+                     }
               },
               "customStateVariables": {}
        },
@@ -350,9 +398,22 @@
               "fn": {
                      "graspable": true,
                      "canContain": true,
+                     "lineable": true,
+                     "lining": {
+                            "axis": [
+                                   1,
+                                   0,
+                                   0
+                            ], 
+                            "point": [
+                                   0,
+                                   0,
+                                   0
+                            ]
+                     },
                      "containment": {
                             "height": {
-                                   "mediumbowl": 0.5
+                                   "bottom": 0.5
                             },
                             "links": [
                                    "bottom"
@@ -364,6 +425,14 @@
                                                  0,
                                                  0,
                                                  0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
                                           ]
                                    }
                             },
@@ -486,9 +555,19 @@
               "fn": {
                      "absorbable": true,
                      "consumable": true,
-                     "transportable": true
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "mixing": {
+                            "mixableRadius": 0.3, 
+                            "substanceRadius": 0.3
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
        },
        {
               "type": "ButteredBreadSlice",
@@ -641,7 +720,9 @@
               "filename": "3DObjects/Dough/dough_particle.urdf",
               "fn": {
                      "shapeable": "true",
-                     "transportable": true
+                     "transportable": true, 
+                     "sticky": true,
+                     "mixMakeable": true
               },
               "customStateVariables": {}
        },
@@ -856,7 +937,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0
+                                                 0.1
                                           ]
                                    }
                             },
@@ -876,9 +957,88 @@
               "filename": "3DObjects/Oven/oven.urdf",
               "immobile": true,
               "fn": {
-                     "canContain": true
+                     "canContain": true, 
+                     "clopenable": true, 
+                     "canBake": true,
+                     "containment": {
+                            "facing": [
+                                   0,
+                                   -1,
+                                   0],
+                            "height": {
+                                   "shelf": 0.5
+                            },
+                            "door": {
+                                   "shelf": "door"
+                            },
+                            "links": [
+                                   "shelf"
+                            ], 
+                            "pouring": {
+                                   "into": {
+                                          "link": "shelf", 
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   }, 
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "side-by-side", 
+                                   "axis": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
+                     "clopening": {
+                            "clopenableLinks": [
+                                   "door"
+                            ],
+                            "radius": {
+                                   "door": 0.7
+                            },
+                            "openingAngle": {
+                                   "door": -1.57
+                            },
+                            "closingAngle": {
+                                   "door": 0
+                            },
+                            "openMin": {
+                                   "door": -1.8
+                            },
+                            "openMax": {
+                                   "door": -1.5
+                            },
+                            "closedMin": {
+                                   "door": -0.1
+                            },
+                            "closedMax": {
+                                   "door": 0.1
+                            },
+                            "handle": {
+                                   "door": "handle"
+                            }
+                     }                     
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "clopening": {
+                            "action": {
+                                   "freezer_door": null, 
+                                   "fridge_door": null
+                            }
+                     }
+              }
        },
        {
               "type": "SugarBag",
@@ -920,6 +1080,12 @@
                                                  0,
                                                  0,
                                                  0.707
+                                          ],
+                                          "upright": [
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 1
                                           ]
                                    }
                             }
@@ -940,19 +1106,36 @@
               "fn": {
                      "absorbable": true,
                      "consumable": true,
-                     "transportable": true
+                     "transportable": true,
+                     "mixable": true, 
+                     "sticky": true,
+                     "mixing": {
+                            "mixableRadius": 0.3, 
+                            "substanceRadius": 0.3
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
        },
        {
               "type": "SugarSprinkledCookie",
               "simtype": "ktree",
               "filename": "3DObjects/Dough/sugar_sprinkled_cookie.urdf",
               "fn": {
+                     "canAbsorb": true,
                      "graspable": "true",
                      "transportable": true
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "absorbing": {
+                            "SugarParticle": {
+                                   "hp": null
+                            }
+                     }
+              }
        },
        {
               "type": "Tomato",
@@ -1019,12 +1202,37 @@
               "fn": {
                      "canMix": true,
                      "graspable": true,
+                     "grasping": {
+                            "handle": "handle",
+                            "axis": {
+                                   "handle": [
+                                          0,
+                                          1,
+                                          0]
+                            }
+                     },
                      "mixing": {
                             "links": [
                                    "whisk"
                             ],
+                            "radius": {
+                                   "whisk": 0.3
+                            },
+                            "tipped": [
+                                   0,
+                                   0.707,
+                                   0,
+                                   0.707
+                            ],
+                            "mixPoint": {
+                                   "whisk": [
+                                          0.18,
+                                          0,
+                                          0
+                                   ]
+                            },
                             "axis": {
-                                   "masher": [
+                                   "whisk": [
                                           1,
                                           0,
                                           0

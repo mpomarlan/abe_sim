@@ -24,6 +24,11 @@
                                 "default": {
                                         "toDelete": true
                                 }
+                        },
+                        "SugarParticle": {
+                                "default": {
+                                        "toDelete": true
+                                }
                         }
                 },
                 "cracking": {
@@ -3174,6 +3179,47 @@
                                         ]
                                 }
                         }
+                },
+                "mixing": {
+                        "ButterParticle;SugarParticle": {
+                                "default": {
+                                        "toReplace": "DoughParticle"
+                                }
+                        },
+                        "ButterParticle;DoughParticle": {
+                                "default": {
+                                        "toReplace": "DoughParticle"
+                                }
+                        },
+                        "DoughParticle;SugarParticle": {
+                                "default": {
+                                        "toReplace": "DoughParticle"
+                                }
+                        }
                 }
+        },
+        "resource": {
+               "mixing": {
+                       "ButterParticle": [
+                               [
+                                       "ButterParticle", 
+                                       "SugarParticle"
+                               ], 
+                               [
+                                       "ButterParticle", 
+                                       "DoughParticle"
+                               ]
+                       ],
+                       "SugarParticle": [
+                               [
+                                       "ButterParticle", 
+                                       "SugarParticle"
+                               ], 
+                               [
+                                       "DoughParticle", 
+                                       "SugarParticle"
+                               ]
+                       ]
+               }
         }
 }

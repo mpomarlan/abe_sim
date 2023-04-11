@@ -21,6 +21,11 @@ from abe_sim.kinematicControl import updateKinematicControl
 from abe_sim.grasping import updateGrasping, updateGraspingConstraint
 from abe_sim.timing import updateTiming
 from abe_sim.processGardening import updateGarden
+from abe_sim.transporting import updateTransportingConstraint, updateTransporting
+from abe_sim.shaping import updateShaping, updateShaped
+from abe_sim.stickiness import updateStickiness
+from abe_sim.mixing import updateMixing
+from abe_sim.clopening import updateClopening
 
 from abe_sim.customDynamics import buildSpecs
 from abe_sim.commands import commandFns
@@ -40,6 +45,25 @@ def placeCamera(w, item, relatum):
     world.stubbornTry(lambda : pybullet.resetDebugVisualizerCamera(4,yaw-90,-35, cP))
     
 def serviceRequest(command, request, requestDictionary, responseDictionary, updating, executingAction):
+    def print_circular_refs(ob, _path=None, _seen=None):
+        if _path is None:
+            _path = []
+        if _seen is None:
+            _seen = set()
+        if id(ob) in _seen:
+            print("CIRCULAR", _path, ob)
+            return None
+        _seen.add(id(ob))
+        res = ob
+        if isinstance(ob, dict):
+            res = {
+                print_circular_refs(k, _seen=_seen, _path=_path): print_circular_refs(v, _seen=_seen, _path=_path + [k])
+                for k, v in ob.items()}
+        elif isinstance(ob, (list, tuple, set, frozenset)):
+            res = type(ob)(print_circular_refs(v, _seen=_seen, _path=_path) for v in ob)
+        # remove id again; only *nested* references count
+        _seen.remove(id(ob))
+        return res
     if command not in commandFns:
         return {'response': 'Unrecognized command.'}, requests.status_codes.codes.NOT_IMPLEMENTED
     with updating:
@@ -59,6 +83,7 @@ def serviceRequest(command, request, requestDictionary, responseDictionary, upda
             executingAction.wait()
         with updating:
             _, status, response = responseDictionary.pop(commandId)
+        #print_circular_refs(response, _path=None, _seen=None)
     return json.dumps(response), status
 
 def thread_function_flask(requestDictionary, responseDictionary, updating, executingAction):
@@ -83,7 +108,7 @@ def runBrain():
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation]')
     arguments = parser.parse_args()
-    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden]]
+    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening]]
 
     objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
     objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}

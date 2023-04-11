@@ -172,9 +172,13 @@ def filterGoal(candidate, name, customDynamicsAPI, roleBdgs, description):
 
 def checkProgress(name, customDynamicsAPI, description):
     def loadCandidate(candidate, name, customDynamicsAPI, roleBdgs):
-        roleBdgs['relatum-part'] = candidate['relatumId'][1]
+        roleBdgs['relatum-part'] = None
+        roleBdgs['trajector-part'] = None
+        if 1 < len(candidate['relatumId']):
+            roleBdgs['relatum-part'] = candidate['relatumId'][1]
+        if 1 < len(candidate['trajectorId']):
+            roleBdgs['trajector-part'] = candidate['trajectorId'][1]
         roleBdgs['trajector'] = candidate['trajectorId'][0]
-        roleBdgs['trajector-part'] = candidate['trajectorId'][1]
         roleBdgs['trajector-type'] = customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'],), 'type')
         roleBdgs['contact-normal'] = candidate['normal']
         roleBdgs['contact-force'] = candidate['force']

@@ -121,6 +121,11 @@ def updateKinematicControl(name, customDynamicsAPI):
         for d in dofs:
             if d in usableDoFs:
                 force = getDictionaryEntry(fnKinematicControl, ('maxForce', d), 1000)
+                if 'hand_right_yaw_to_hand_right_pitch' == d:
+                    print(jointVels[k], force)
+                    print('P', customDynamicsAPI['getObjectProperty']((name,), 'jointPositions')['hand_right_yaw_to_hand_right_pitch'])
+                    print('V', customDynamicsAPI['getObjectProperty']((name,), 'jointVelocities')['hand_right_yaw_to_hand_right_pitch'])
+                    print('F', customDynamicsAPI['getObjectProperty']((name,), 'jointReactionForces')['hand_right_yaw_to_hand_right_pitch'])
                 customDynamicsAPI['applyJointControl'](d, targetVelocity=jointVels[k], force=force)
                 k = k + 1
     return

@@ -258,12 +258,191 @@ def toPortionEnd(requestData, w, agentName):
     if requests.status_codes.codes.ALL_OK != status:
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'outputContainer': requestData.get('targetContainer', None), 'kitchenStateOut': w.worldDump()}}
+    
+["http://localhost:54321/abe-sim-command/to-transfer", {'containerWithInputIngredients': 'mediumBowl1', 'targetContainer': 'mediumBowl2', 'kitchenStateIn': None, 'setWorldState': False}]
+
+
+def toTransferStart(requestData, w, agentName, todos):
+    oname = requestData.get("containerWithInputIngredients", None)
+    storeName = requestData.get("targetContainer", None)
+    lacks = _checkArgs([[oname, "Request lacks containetWithInputIngredients parameter."],
+                        [storeName, "Request lacks targetContainer parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if oname not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithInputIngredients does not exist in world.'}
+    if storeName not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested targetContainer does not exist in world.'}
+    storage = _getStorage(w)
+    if storage is None:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Nowhere to return containerWithInputIngredients to.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'transferredAndStored', 'item': oname, 'hand': 'hand_right', 'container': storeName, 'storage': storage, 'amount': None, 'pouredType': None}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+    
+def toTransferEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'containerWithAllIngredients': requestData.get('targetContainer', None), 'kitchenStateOut': w.worldDump()}}
+    
+def toMixStart(requestData, w, agentName, todos):
+    container = requestData.get("containerWithInputIngredients", None)
+    tool = requestData.get("mixingTool", None)
+    lacks = _checkArgs([[container, "Request lacks containerWithInputIngredients parameter."],
+                        [tool, "Request lacks tool parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if container not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithInputIngredients does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested tool does not exist in world.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canMix', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested tool cannot mix.'}
+    _checkGreatReset(requestData, w)
+    mixedType = 'default' # TODO: get mixed type
+    toolLink = w._kinematicTrees[tool]['fn']['mixing']['links'][0]
+    storage = _getStorage(w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'mixedAndStored', 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': container, 'storage': storage, 'mixedType': mixedType}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toMixEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'containerWithMixture': requestData.get('containerWithInputIngredients', None), 'kitchenStateOut': w.worldDump()}}
+
+def toLineStart(requestData, w, agentName, todos):
+    item = requestData.get("bakingTray", None)
+    lining = requestData.get("bakingPaper", None)
+    lacks = _checkArgs([[item, "Request lacks bakingTray parameter."],
+                        [lining, "Request lacks bakingPaper parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested bakingTray does not exist in world.'}
+    if lining not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested bakingPaper does not exist in world.'}
+    if not w._kinematicTrees[lining].get('fn', {}).get('canLine', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested bakingPaper cannot line.'}
+    if not w._kinematicTrees[item].get('fn', {}).get('lineable', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested bakingTray cannot be lined.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'linedAndParked', 'lining': lining, 'hand': 'hand_right', 'item': item}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toLineEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'linedBakingTray': requestData.get('bakingTray', None), 'kitchenStateOut': w.worldDump()}}
+
+def toShapeStart(requestData, w, agentName, todos):
+    container = requestData.get("containerWithDough", None)
+    destination = requestData.get("destination", None)
+    shapedType = 'DoughClump' ### TODO
+    ingredientTypes = {'DoughParticle': 3} ### TODO
+    lacks = _checkArgs([[container, "Request lacks containerWithDough parameter."],
+                        [destination, "Request lacks destination parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if container not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithDough does not exist in world.'}
+    if destination not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested destination does not exist in world.'}
+    if not w._kinematicTrees[container].get('fn', {}).get('canContain', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested containerWithDough cannot contain.'}
+    if not w._kinematicTrees[destination].get('fn', {}).get('canContain', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested destination cannot contain.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'shapedAndParked', 'item': container, 'hand': 'hand_right', 'destination': destination, 'shapedType': shapedType, 'ingredientTypes': ingredientTypes}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toShapeEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    shapes = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'log', 'shaping', 'products'), [])
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'log', 'shaping', 'products'), [])
+    return requests.status_codes.codes.ALL_OK, {'response': {'shapedPortions': shapes, 'kitchenStateOut': w.worldDump()}}
+
+def toBakeStart(requestData, w, agentName, todos):
+    item = requestData.get("thingToBake", None)
+    oven = requestData.get("oven", None)
+    destination = requestData.get("inputDestinationContainer", None)
+    bakedType = 'Cookie' ### TODO
+    lacks = _checkArgs([[item, "Request lacks thingToBake parameter."],
+                        [oven, "Request lacks oven parameter."],
+                        [destination, "Request lacks inputDestinationContainer parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested thingToBake does not exist in world.'}
+    if oven not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested oven does not exist in world.'}
+    if destination not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested inputDestinationContainer does not exist in world.'}
+    if not w._kinematicTrees[oven].get('fn', {}).get('canBake', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven cannot bake.'}
+    if not w._kinematicTrees[destination].get('fn', {}).get('canContain', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested inputDestinationContainer cannot contain.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': bakedType}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toBakeEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'thingBaked': requestData['thingToBake'], 'outputDestinationContainer': requestData['inputDestinationContainer'], 'kitchenStateOut': w.worldDump()}}
+
+def toSprinkleStart(requestData, w, agentName, todos):
+    item = requestData.get("object", None)
+    shaker = requestData.get("toppingContainer", None)
+    storage = _getStorage(w)
+    sprinkledType = 'Cookie' ### TODO
+    lacks = _checkArgs([[item, "Request lacks object parameter."],
+                        [shaker, "Request lacks toppingContainer parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
+    if shaker not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested shaker does not exist in world.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'sprinkled', 'shaker': shaker, 'hand': 'hand_right', 'item': item, 'storage': storage, 'sprinkledType': sprinkledType}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toSprinkleEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'sprinkledObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
+
+def toChopStart(requestData, w, agentName, todos):
+    return requests.status_codes.codes.NOT_IMPLEMENTED, {}
+
+def toChopEnd(requestData, w, agentName):
+    return requests.status_codes.codes.ALL_OK, {'response': {'kitchenStateOut': w.worldDump()}}
+
 
 def processActionRequest(fn, requestData, w, agentName, todos):
     if todos['currentAction'] is not None:
         return False, requests.status_codes.codes.SERVICE_UNAVAILABLE, 'Robot already performs an action.'
     status, response = fn(requestData, w, agentName, todos)
-    return True, status, response
+    return (requests.status_codes.codes.ALL_OK == status), status, response
     
 def processInstantRequest(fn, requestData, w, agentName, todos):
     status, response = fn(requestData, w, agentName, todos)
@@ -281,4 +460,11 @@ commandFns = {
     "to-get-state-updates": [processInstantRequest, toGetStateUpdates, None],
     "to-get-location": [processInstantRequest, toGetLocation, None],
     "to-fetch": [processActionRequest, toFetchStart, toFetchEnd],
-    "to-portion": [processActionRequest, toPortionStart, toPortionEnd]}
+    "to-portion": [processActionRequest, toPortionStart, toPortionEnd],
+    "to-transfer": [processActionRequest, toTransferStart, toTransferEnd],
+    "to-mix": [processActionRequest, toMixStart, toMixEnd],
+    "to-line": [processActionRequest, toLineStart, toLineEnd],
+    "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
+    "to-bake": [processActionRequest, toBakeStart, toBakeEnd],
+    "to-sprinkle": [processActionRequest, toSprinkleStart, toSprinkleEnd],
+    "to-chop": [processActionRequest, toChopStart, toChopEnd]}

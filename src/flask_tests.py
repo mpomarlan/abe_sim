@@ -76,6 +76,17 @@ if 1 < len(sys.argv):
 commands = [
         ["http://localhost:54321/abe-sim-command/to-fetch", {'object': 'mediumBowl1', 'kitchenStateIn': None, 'setWorldState': False}, None, "./WS1.log"],
         ["http://localhost:54321/abe-sim-command/to-portion", {'containerWithIngredient': 'sugarBag', 'targetContainer': 'mediumBowl1', 'quantity': 134, 'kitchenStateIn': None, 'setWorldState': False}, "./WS1.log", "./WS2.log"],
+        ["http://localhost:54321/abe-sim-command/to-fetch", {'object': 'mediumBowl2', 'kitchenStateIn': None, 'setWorldState': False}, "./WS2.log", "./WS3.log"],
+        ["http://localhost:54321/abe-sim-command/to-portion", {'containerWithIngredient': 'butterBag', 'targetContainer': 'mediumBowl2', 'quantity': 134, 'kitchenStateIn': None, 'setWorldState': False}, "./WS3.log", "./WS4.log"],
+        ["http://localhost:54321/abe-sim-command/to-fetch", {'object': 'mediumBowl3', 'kitchenStateIn': None, 'setWorldState': False}, "./WS4.log", "./WS5.log"],
+        ["http://localhost:54321/abe-sim-command/to-transfer", {'containerWithInputIngredients': 'mediumBowl1', 'targetContainer': 'mediumBowl3', 'kitchenStateIn': None, 'setWorldState': False}, "./WS5.log", "./WS6.log"],
+        ["http://localhost:54321/abe-sim-command/to-transfer", {'containerWithInputIngredients': 'mediumBowl2', 'targetContainer': 'mediumBowl3', 'kitchenStateIn': None, 'setWorldState': False}, "./WS6.log", "./WS7.log"],
+        ["http://localhost:54321/abe-sim-command/to-mix", {'containerWithInputIngredients': 'mediumBowl3', 'mixingTool': 'whisk', 'kitchenStateIn': None, 'setWorldState': False}, "./WS7.log", "./WS8.log"],
+        ["http://localhost:54321/abe-sim-command/to-fetch", {'object': 'bakingTray', 'kitchenStateIn': None, 'setWorldState': False}, "./WS8.log", "./WS9.log"],
+        ["http://localhost:54321/abe-sim-command/to-line", {'bakingTray': 'bakingTray', 'bakingPaper': 'bakingSheet', 'kitchenStateIn': None, 'setWorldState': False}, "./WS9.log", "./WS10.log"],
+        ["http://localhost:54321/abe-sim-command/to-shape", {'containerWithDough': 'mediumBowl3', 'destination': 'bakingTray', 'kitchenStateIn': None, 'setWorldState': False}, "./WS10.log", "./WS11.log"],
+        ["http://localhost:54321/abe-sim-command/to-bake", {'thingToBake': 'bakingTray', 'inputDestinationContainer': 'kitchenCounter', 'oven': 'oven', 'kitchenStateIn': None, 'setWorldState': False}, "./WS11.log", "./WS12.log"],
+        ["http://localhost:54321/abe-sim-command/to-sprinkle", {'object': 'bakingTray', 'toppingContainer': 'sugarBag', 'kitchenStateIn': None, 'setWorldState': False}, "./WS12.log", "./WS13.log"]
     ]
 
 for k, e in enumerate(commands[crOp:]):
@@ -87,6 +98,7 @@ for k, e in enumerate(commands[crOp:]):
     req['kitchenStateIn'] = kSI
     r = requests.post(command, data=bytes(json.dumps(req), "utf-8"))
     response = json.loads(r.text)
+    print(response)
     if (pathOut is not None) and ('response' in response) and ('kitchenStateOut' in response['response']):
         with open(pathOut, "w") as outfile:
             _ = outfile.write("%s\n" % json.dumps(response['response']['kitchenStateOut']))
