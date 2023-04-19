@@ -3,7 +3,7 @@
   <link name="body">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <mass value="0.01"/>
+        <mass value="0.1"/>
         <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
     </inertial>
     <visual>
@@ -13,7 +13,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="mustardCollider.obj"/>
+        <mesh filename="mayonnaiseBottle.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>

@@ -20,5 +20,31 @@
       </surface>
     </collision>
   </link>
+  <link name="handle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.5e-3" ixy="0" ixz="0" iyy="0.5e-3" iyz="0" izz="0.9e-3"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.01"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="largebowl_to_handle" type="fixed">
+    <parent link="largebowl"/>
+    <child link="handle"/>
+    <origin rpy="0 0 0" xyz="0 -0.26 0.043"/>
+  </joint>
+
 </robot>
 

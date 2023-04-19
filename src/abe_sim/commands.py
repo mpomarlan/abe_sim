@@ -23,14 +23,15 @@ def _checkArgs(args):
             retq.append(msg)
     return retq
     
-def _getStorage(w):
+def _getStorage(w, working=False):
     # TODO: choose storage more intelligently so as to avoid overcrowding one piece of furniture.
-    for k, v in w._kinematicTrees.items():
-        if 'KitchenCabinet' == v['type']:
-            return k
-    for k, v in w._kinematicTrees.items():
-        if 'Pantry' == v['type']:
-            return k
+    types = ['KitchenCabinet', 'Pantry']
+    if working:
+        types = ['KitchenCounter'] + types
+    for e in types:
+        for k, v in w._kinematicTrees.items():
+            if e == v['type']:
+                return k
     return None
     
 def _getPouredType(w, oname):
@@ -431,12 +432,59 @@ def toSprinkleEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'sprinkledObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
 
-def toChopStart(requestData, w, agentName, todos):
-    return requests.status_codes.codes.NOT_IMPLEMENTED, {}
+def toCutStart(requestData, w, agentName, todos):
+    item = requestData.get("object", None)
+    tool = requestData.get("cuttingTool", None)
+    # TODO: implement several patterns
+    cutPattern = requestData.get("cutPattern", None)
+    storage = _getStorage(w, working=True)
+    lacks = _checkArgs([[item, "Request lacks object parameter."],
+                        [tool, "Request lacks cuttingTool parameter."],
+                        [cutPattern, "Request lacks cutPattern parameter"]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested cuttingTool does not exist in world.'}
+    if not w._kinematicTrees[item].get('fn', {}).get('cuttable', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested object is not cuttable.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canCut', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested cuttingTool cannot cut.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'cutItem', 'tool': tool, 'hand': 'hand_right', 'item': item, 'storage': storage}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
 
-def toChopEnd(requestData, w, agentName):
-    return requests.status_codes.codes.ALL_OK, {'response': {'kitchenStateOut': w.worldDump()}}
+def toCutEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'cutObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
 
+def toPlaceStart(requestData, w, agentName, todos):
+    item = requestData.get("object", None)
+    container = requestData.get("container", None)
+    lacks = _checkArgs([[item, "Request lacks object parameter."],
+                        [container, "Request lacks container parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
+    if container not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested container does not exist in world.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'placedItem', 'container': container, 'hand': 'hand_right', 'item': item}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toPlaceEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'placedObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
 
 def processActionRequest(fn, requestData, w, agentName, todos):
     if todos['currentAction'] is not None:
@@ -467,4 +515,6 @@ commandFns = {
     "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
     "to-bake": [processActionRequest, toBakeStart, toBakeEnd],
     "to-sprinkle": [processActionRequest, toSprinkleStart, toSprinkleEnd],
-    "to-chop": [processActionRequest, toChopStart, toChopEnd]}
+    "to-cut": [processActionRequest, toCutStart, toCutEnd],
+    "to-place": [processActionRequest, toPlaceStart, toPlaceEnd]}
+

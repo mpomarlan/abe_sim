@@ -1708,7 +1708,8 @@
               "simtype": "ktree",
               "filename": "3DObjects/Bacon/bacon.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true
               },
               "customStateVariables": {}
        },
@@ -1758,9 +1759,18 @@
               "simtype": "ktree",
               "filename": "3DObjects/Broccoli/broccoli.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "Carrot",
@@ -1910,8 +1920,8 @@
                                           ],
                                           "point": [
                                                  0,
-                                                 0,
-                                                 0.61
+                                                 0.04,
+                                                 0.156
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -2282,7 +2292,8 @@
               "simtype": "ktree",
               "filename": "3DObjects/FetaCheese/fetaCheeseCube.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "transportable": true
               },
               "customStateVariables": {}
        },
@@ -2294,10 +2305,15 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                  "cutting": {
+                      "hp": 5
+                  }
+              }
        },
        {
               "type": "Fork",
@@ -2415,7 +2431,11 @@
               "fn": {
                      "canContain": true,
                      "graspable": true,
+                     "grasping": {
+                         "handle": "handle"
+                     },
                      "containment": {
+                            "largeConcavity": true,
                             "height": {
                                    "largebowl": 0.5
                             },
@@ -2443,7 +2463,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0
+                                                 0.2
                                           ]
                                    }
                             },
@@ -3179,17 +3199,23 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "ChoppedRedOnion",
               "simtype": "ktree",
               "filename": "3DObjects/Onion/choppedRedOnion.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "transportable": true
               },
               "customStateVariables": {}
        },
@@ -3198,7 +3224,8 @@
               "simtype": "ktree",
               "filename": "3DObjects/Broccoli/choppedBroccoli.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "transportable": true
               },
               "customStateVariables": {}
        },
@@ -3447,8 +3474,8 @@
                                           ],
                                           "point": [
                                                  0,
-                                                 0,
-                                                 0.393121
+                                                 0.03,
+                                                 0.093
                                           ],
                                           "tipped": [
                                                  -0.707,

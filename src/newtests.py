@@ -241,7 +241,7 @@ objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
 objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}
 
 processKnowledge = json.loads(open('./abe_sim/processknowledge.json').read())
-w = world.World(pybulletOptions="--opengl3", useGUI=True, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge)
+w = world.World(pybulletOptions="--opengl2", useGUI=True, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge)
 
 toPreload = [
         ["CrackedEggshellPointyHalf", "CrackedEggshellPointyHalf_0", [0,-1,-10]],

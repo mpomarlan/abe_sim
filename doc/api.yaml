@@ -8,6 +8,68 @@ info:
   title: abe-sim
   description: The API for the AbeSim kitchen simulator
 paths:
+  '/abe-sim-command/to-cut':
+    post:
+      description: Asks abe sim to cut an object.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - object
+                - cuttingTool
+                - cutPattern
+                - kitchenStateIn
+                - setWorldState
+              example:
+                - object: Broccoli-1
+                - cuttingTool: CookingKnife-1
+                - cutPattern: dice
+                - kitchenStateIn: null
+                - setWorldState: false
+              properties:
+                object:
+                  type: string
+                  description: Name of the cuttable object to cut.
+                cuttingTool:
+                  type: string
+                  description: Name of the cutting tool, which must be an object that can cut.
+                cuttingPattern:
+                  type: string
+                  description: Name of the pattern to cut the object into.
+                kitchenStateIn:
+                  nullable: true
+                  $ref: '#/components/schemas/WorldState'
+                setWorldState:
+                  type: boolean
+                  description: Should not be true if kitchenStateIn is null.
+      responses:
+        '200':
+          description: Returns the name of the object that was cut.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - response
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                    description: is 'ok' if everything went well
+                  response:
+                    example:
+                      cutObject: Broccoli-1
+                      kitchenStateOut: {}
+                    properties:
+                      cutObject:
+                        type: string
+                        nullable: true
+                      kitchenStateOut:
+                        $ref: '#/components/schemas/WorldState'
   '/abe-sim-command/to-sprinkle':
     post:
       description: Asks abe sim to sprinkle the contents of a container (object) using the contents of another (toppingContainer).

@@ -1,8 +1,8 @@
-# Blender 3.4.1 MTL File: 'None'
-# www.blender.org
+# Blender MTL File: 'None'
+# Material Count: 1
 
 newmtl Material.005
-Ns 250.000000
+Ns 249.019608
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 0.570000 0.804780
 Ks 0.500000 0.500000 0.500000

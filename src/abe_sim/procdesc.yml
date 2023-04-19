@@ -31,7 +31,7 @@ baking:
 # Something gets replaced by parts if something that can cut hits it
 # with sufficient force and blade first.
 chopping:
-  disposition: [self, fn, cuttable]
+  disposition: [self, fn, choppable]
   progress:
     trajector:
       disposition: [trajector, fn, canCut]
@@ -70,6 +70,27 @@ cracking:
       minforce: [self, fn, cracking, force]
   completion:
     process: cracking
+# Something gets replaced by parts if something that can cut descends upon it
+cutting:
+  disposition: [self, fn, cuttable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canCut]
+      part: [trajector, fn, cutting, links]
+    source:
+      mode: close
+      radius: [self, fn, cutting, radius]
+    path:
+      mode: alignment
+      reference: [trajector, fn, cutting, axis, $trajector-part]
+      threshold: 0.7
+    goal: 
+      direction: towards
+      threshold: 0.7
+  resource: [self, customStateVariables, cutting, hp]
+  completion:
+    process: cutting
+    instrument: [trajector, type]
 # Something gets mashed -- replaced with shards -- if a masher moves in an appropriate way long enough.
 mashing:
   disposition: [self, fn, mashable]

@@ -10,46 +10,49 @@ from abe_sim.world import getDictionaryEntry, stubbornTry
 
 baseFwdOffset = (1.5, 0, 0)
 
-def rotationMatrixToQuaternion1(m):
-    #q0 = qw
-    t = numpy.matrix.trace(m)
-    q = numpy.asarray([0.0, 0.0, 0.0, 0.0], dtype=numpy.float64)
-
-    if(t > 0):
-        t = numpy.sqrt(t + 1)
-        q[3] = 0.5 * t
-        t = 0.5/t
-        q[0] = (m[2,1] - m[1,2]) * t
-        q[1] = (m[0,2] - m[2,0]) * t
-        q[2] = (m[1,0] - m[0,1]) * t
-    else:
-        i = 0
-        if (m[1,1] > m[0,0]):
-            i = 1
-        if (m[2,2] > m[i,i]):
-            i = 2
-        j = (i+1)%3
-        k = (j+1)%3
-
-        t = numpy.sqrt(m[i,i] - m[j,j] - m[k,k] + 1)
-        q[i] = 0.5 * t
-        t = 0.5 / t
-        q[3] = (m[k,j] - m[j,k]) * t
-        q[j] = (m[j,i] + m[i,j]) * t
-        q[k] = (m[k,i] + m[i,k]) * t
-    # PYBULLET convention: qw last
-    return [q[1], q[2], q[3], q[0]]
+def rotationMatrixToQuaternion(m):
+    m00,m01,m02 = m[0]
+    m10,m11,m12 = m[1]
+    m20,m21,m22 = m[2]
+    tr = m00 + m11 + m22
+    if (tr > 0):
+        S = math.sqrt(tr+1.0) * 2; # S=4*qw 
+        qw = 0.25 * S
+        qx = (m21 - m12) / S
+        qy = (m02 - m20) / S 
+        qz = (m10 - m01) / S 
+    elif ((m00 > m11) and (m00 > m22)): 
+        S = math.sqrt(1.0 + m00 - m11 - m22) * 2 # S=4*qx 
+        qw = (m21 - m12) / S
+        qx = 0.25 * S
+        qy = (m01 + m10) / S
+        qz = (m02 + m20) / S
+    elif (m11 > m22):
+        S = math.sqrt(1.0 + m11 - m00 - m22) * 2 # S=4*qy
+        qw = (m02 - m20) / S
+        qx = (m01 + m10) / S
+        qy = 0.25 * S
+        qz = (m12 + m21) / S
+    else: 
+        S = math.sqrt(1.0 + m22 - m00 - m11) * 2 # S=4*qz
+        qw = (m10 - m01) / S
+        qx = (m02 + m20) / S
+        qy = (m12 + m21) / S
+        qz = 0.25 * S
+    n = math.sqrt(qx*qx + qy*qy + qz*qz + qw*qw)
+    return [qx/n, qy/n, qz/n, qw/n]
 
 def quatFromVecPairs(pA, pB):
     vAI, vAO = pA
     vBI, vBO = pB
     vCI = numpy.cross(vAI, vBI)
     vCO = numpy.cross(vAO, vBO)
-    RI = numpy.array([vAI, vBI, vCI])
-    RORI = numpy.array([vAO, vBO, vCO])
-    print(RI, RORI)
+    RI = numpy.transpose(numpy.array([vAI, vBI, vCI]))
+    RORI = numpy.transpose(numpy.array([vAO, vBO, vCO]))
+    #print(RI, RORI)
     RO = numpy.matmul(RORI, numpy.linalg.inv(RI))
-    return rotationMatrixToQuaternion1(RO)
+    retq = rotationMatrixToQuaternion(RO)
+    return retq
 
 def pointCloseness(a, b, t):
     d = [x-y for x,y in zip(a, b)]
@@ -522,6 +525,16 @@ def _checkBaked(customDynamicsAPI, name, description, node):
         node['sourceComponent'] = component
     return baked and atDestination and parked
 
+def _checkCutItem(customDynamicsAPI, name, description, node):
+    item = description['item']
+    tool = description['tool']
+    hand = description['hand']
+    storage = description['storage']
+    parked = node.get('parked', False)
+    parked = checkParked(customDynamicsAPI, name, hand, parked)
+    node['parked'] = parked
+    return (not customDynamicsAPI['getObjectProperty']((item,), ('fn', 'cuttable'), False)) and (not checkGrasped(customDynamicsAPI, name, None, tool)) and checkItemInContainer(customDynamicsAPI, name, tool, storage) and parked
+
 def _checkArmTriggeredPortalHandle(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
@@ -825,12 +838,12 @@ def _getMixingConditions(customDynamicsAPI, name, description, node): # containe
     containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerP, containerQ, containerEntryInContainer, [0,0,0,1])
     entryHeightMixPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, mixPointInHand))[2]
     if tool in getHeld(customDynamicsAPI, name, hand):
-        #fwdInHand = [1,0,0]
-        #facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
-        #fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
-        axis = numpy.cross(mixAxisInHand, down)
-        angle = math.acos(numpy.dot(mixAxisInHand, down))
-        tippedOrientation = stubbornTry(lambda : pybullet.getQuaternionFromAxisAngle(axis, angle)) #quatFromVecPairs((fwdInHand, fwd), (mixAxisInHand, down))
+        fwdInHand = [1,0,0]
+        facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
+        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        #axis = numpy.cross(mixAxisInHand, down)
+        #angle = math.acos(numpy.dot(mixAxisInHand, down))
+        tippedOrientation = quatFromVecPairs((fwdInHand, fwd), (mixAxisInHand, down))
     else:
         tippedOrientation = [0,0,0,1]
     #tippedOrientation = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'tipped'), [-0.707,0,0,0.707])
@@ -852,8 +865,10 @@ def _getMixingConditions(customDynamicsAPI, name, description, node): # containe
     tolpo = [0.99, 0.9]
     constraintConjunctions = [[conpc, conad], [conad, conxy], [conxy, conez], [conez, conpo]]
     #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
-    wppcad = [containerEntry, tippedOrientation, None, mixPointInHand, toolOrientationInHand, None, None]
-    wpadxy = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], tippedOrientation, None, mixPointInHand, toolOrientationInHand, None, None]
+    #wppcad = [containerEntry, tippedOrientation, None, mixPointInHand, toolOrientationInHand, None, None]
+    #wpadxy = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], tippedOrientation, None, mixPointInHand, toolOrientationInHand, None, None]
+    wppcad = [containerEntry, tippedOrientation, None, mixPointInHand, None, None, None]
+    wpadxy = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], tippedOrientation, None, mixPointInHand, None, None, None]
     wpxyez = [[containerEntry[0], containerEntry[1], entryHeightMixPoint], handParkedQ, None, mixPointInHand, None, None, None]
     wpezpo = [[handParkedP[0], handParkedP[1], entryHeight], handParkedQ, None, None, None, None, None]
     waypoints = [wppcad, wpadxy, wpxyez, wpezpo]
@@ -1098,6 +1113,64 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
         return [_makeGoal({'hand': hand}, 'parkedArm')]
     return []
 
+def _getCuttingItemConditions(customDynamicsAPI, name, description, node):
+    item = description.get('item', None)
+    hand = description.get('hand', None)
+    tool = description.get('tool', None)
+    storage = description.get('storage', None)
+    location = customDynamicsAPI['getObjectProperty']((item,), 'at')
+    if location is not None:
+        node['location'] = location
+    location = node.get('location', None)
+    down = customDynamicsAPI['getDown']()
+    handLink = getHandLink(customDynamicsAPI, name, hand)
+    handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
+    handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
+    handParkedP, handParkedQ, _ = getParkedPose(customDynamicsAPI, name, hand)
+    entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': item}, {})
+    itemP = customDynamicsAPI['getObjectProperty']((item,), 'position')
+    itemQ = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
+    blade = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'cutting', 'links'))[0]
+    toolP = customDynamicsAPI['getObjectProperty']((tool, blade), 'position')
+    toolQ = customDynamicsAPI['getObjectProperty']((tool, blade), 'orientation')
+    toolPositionInHand, toolOrientationInHand = customDynamicsAPI['objectPoseRelativeToObject'](handP, handQ, toolP, toolQ)
+    bladeAxisInTool = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'cutting', 'axis', blade), [0,0,-1])
+    bladeAxis = stubbornTry(lambda : pybullet.rotateVector(toolQ, bladeAxisInTool))
+    bladeAxisInHand = stubbornTry(lambda : pybullet.rotateVector(toolOrientationInHand, bladeAxisInTool))
+    facingYaw = getFacingYaw(customDynamicsAPI, item, itemP)
+    fwdInHand = [1,0,0]
+    fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+    tippedOrientation = quatFromVecPairs((fwdInHand, fwd), (bladeAxisInHand, down))
+    entryHeightBlade = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, toolPositionInHand))[2]
+    overItem = customDynamicsAPI['getObjectProperty']((item,), 'aabb')[1][2] + (toolP[2] - customDynamicsAPI['getObjectProperty']((tool, blade), 'aabb')[0][2])
+    #For cutting:
+    #  we want xy/ad/bz: bladeXY at itemXY and blade axis down and bladeZ over item
+    #  we can achieve xy/ad/bz by a lowering process that maintains xy/ad: bladeXY at itemXY and blade axis down
+    #  we can achieve xy/ad by a tipping process that maintains xy/ez: bladeXY at itemXY, handZ at entryHeight
+    #  we can achieve xy/ez by a bringing process that maintains ez: handZ at entryHeight
+    #  we can achieve ez by a lifting process
+    conad = ['aligned', 'bladeAxis', 'down']
+    tolad = [0.99, 0.95]
+    conbz = ['equalz', 'bladePoint', 'overItem']
+    tolbz = [0.0001, 0.0004]
+    conxy = ['equalxy', 'bladePoint', 'itemP']
+    tolxy = [0.0001, 0.0004]
+    conez = ['equalz', 'handP', 'entryHeight']
+    tolez = [0.0001, 0.0004]
+    constraintConjunctions = [[conad, conxy, conbz], [conad, conxy], [conxy, conez], [conez]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpadxybz = [[itemP[0], itemP[1], overItem], tippedOrientation, None, toolPositionInHand, None, None, None]
+    wpadxy = [[itemP[0], itemP[1], entryHeightBlade], tippedOrientation, None, toolPositionInHand, None, None, None]
+    wpxyez = [[itemP[0], itemP[1], entryHeightBlade], handQ, None, toolPositionInHand, None, None, None]
+    wpez = [[handP[0], handP[1], entryHeight], handQ, None, None, None, None, None]
+    waypoints = [wpadxybz, wpadxy, wpxyez, wpez]
+    tolerances = [[tolad, tolxy, tolbz], [tolad, tolxy], [tolxy, tolez], [tolez]]
+    entities = {'down': down, 'handP': handP, 'handQ': handQ, 'entryHeight': entryHeight, 'bladePoint': toolP, 'itemP': itemP, 'bladeAxis': bladeAxis, 'overItem': overItem}
+    return [_makeGoal({'hand': hand, 'item': tool}, 'pickedItem'),
+            _makeGoal({'relatum': item}, 'near'),
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+                          numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
+
 def _getBringingNearConditions(customDynamicsAPI, name, description, node):
     trajector = description.get('trajector', None)
     hand = description.get('hand', None)
@@ -1155,7 +1228,7 @@ def _getNearingConditionsA(customDynamicsAPI, name, description, node):
     conp = ['equalp', 'baseFwdP', 'targetP']
     tolp = [0.01, 0.05]
     conf = ['equalq', 'baseQ', 'targetQ']
-    tolf = [0.99, 0.9]
+    tolf = [0.95, 0.9]
     conz = ['equalp', 'baseP', 'zeroP']
     tolz = [0.05, 0.2]
     constraintConjunctions = [[conp, conf], [conf], [conz]]
@@ -1446,6 +1519,16 @@ def _suggestShapedAndParked(customDynamicsAPI, name, description, node):
                          target={'shapingIngredients': {hand: {'toSet': pickedIngredients}},
                                  'shapingOutcome': {hand: shapedType}})]
 
+def _suggestCutItem(customDynamicsAPI, name, description, node):
+    hand = description['hand']
+    item = description['item']
+    storage = description['storage']
+    tool = description['tool']
+    if customDynamicsAPI['getObjectProperty']((item,), ('fn', 'cuttable')):
+        return [_makeProcess({'hand': hand, 'item': item, 'storage': storage, 'tool': tool}, 'cuttingItem')]
+    else:
+        return [_makeProcess({'container': storage, 'hand': hand, 'item': tool}, 'placingItem')]
+
 def _suggestOpened(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
@@ -1547,6 +1630,7 @@ goalCheckers = {
     'shapedAndParked': _checkShapedAndParked, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkled': _checkSprinkled, # hand, item, shaker, sprinkledType, storage |
     'bakedItem': _checkBaked,
+    'cutItem': _checkCutItem, # hand, item, storage, tool |
     'armTriggeredPortalHandle': _checkArmTriggeredPortalHandle,
     'stoppedOpening': _checkStoppedOpening,
     'opened': _checkOpened,
@@ -1585,6 +1669,7 @@ processSuggesters = {
     'lined': _suggestLined, # hand, item, lining |
     'shapedAndParked': _suggestShapedAndParked, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkled': _suggestSprinkled, # hand, item, shaker, sprinkledType, storage |
+    'cutItem': _suggestCutItem, # hand, item, storage, tool |
     'opened': _suggestOpened,
     'closed': _suggestClosed,
     'stoppedOpening': _suggestStoppedOpening,
@@ -1623,6 +1708,7 @@ conditionListers = {
     'lining': _getLiningConditions, # hand, item, lining |
     'shaping': _getShapingConditions, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkling': _getSprinklingConditions, # hand, item, shaker, sprinkledType, storage |
+    'cuttingItem': _getCuttingItemConditions, # hand, item, storage, tool |
     'liftingItemToPouringEntry': _emptyList,
     'stopOpening': _emptyList,
     'stopClosing': _emptyList,
@@ -1975,7 +2061,8 @@ def checkTransferred(customDynamicsAPI, name, item, pouredType, amount, containe
 
 def checkItemInContainer(customDynamicsAPI, name, item, container):
     ## TODO: test whether transitive closure of at includes container
-    return container == customDynamicsAPI['getObjectProperty']((item,), 'at')
+    inLargeContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'largeConcavity'), False) and (item in customDynamicsAPI['checkOverlap'](customDynamicsAPI['getObjectProperty']((container,), 'aabb')))
+    return (customDynamicsAPI['getObjectProperty']((item,), 'position') is None) or (container == customDynamicsAPI['getObjectProperty']((item,), 'at')) or inLargeContainer
 
 def checkBakedContents(customDynamicsAPI, item, bakedType):
     contents = getContents(customDynamicsAPI, item)
