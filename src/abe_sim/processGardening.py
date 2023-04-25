@@ -676,10 +676,6 @@ def _getArmNearingItemHandleConditions(customDynamicsAPI, name, description, nod
     return [_makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
                       numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
-def _getHoveringLocationConditions(customDynamicsAPI, name, description, node):
-    return [_makeGoal({'hand': description['hand'], 'item': description['item']}, 'liftedToEntry',
-                      numerics={'entryHeight': node['numerics'].get('entryHeight', None)})]
-
 def _getGraspingConditions(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
@@ -1673,7 +1669,6 @@ conditionListers = {
     'stoppingHands': _emptyList,
     'parkingArm': _getParkingArmConditions, # hand |
     'armNearingItemHandle': _getArmNearingItemHandleConditions, # hand, item |
-    'hoveringLocation': _getHoveringLocationConditions, # hand, item | entryHeight
     'grasping': _getGraspingConditions, # hand, item |
     'ungrasping': _emptyList,
     'pickingItem': _getPickingItemConditions, # hand, item |
