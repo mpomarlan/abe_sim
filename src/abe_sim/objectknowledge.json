@@ -1709,9 +1709,17 @@
               "filename": "3DObjects/Bacon/bacon.urdf",
               "fn": {
                      "graspable": true,
-                     "cuttable": true
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "AllspiceParticle",
