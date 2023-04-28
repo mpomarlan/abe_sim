@@ -3215,17 +3215,24 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
+
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "ChoppedOnion",
               "simtype": "ktree",
               "filename": "3DObjects/Onion/choppedBrownOnion.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "transportable": true
               },
               "customStateVariables": {}
        },
