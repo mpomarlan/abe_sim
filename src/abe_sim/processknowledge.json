@@ -661,7 +661,7 @@
                         },
                         "Broccoli": {
                                 "default": {
-                                        "toDelete": true,
+                                        "toReplace": "BroccoliStem",
                                         "toAdd": [
                                                 [
                                                         "ChoppedBroccoli",

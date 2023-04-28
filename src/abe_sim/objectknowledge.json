@@ -792,6 +792,7 @@
               "immobile": true,
               "fn": {
                      "canContain": true,
+                     "canRefrigerate": true,
                      "clopenable": true,
                      "clopening": {
                             "clopenableLinks": [
@@ -830,6 +831,12 @@
                                    "fridge_door": "fridge_door_handle",
                                    "freezer_door": "freezer_door_handle"
                             }
+                     },
+                     "refrigeration": {
+                             "links": [
+                                   "fridge_shelf_top",
+                                   "fridge_shelf_bottom"
+                             ]
                      },
                      "containment": {
                             "facing": [
@@ -2494,7 +2501,7 @@
                      "containment": {
                             "largeConcavity": true,
                             "height": {
-                                   "largebowl": 0.5
+                                   "largebowl": 0.3
                             },
                             "pouring": {
                                    "outof": {

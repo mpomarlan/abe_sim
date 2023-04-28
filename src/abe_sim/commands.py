@@ -470,11 +470,11 @@ def toPlaceStart(requestData, w, agentName, todos):
                         [container, "Request lacks container parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if item not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
     if container not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested container does not exist in world.'}
-    _checkGreatReset(requestData, w)
     garden = {0: {'type': 'G', 'description': {'goal': 'placedItem', 'container': container, 'hand': 'hand_right', 'item': item}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
@@ -485,6 +485,35 @@ def toPlaceEnd(requestData, w, agentName):
     if requests.status_codes.codes.ALL_OK != status:
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'placedObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
+
+def toRefrigerateStart(requestData, w, agentName, todos):
+    item = requestData.get("containerWithIngredients", None)
+    refrigerator = requestData.get("refrigerator", None)
+    lacks = _checkArgs([[item, "Request lacks containerWithIngredients parameter."],
+                        [refrigerator, "Request lacks refrigerator parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithIngredients does not exist in world.'}
+    if refrigerator not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested refrigerator does not exist in world.'}
+    fn = w._kinematicTrees[refrigerator].get('fn', {})
+    if not fn.get('canRefrigerate', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested refrigerator cannot refrigerate.'}
+    allowedComponents = list(set(fn.get('refrigeration', {}).get('links', [])).intersection(fn.get('containment', {}).get('links', [])))
+    if 0 == len(allowedComponents):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested refrigerator has no room to refrigerate in.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'placedItem', 'container': refrigerator, 'hand': 'hand_right', 'item': item, 'allowedComponents': allowedComponents}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toRefrigerateEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'containerWithIngredientsAtTemperature': requestData['containerWithIngredients'], 'kitchenStateOut': w.worldDump()}}
 
 def processActionRequest(fn, requestData, w, agentName, todos):
     if todos['currentAction'] is not None:
@@ -516,5 +545,6 @@ commandFns = {
     "to-bake": [processActionRequest, toBakeStart, toBakeEnd],
     "to-sprinkle": [processActionRequest, toSprinkleStart, toSprinkleEnd],
     "to-cut": [processActionRequest, toCutStart, toCutEnd],
-    "to-place": [processActionRequest, toPlaceStart, toPlaceEnd]}
+    "to-place": [processActionRequest, toPlaceStart, toPlaceEnd],
+    "to-refrigerate": [processActionRequest, toRefrigerateStart, toRefrigerateEnd]}
 

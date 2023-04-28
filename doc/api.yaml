@@ -8,125 +8,6 @@ info:
   title: abe-sim
   description: The API for the AbeSim kitchen simulator
 paths:
-  '/abe-sim-command/to-cut':
-    post:
-      description: Asks abe sim to cut an object.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - object
-                - cuttingTool
-                - cutPattern
-                - kitchenStateIn
-                - setWorldState
-              example:
-                - object: Broccoli-1
-                - cuttingTool: CookingKnife-1
-                - cutPattern: dice
-                - kitchenStateIn: null
-                - setWorldState: false
-              properties:
-                object:
-                  type: string
-                  description: Name of the cuttable object to cut.
-                cuttingTool:
-                  type: string
-                  description: Name of the cutting tool, which must be an object that can cut.
-                cuttingPattern:
-                  type: string
-                  description: Name of the pattern to cut the object into.
-                kitchenStateIn:
-                  nullable: true
-                  $ref: '#/components/schemas/WorldState'
-                setWorldState:
-                  type: boolean
-                  description: Should not be true if kitchenStateIn is null.
-      responses:
-        '200':
-          description: Returns the name of the object that was cut.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - status
-                  - response
-                properties:
-                  status:
-                    type: string
-                    example: ok
-                    description: is 'ok' if everything went well
-                  response:
-                    example:
-                      cutObject: Broccoli-1
-                      kitchenStateOut: {}
-                    properties:
-                      cutObject:
-                        type: string
-                        nullable: true
-                      kitchenStateOut:
-                        $ref: '#/components/schemas/WorldState'
-  '/abe-sim-command/to-sprinkle':
-    post:
-      description: Asks abe sim to sprinkle the contents of a container (object) using the contents of another (toppingContainer).
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - object
-                - toppingContainer
-                - kitchenStateIn
-                - setWorldState
-              example:
-                object: Tray-1
-                toppingContainer: PowderedSugar-1
-                kitchenStateIn: null
-                setWorldState: false
-              properties:
-                object:
-                  type: string
-                  description: Name of the object containing the thing(s) to sprinkle on.
-                toppingContainer:
-                  type: string
-                  description: Name of the object containing the thing(s) to sprinkle with.
-                kitchenStateIn:
-                  nullable: true
-                  $ref: '#/components/schemas/WorldState'
-                setWorldState:
-                  type: boolean
-                  description: Should not be true if kitchenStateIn is null.
-      responses:
-        '200':
-          description: Returns the names of the container with sprinkled contents if successful or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - status
-                  - response
-                properties:
-                  status:
-                    type: string
-                    example: ok
-                    description: is 'ok' if everything went well
-                  response:
-                    example:
-                      sprinkledObject: Tray-1
-                      kitchenStateOut: {}
-                    properties:
-                      sprinkledObject:
-                        type: string
-                        nullable: true
-                      kitchenStateOut:
-                        $ref: '#/components/schemas/WorldState'
   '/abe-sim-command/to-bake':
     post:
       description: Asks abe sim to bake the contents of a container (thingToBake) using an appliance (oven) and then place the baked container on some destination (inputDestinationContainer).
@@ -193,9 +74,9 @@ paths:
                         nullable: true
                       kitchenStateOut:
                         $ref: '#/components/schemas/WorldState'
-  '/abe-sim-command/to-shape':
+  '/abe-sim-command/to-cut':
     post:
-      description: Asks abe sim to shape the contents of an item (containerWithDough) into clumps and place the results into a different container (destination).
+      description: Asks abe sim to cut an object.
       requestBody:
         required: true
         content:
@@ -203,22 +84,27 @@ paths:
             schema:
               type: object
               required:
-                - containerWithDough
-                - destination
+                - object
+                - cuttingTool
+                - cutPattern
                 - kitchenStateIn
                 - setWorldState
               example:
-                containerWithDough: MediumBowl-1
-                destination: Tray-1
-                kitchenStateIn: null
-                setWorldState: false
+                - object: Broccoli-1
+                - cuttingTool: CookingKnife-1
+                - cutPattern: dice
+                - kitchenStateIn: null
+                - setWorldState: false
               properties:
-                containerWithDough:
+                object:
                   type: string
-                  description: Name of the object containing the dough to shape into clumps.
-                destination:
+                  description: Name of the cuttable object to cut.
+                cuttingTool:
                   type: string
-                  description: Name of the object to put the resulting clumps into.
+                  description: Name of the cutting tool, which must be an object that can cut.
+                cuttingPattern:
+                  type: string
+                  description: Name of the pattern to cut the object into.
                 kitchenStateIn:
                   nullable: true
                   $ref: '#/components/schemas/WorldState'
@@ -227,7 +113,7 @@ paths:
                   description: Should not be true if kitchenStateIn is null.
       responses:
         '200':
-          description: Returns a list of names of the created clumps or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
+          description: Returns the name of the object that was cut.
           content:
             application/json:
               schema:
@@ -242,16 +128,155 @@ paths:
                     description: is 'ok' if everything went well
                   response:
                     example:
-                      shapedPortions: [Clump-1, Clump-2, Clump-3]
+                      cutObject: Broccoli-1
                       kitchenStateOut: {}
                     properties:
-                      shapedPortions:
-                        type: array
+                      cutObject:
+                        type: string
                         nullable: true
-                        items:
-                          type: string
                       kitchenStateOut:
                         $ref: '#/components/schemas/WorldState'
+  '/abe-sim-command/to-fetch':
+    post:
+      description: Asks abe sim to bring a particular object to the countertop -- i.e. to the large table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - object
+                - kitchenStateIn
+                - setWorldState
+              example:
+                object: MediumBowl-1
+                kitchenStateIn: null
+                setWorldState: false
+              properties:
+                object:
+                  type: string
+                  description: Name of the object to fetch.
+                kitchenStateIn:
+                  nullable: true
+                  $ref: '#/components/schemas/WorldState'
+                setWorldState:
+                  type: boolean
+                  description: Should not be true if kitchenStateIn is null.
+      responses:
+        '200':
+          description: Returns the fetched object name, or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - response
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                    description: is 'ok' if everything went well
+                  response:
+                    example:
+                      fetchedObject: MediumBowl-1
+                      kitchenStateOut: {}
+                    properties:
+                      fetchedObject:
+                        type: string
+                        nullable: true
+                      kitchenStateOut:
+                        $ref: '#/components/schemas/WorldState'
+  '/abe-sim-command/to-get-kitchen':
+    post:
+      description: Asks abe sim to bind the current world state to some variable name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - kitchen
+              properties:
+                kitchen:
+                  type: string
+              example:
+                kitchen: ?kitchen-1
+      responses:
+        '200':
+          description: Returns the world state, or an error message if some parameter is missing/not set properly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - response
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                    description: is 'ok' if everything went well
+                  response:
+                    example:
+                      ?kitchen-1: {}
+                    type: object
+                    description: The world state.
+                    additionalProperties:
+                      $ref: '#/components/schemas/WorldState'
+  '/abe-sim-command/to-get-location':
+    post:
+      description: Asks abe sim to bind a particular variable name to a location of a given type (oven, pantry, fridge etc) in the scene. Optionally, first sets the world state and then queries for the location.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - availableLocation
+                - type
+                - kitchenStateIn
+                - setWorldState
+              example:
+                availableLocation: ?oven-1
+                type: Oven
+                kitchenStateIn: null
+                setWorldState: false
+              properties:
+                availableLocation:
+                  type: string
+                  description: Name of the variable to bind the retrieved location to.
+                type:
+                  type: string
+                  description: Ontological type of location to look for, refers to SOMA_MUHAI types.
+                kitchenStateIn:
+                  nullable: true
+                  $ref: '#/components/schemas/WorldState'
+                setWorldState:
+                  type: boolean
+                  description: Should not be true if kitchenStateIn is null.
+      responses:
+        '200':
+          description: Returns an object name, or an error message if some parameter is missing/not set properly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - response
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                    description: is 'ok' if everything went well
+                  response:
+                    example:
+                      ?oven-1: ElectricOvenABC1
+                    type: object
   '/abe-sim-command/to-line':
     post:
       description: Asks abe sim to place an item (bakingPaper) such that it covers the bottom of the interior of a container (the bakingTray).
@@ -366,63 +391,6 @@ paths:
                         nullable: true
                       kitchenStateOut:
                         $ref: '#/components/schemas/WorldState'
-  '/abe-sim-command/to-transfer':
-    post:
-      description: Asks abe sim to bring an object (the targetContainer) to the counter, and then pour all the contents of containerWithIngredient into it.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - targetContainer
-                - containerWithIngredients
-                - kitchenStateIn
-                - setWorldState
-              example:
-                targetContainer: MediumBowl-1
-                containerWithIngredient: SugarBag-1
-                kitchenStateIn: null
-                setWorldState: false
-              properties:
-                targetContainer:
-                  type: string
-                  description: Name of the object to pour into.
-                containerWithIngredients:
-                  type: string
-                  description: Name of the object to pour from.
-                kitchenStateIn:
-                  nullable: true
-                  $ref: '#/components/schemas/WorldState'
-                setWorldState:
-                  type: boolean
-                  description: Should not be true if kitchenStateIn is null.
-      responses:
-        '200':
-          description: Returns the poured-into container name, or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - status
-                  - response
-                properties:
-                  status:
-                    type: string
-                    example: ok
-                    description: is 'ok' if everything went well
-                  response:
-                    example:
-                      containerWithAllIngredients: MediumBowl-1
-                      kitchenStateOut: {}
-                    properties:
-                      containerWithAllIngredients:
-                        type: string
-                        nullable: true
-                      kitchenStateOut:
-                        $ref: '#/components/schemas/WorldState'
   '/abe-sim-command/to-portion':
     post:
       description: Asks abe sim to bring an object (the targetContainer) to the counter, and then pour a portion of the contents of containerWithIngredient. The portion is described by a quantity, which is a number giving the portion's mass in grams.
@@ -485,9 +453,135 @@ paths:
                         nullable: true
                       kitchenStateOut:
                         $ref: '#/components/schemas/WorldState'
-  '/abe-sim-command/to-fetch':
+  '/abe-sim-command/to-refrigerate':
     post:
-      description: Asks abe sim to bring a particular object to the countertop -- i.e. to the large table.
+      description: Asks abe sim to place an item (containerWithIngredients) into a refrigerator [for some span of time].
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - containerWithIngredients
+                - refrigerator
+                - coolingQuantity
+                - coolingUnit
+                - kitchenStateIn
+                - setWorldState
+              example:
+                containerWithIngredients: MediumBowl-1
+                refrigerator: Fridge-1
+                coolingQuantity: 24
+                coolingUnit: hour
+                kitchenStateIn: null
+                setWorldState: false
+              properties:
+                containerWithIngredients:
+                  type: string
+                  description: Name of the container to place in the fridge.
+                refrigerator:
+                  type: string
+                  description: Name of the refrigerator to use.
+                coolingQuantity:
+                  type: string
+                  description: An amount of time to keep the container in the fridge.
+                coolingUnit:
+                  type: string
+                  description: Unit of measurement for the amount of time.
+                kitchenStateIn:
+                  nullable: true
+                  $ref: '#/components/schemas/WorldState'
+                setWorldState:
+                  type: boolean
+                  description: Should not be true if kitchenStateIn is null.
+      responses:
+        '200':
+          description: Returns the name of the refrigerated container.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - response
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                    description: is 'ok' if everything went well
+                  response:
+                    example:
+                      containerWithIngredientsAtTemperature: MediumBowl-1
+                      kitchenStateOut: {}
+                    properties:
+                      containerWithIngredientsAtTemperature:
+                        type: string
+                        description: Name of the container placed in the refrigerator.
+                      kitchenStateOut:
+                        $ref: '#/components/schemas/WorldState'
+  '/abe-sim-command/to-shape':
+    post:
+      description: Asks abe sim to shape the contents of an item (containerWithDough) into clumps and place the results into a different container (destination).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - containerWithDough
+                - destination
+                - kitchenStateIn
+                - setWorldState
+              example:
+                containerWithDough: MediumBowl-1
+                destination: Tray-1
+                kitchenStateIn: null
+                setWorldState: false
+              properties:
+                containerWithDough:
+                  type: string
+                  description: Name of the object containing the dough to shape into clumps.
+                destination:
+                  type: string
+                  description: Name of the object to put the resulting clumps into.
+                kitchenStateIn:
+                  nullable: true
+                  $ref: '#/components/schemas/WorldState'
+                setWorldState:
+                  type: boolean
+                  description: Should not be true if kitchenStateIn is null.
+      responses:
+        '200':
+          description: Returns a list of names of the created clumps or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - response
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                    description: is 'ok' if everything went well
+                  response:
+                    example:
+                      shapedPortions: [Clump-1, Clump-2, Clump-3]
+                      kitchenStateOut: {}
+                    properties:
+                      shapedPortions:
+                        type: array
+                        nullable: true
+                        items:
+                          type: string
+                      kitchenStateOut:
+                        $ref: '#/components/schemas/WorldState'
+  '/abe-sim-command/to-sprinkle':
+    post:
+      description: Asks abe sim to sprinkle the contents of a container (object) using the contents of another (toppingContainer).
       requestBody:
         required: true
         content:
@@ -496,16 +590,21 @@ paths:
               type: object
               required:
                 - object
+                - toppingContainer
                 - kitchenStateIn
                 - setWorldState
               example:
-                object: MediumBowl-1
+                object: Tray-1
+                toppingContainer: PowderedSugar-1
                 kitchenStateIn: null
                 setWorldState: false
               properties:
                 object:
                   type: string
-                  description: Name of the object to fetch.
+                  description: Name of the object containing the thing(s) to sprinkle on.
+                toppingContainer:
+                  type: string
+                  description: Name of the object containing the thing(s) to sprinkle with.
                 kitchenStateIn:
                   nullable: true
                   $ref: '#/components/schemas/WorldState'
@@ -514,7 +613,7 @@ paths:
                   description: Should not be true if kitchenStateIn is null.
       responses:
         '200':
-          description: Returns the fetched object name, or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
+          description: Returns the names of the container with sprinkled contents if successful or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
           content:
             application/json:
               schema:
@@ -529,17 +628,17 @@ paths:
                     description: is 'ok' if everything went well
                   response:
                     example:
-                      fetchedObject: MediumBowl-1
+                      sprinkledObject: Tray-1
                       kitchenStateOut: {}
                     properties:
-                      fetchedObject:
+                      sprinkledObject:
                         type: string
                         nullable: true
                       kitchenStateOut:
                         $ref: '#/components/schemas/WorldState'
-  '/abe-sim-command/to-get-location':
+  '/abe-sim-command/to-transfer':
     post:
-      description: Asks abe sim to bind a particular variable name to a location of a given type (oven, pantry, fridge etc) in the scene. Optionally, first sets the world state and then queries for the location.
+      description: Asks abe sim to bring an object (the targetContainer) to the counter, and then pour all the contents of containerWithIngredient into it.
       requestBody:
         required: true
         content:
@@ -547,22 +646,22 @@ paths:
             schema:
               type: object
               required:
-                - availableLocation
-                - type
+                - targetContainer
+                - containerWithIngredients
                 - kitchenStateIn
                 - setWorldState
               example:
-                availableLocation: ?oven-1
-                type: Oven
+                targetContainer: MediumBowl-1
+                containerWithIngredient: SugarBag-1
                 kitchenStateIn: null
                 setWorldState: false
               properties:
-                availableLocation:
+                targetContainer:
                   type: string
-                  description: Name of the variable to bind the retrieved location to.
-                type:
+                  description: Name of the object to pour into.
+                containerWithIngredients:
                   type: string
-                  description: Ontological type of location to look for, refers to SOMA_MUHAI types.
+                  description: Name of the object to pour from.
                 kitchenStateIn:
                   nullable: true
                   $ref: '#/components/schemas/WorldState'
@@ -571,7 +670,7 @@ paths:
                   description: Should not be true if kitchenStateIn is null.
       responses:
         '200':
-          description: Returns an object name, or an error message if some parameter is missing/not set properly.
+          description: Returns the poured-into container name, or an error message if some parameter is missing/not set properly. Note, this command will return a response only after the simulated action finishes.
           content:
             application/json:
               schema:
@@ -586,46 +685,14 @@ paths:
                     description: is 'ok' if everything went well
                   response:
                     example:
-                      ?oven-1: ElectricOvenABC1
-                    type: object
-  '/abe-sim-command/to-get-kitchen':
-    post:
-      description: Asks abe sim to bind the current world state to some variable name.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object 
-              required:
-                - kitchen
-              properties:
-                kitchen:
-                  type: string
-              example:
-                kitchen: ?kitchen-1
-      responses:
-        '200':
-          description: Returns the world state, or an error message if some parameter is missing/not set properly.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - status
-                  - response
-                properties:
-                  status:
-                    type: string
-                    example: ok
-                    description: is 'ok' if everything went well
-                  response:
-                    example:
-                      ?kitchen-1: {}
-                    type: object
-                    description: The world state.
-                    additionalProperties:
-                      $ref: '#/components/schemas/WorldState'
+                      containerWithAllIngredients: MediumBowl-1
+                      kitchenStateOut: {}
+                    properties:
+                      containerWithAllIngredients:
+                        type: string
+                        nullable: true
+                      kitchenStateOut:
+                        $ref: '#/components/schemas/WorldState'
 components:
   schemas:
     WorldState:
