@@ -13,7 +13,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="base.obj"/>
+        <mesh filename="base_collision.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>

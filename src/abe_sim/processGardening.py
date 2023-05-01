@@ -112,9 +112,9 @@ def getComponentUnderHandHeight(customDynamicsAPI, name, hand, handPosition):
     aabb = [list(aabb[0]), list(aabb[1])]
     for e in aabbs:
         for k, v in enumerate(aabb[0]):
-            if e[0][k] < v:
+            if e[0][k] < aabb[0][k]:
                 aabb[0][k] = e[0][k]
-            if e[1][k] > v:
+            if e[1][k] > aabb[1][k]:
                 aabb[1][k] = e[1][k]
     aabb[0][2] = -0.1
     overlaps = [x for x in customDynamicsAPI['checkOverlap'](aabb) if (x != name) and (x not in held) and customDynamicsAPI['getObjectProperty']((x,), ('fn', 'canContain'), False)]
@@ -692,7 +692,6 @@ def _getLoweringItemConditions(customDynamicsAPI, name, description, node):
     itemQ = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
     itemInHandP, itemInHandQ = customDynamicsAPI['objectPoseRelativeToObject'](handP, handQ, itemP, itemQ)
     facingYaw = getFacingYaw(customDynamicsAPI, container, customDynamicsAPI['getObjectProperty']((container,), 'position'))
-    fwdQ = stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,facingYaw)))
     _, fwdItemQ = customDynamicsAPI['objectPoseRelativeToWorld']((0,0,0), handQ, (0,0,0), itemInHandQ)
     component, placementP = getItemPlacement(customDynamicsAPI, name, item, container, node['numerics'].get('component'), node['numerics'].get('position'), allowedComponents=allowedComponents)
     node['numerics']['component'] = component

@@ -13,7 +13,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="stemCollider.obj"/>
+        <mesh filename="broccoliStem.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>
