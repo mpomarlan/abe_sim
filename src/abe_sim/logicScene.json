@@ -2,7 +2,9 @@
     ["Floor", "floor", [0,0,0], [0,0,0,1]],
     ["Abe", "abe", [0,0,0], [0,0,0,1]],
     ["KitchenCounter", "kitchenCounter", [0,-4.5,0.1], [0,0,0,1]],
-    ["CuttingBoard", "cuttingBoard", [0, -4.5, 1.2], [0,0,0,1]],
-    ["PeeledOnion", "brownOnion", [0.9, -4.5, 1.2], [0,0,0,1]],
-    ["PeeledRedOnion", "redOnion", [-0.9, -4.5, 1.2], [0,0,0,1]]
+    ["KitchenCabinet", "kitchenCabinet", [0,4.5,0.1], [0,0,1,0]],
+    ["CuttingBoard", "cuttingBoard", [-0.8, 4.5, 1.2], [0,0,0,1]],
+    ["PeeledOnion", "brownOnion", [-1.5, 4.5, 0.375], [0,0,0,1]],
+    ["PeeledRedOnion", "redOnion", [-0.9, 4.5, 0.375], [0,0,0,1]],
+    ["LargeBowl", "largeBowl", [-1.3, -4.5, 1.2], [0,0,0,1]]
 ]

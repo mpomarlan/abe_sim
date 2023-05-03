@@ -720,6 +720,7 @@ def _getLoweringItemConditions(customDynamicsAPI, name, description, node):
     waypoints = [wpp, wpxy, wpz]
     tolerances = [[tolp], [tolxy], [tolz]]
     entities = {'handP': handP, 'itemP': itemP, 'placementP': placementP, 'entryHeight': entryHeight}
+    print('Placement', customDynamicsAPI['getObjectProperty']((item,), 'at'), placementP, itemP)
     return [_makeGoal({'item': item, 'hand': hand}, 'pickedItem'),
             _makeGoal({'relatum': container}, 'near', numerics={'position': node['numerics'].get('position', None)}),
             _makeGoal({'container': container, 'component': node['numerics'].get('component', None), 'hand': freeHand}, 'opened'),
@@ -1853,9 +1854,8 @@ def getComponentHeight(customDynamicsAPI, container, component):
 #    print("XXX", list(av), sa)
 #    return stubbornTry(lambda: pybullet.multiplyTransforms([0,0,0], pybullet.getQuaternionFromAxisAngle(list(av), math.asin(sa)), [0,0,0], itemOrientation))[1]
 
-def toOriginAABB(aabb):
-    middle = [(x+y)/2 for x,y in zip(aabb[0], aabb[1])]
-    return [[x-y for x,y in zip(aabb[0],middle)], [x-y for x,y in zip(aabb[1],middle)]]
+def toOriginAABB(aabb, pos):
+    return [[x-y for x,y in zip(aabb[0],pos)], [x-y for x,y in zip(aabb[1],pos)]]
 
 def getLocations(customDynamicsAPI, container, component, aabb, canLine):
     aabbC = customDynamicsAPI['getObjectProperty']((container, component), 'aabb')
@@ -1902,7 +1902,7 @@ def getItemPlacement(customDynamicsAPI, name, item, container, component, target
                 badOverlaps.append(e)
         #print("BAD", component, targetPosition, aabbAdj, badOverlaps)
         return 0 == len(badOverlaps)
-    aabb = toOriginAABB(customDynamicsAPI['getObjectProperty']((item,), 'aabb'))
+    aabb = toOriginAABB(customDynamicsAPI['getObjectProperty']((item,), 'aabb'), customDynamicsAPI['getObjectProperty']((item,), 'position'))
     aabbLocal = customDynamicsAPI['getObjectProperty']((item,), 'localAABB')
     itemHeight = aabbLocal[1][2] - aabbLocal[0][2]
     # TODO: get hand radius from hand local aabb; hand grasp tolerance from ???
@@ -2149,8 +2149,8 @@ def updateGarden(name, customDynamicsAPI):
         if nodeIdx not in toKeep:
             garden.pop(nodeIdx)
 
-    #for k in sorted(garden.keys()):
-    #    print(k, garden[k]['description'], garden[k].get('children'), garden[k].get('previousStatus'))
+    for k in sorted(garden.keys()):
+        print(k, garden[k]['description'], garden[k].get('children'), garden[k].get('previousStatus'))
 
     # customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'processGardening', 'garden'), garden)
     for actuator, processes in bodyProcesses.items():
