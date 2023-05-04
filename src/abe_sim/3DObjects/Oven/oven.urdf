@@ -232,7 +232,7 @@
   <joint name="base_to_top_back" type="fixed">
     <parent link="base"/>
     <child link="top_back"/>
-    <origin rpy="0 0 0" xyz="0 -0.60. 1.35"/>
+    <origin rpy="0 0 0" xyz="0 -0.60 1.35"/>
   </joint>
   <joint name="base_to_top_base" type="fixed">
     <parent link="base"/>
