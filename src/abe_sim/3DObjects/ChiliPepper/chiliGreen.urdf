@@ -43,7 +43,7 @@
   <joint name="chi_to_stem" type="fixed">
     <parent link="chi"/>
     <child link="stem"/>
-    <origin rpy="0 0 0" xyz="0 0.408695 0"/>
+    <origin rpy="0 0 0" xyz="0 0.2043 0"/>
   </joint>
 </robot>
 
