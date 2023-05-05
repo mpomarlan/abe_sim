@@ -157,7 +157,10 @@ def toGetStateUpdates(requestData, w, agentName, todos):
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
-        updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': copy.deepcopy(data.get('joints', None))}
+        updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': w.getObjectProperty((name,), 'jointPositions')}
+        if name == agentName:
+            updates[name]['position'] = {'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
+            updates[name]['orientation'] = {'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
     return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "currentCommand": str(todos["command"]), "abeActions": bps}}
 
 def toGetLocation(requestData, w, agentName, todos):
