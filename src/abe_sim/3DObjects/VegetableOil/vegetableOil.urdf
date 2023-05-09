@@ -63,12 +63,12 @@
   <joint name="body_to_cap" type="fixed">
     <parent link="body"/>
     <child link="cap"/>
-    <origin rpy="0 0 0" xyz="0 0 0.546"/>
+    <origin rpy="0 0 0" xyz="0 0 0.273"/>
   </joint>
   <joint name="body_to_label" type="fixed">
     <parent link="body"/>
     <child link="label"/>
-    <origin rpy="0 0 0" xyz="0.069 0 0.225"/>
+    <origin rpy="0 0 0" xyz="0.0345 0 0.1225"/>
   </joint>
 </robot>
 
