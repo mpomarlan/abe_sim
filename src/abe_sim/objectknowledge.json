@@ -37,14 +37,14 @@
                             }
                      },
                      "shaping": {
-                           "actuators": [
+                            "actuators": [
                                    "hand_left",
                                    "hand_right"
-                           ],
-                           "radius": {
-                                   "hand_left":0.5, 
+                            ],
+                            "radius": {
+                                   "hand_left": 0.5,
                                    "hand_right": 0.5
-                           }
+                            }
                      },
                      "processGardening": {
                             "actuator": {
@@ -57,32 +57,43 @@
                                           "hand_right": {},
                                           "hand_left": {},
                                           "shapingIngredients": {
-                                                 "hand_left": "set", 
+                                                 "hand_left": "set",
                                                  "hand_right": "set"
                                           },
                                           "shapingOutcome": {
-                                                 "hand_left": "value", 
+                                                 "hand_left": "value",
                                                  "hand_right": "value"
                                           }
                                    },
                                    "variablePath": {
                                           "shapingIngredients": {
                                                  "hand_left": [
-                                                        "customStateVariables", 
-                                                        "shaping", 
-                                                        "ingredients", 
+                                                        "customStateVariables",
+                                                        "shaping",
+                                                        "ingredients",
                                                         "hand_left"
                                                  ],
                                                  "hand_right": [
-                                                        "customStateVariables", 
-                                                        "shaping", 
-                                                        "ingredients", 
+                                                        "customStateVariables",
+                                                        "shaping",
+                                                        "ingredients",
                                                         "hand_right"
                                                  ]
                                           },
-                                          "shapingOutcome": {"hand_left": ["customStateVariables", "shaping", "outcome", "hand_left"],
-                                                                             "hand_right": ["customStateVariables", "shaping", "outcome", "hand_right"]},
-
+                                          "shapingOutcome": {
+                                                 "hand_left": [
+                                                        "customStateVariables",
+                                                        "shaping",
+                                                        "outcome",
+                                                        "hand_left"
+                                                 ],
+                                                 "hand_right": [
+                                                        "customStateVariables",
+                                                        "shaping",
+                                                        "outcome",
+                                                        "hand_right"
+                                                 ]
+                                          },
                                           "grasping": {
                                                  "hand_left": [
                                                         "customStateVariables",
@@ -325,7 +336,8 @@
                             "sound": {}
                      },
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
               "customStateVariables": {}
@@ -381,7 +393,7 @@
                                    1,
                                    0,
                                    0
-                            ], 
+                            ],
                             "point": [
                                    0,
                                    0,
@@ -404,7 +416,7 @@
                                    1,
                                    0,
                                    0
-                            ], 
+                            ],
                             "point": [
                                    0,
                                    0,
@@ -559,7 +571,7 @@
                      "mixable": true,
                      "sticky": true,
                      "mixing": {
-                            "mixableRadius": 0.3, 
+                            "mixableRadius": 0.3,
                             "substanceRadius": 0.3
                      }
               },
@@ -769,7 +781,7 @@
               "filename": "3DObjects/Dough/dough_particle.urdf",
               "fn": {
                      "shapeable": "true",
-                     "transportable": true, 
+                     "transportable": true,
                      "sticky": true,
                      "mixMakeable": true
               },
@@ -833,10 +845,10 @@
                             }
                      },
                      "refrigeration": {
-                             "links": [
+                            "links": [
                                    "fridge_shelf_top",
                                    "fridge_shelf_bottom"
-                             ]
+                            ]
                      },
                      "containment": {
                             "facing": [
@@ -1013,14 +1025,15 @@
               "filename": "3DObjects/Oven/oven.urdf",
               "immobile": true,
               "fn": {
-                     "canContain": true, 
-                     "clopenable": true, 
+                     "canContain": true,
+                     "clopenable": true,
                      "canBake": true,
                      "containment": {
                             "facing": [
                                    0,
                                    -1,
-                                   0],
+                                   0
+                            ],
                             "height": {
                                    "shelf": 0.5
                             },
@@ -1029,16 +1042,16 @@
                             },
                             "links": [
                                    "shelf"
-                            ], 
+                            ],
                             "pouring": {
                                    "into": {
-                                          "link": "shelf", 
+                                          "link": "shelf",
                                           "point": [
                                                  0,
                                                  0,
                                                  0
                                           ]
-                                   }, 
+                                   },
                                    "outof": {
                                           "tipped": [
                                                  -0.707,
@@ -1049,7 +1062,7 @@
                                    }
                             },
                             "arrangement": {
-                                   "mode": "side-by-side", 
+                                   "mode": "side-by-side",
                                    "axis": [
                                           1,
                                           0,
@@ -1085,12 +1098,12 @@
                             "handle": {
                                    "door": "handle"
                             }
-                     }                     
+                     }
               },
               "customStateVariables": {
                      "clopening": {
                             "action": {
-                                   "freezer_door": null, 
+                                   "freezer_door": null,
                                    "fridge_door": null
                             }
                      }
@@ -1163,10 +1176,10 @@
                      "absorbable": true,
                      "consumable": true,
                      "transportable": true,
-                     "mixable": true, 
+                     "mixable": true,
                      "sticky": true,
                      "mixing": {
-                            "mixableRadius": 0.3, 
+                            "mixableRadius": 0.3,
                             "substanceRadius": 0.3
                      }
               },
@@ -1264,7 +1277,8 @@
                                    "handle": [
                                           0,
                                           1,
-                                          0]
+                                          0
+                                   ]
                             }
                      },
                      "mixing": {
@@ -1422,7 +1436,8 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
               "customStateVariables": {}
@@ -1724,7 +1739,8 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
               "customStateVariables": {}
@@ -1745,7 +1761,8 @@
               "fn": {
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
               "customStateVariables": {}
@@ -1870,7 +1887,8 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
               "customStateVariables": {}
@@ -2106,9 +2124,9 @@
                                                  0
                                           ],
                                           "point": [
-                                                 -0.327148,
-                                                 0.000214,
-                                                 0.360229
+                                                 -0.163574,
+                                                 0.000107,
+                                                 0.1801145
                                           ],
                                           "tipped": [
                                                  0,
@@ -2186,8 +2204,8 @@
                                           ],
                                           "point": [
                                                  0,
-                                                 0.09724,
-                                                 0.204705
+                                                 0.04862,
+                                                 0.02352
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -2331,7 +2349,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0.61
+                                                 0.305
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -2374,9 +2392,9 @@
                      }
               },
               "customStateVariables": {
-                  "cutting": {
-                      "hp": 5
-                  }
+                     "cutting": {
+                            "hp": 5
+                     }
               }
        },
        {
@@ -2496,7 +2514,7 @@
                      "canContain": true,
                      "graspable": true,
                      "grasping": {
-                         "handle": "handle"
+                            "handle": "handle"
                      },
                      "containment": {
                             "largeConcavity": true,
@@ -2659,7 +2677,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0.393121
+                                                 0.19656
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -2894,7 +2912,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0.61
+                                                 0.305
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -3051,7 +3069,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0.61
+                                                 0.305
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -3113,7 +3131,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0.61
+                                                 0.305
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -3167,7 +3185,8 @@
                      "cuttable": true,
                      "graspable": true,
                      "cutting": {
-                            "force": 0.3
+                            "force": 0.3,
+                            "radius": 0.2
                      }
               },
               "customStateVariables": {}
@@ -3217,7 +3236,6 @@
                      "cutting": {
                             "force": 0.3,
                             "radius": 0.2
-
                      }
               },
               "customStateVariables": {
@@ -3484,7 +3502,7 @@
                                           "point": [
                                                  0,
                                                  0,
-                                                 0.24845
+                                                 0.12425
                                           ],
                                           "tipped": [
                                                  -0.707,

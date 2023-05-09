@@ -43,7 +43,7 @@
   <joint name="leaf_to_cob" type="fixed">
     <parent link="leaf"/>
     <child link="cob"/>
-    <origin rpy="0 0 0" xyz="0 0.196 0"/>
+    <origin rpy="0 0 0" xyz="0 0.098 0"/>
   </joint>
 </robot>
 

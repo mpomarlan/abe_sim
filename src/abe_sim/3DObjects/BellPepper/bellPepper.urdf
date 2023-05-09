@@ -43,7 +43,7 @@
   <joint name="body_to_stem" type="fixed">
     <parent link="body"/>
     <child link="stem"/>
-    <origin rpy="0 0 0" xyz="0 0.168 0"/>
+    <origin rpy="0 0 0" xyz="0 0.084 0"/>
   </joint>
 </robot>
 

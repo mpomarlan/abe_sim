@@ -43,7 +43,7 @@
   <joint name="grip_to_spatula" type="fixed">
     <parent link="spatula"/>
     <child link="grip"/>
-    <origin rpy="0 0 0" xyz="-0.231617 0.008735 0"/>
+    <origin rpy="0 0 0" xyz="-0.1158 0.00437 0"/>
   </joint>
 </robot>
 

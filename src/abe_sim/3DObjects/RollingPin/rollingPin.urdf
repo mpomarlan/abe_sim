@@ -63,12 +63,12 @@
   <joint name="body_to_grip1" type="fixed">
     <parent link="body"/>
     <child link="grip1"/>
-    <origin rpy="0 0 0" xyz="-0.309577 0 0"/>
+    <origin rpy="0 0 0" xyz="-0.154788 0 0"/>
   </joint>
   <joint name="body_to_grip2" type="fixed">
     <parent link="body"/>
     <child link="grip2"/>
-    <origin rpy="0 0 0" xyz="0.309577 0 0"/>
+    <origin rpy="0 0 0" xyz="0.154788 0 0"/>
   </joint>
 </robot>
 

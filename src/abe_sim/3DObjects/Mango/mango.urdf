@@ -43,7 +43,7 @@
   <joint name="man_to_go" type="fixed">
     <parent link="man"/>
     <child link="go"/>
-    <origin rpy="0 0 0" xyz="0 -0.001 0"/>
+    <origin rpy="0 0 0" xyz="0 -0.0005 0"/>
   </joint>
 </robot>
 
