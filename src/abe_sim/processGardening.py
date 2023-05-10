@@ -1624,7 +1624,7 @@ conditionListers = {
     'parkingArm': _getParkingArmConditions, # hand |
     'armNearingItemHandle': _getArmNearingItemHandleConditions, # hand, item |
     'grasping': _getGraspingConditions, # hand, item |
-    'ungrasping': _emptyList,
+    'ungrasping': _emptyList, # hand, item |
     'pickingItem': _getPickingItemConditions, # hand, item |
     'placingItem': _getPlacingItemConditions, # container, hand, item[, allowedComponents] | 
     'loweringItem': _getLoweringItemConditions, # container, hand, item[, allowedComponents] |

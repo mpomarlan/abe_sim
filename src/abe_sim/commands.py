@@ -152,16 +152,54 @@ def toSetObjectPose(requestData, w, agentName, todos):
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
     
 def toGetStateUpdates(requestData, w, agentName, todos):
+    def _active(p, garden):
+        for e in p['children']:
+            if (not garden[e]['previousStatus']) and ('constraintFollowed' != garden[e]['description']['goal']):
+                return False
+        return True
+    def _strP(p):
+        description = p['description']
+        if 'nearing' == description['process']:
+            return 'NavigateTo(%s)' % (description['relatum'])
+        elif 'parkingArm' == description['process']:
+            return 'ParkingArms(%s)' % (description['hand'])
+        elif 'grasping' == description['process']:
+            return 'SwitchingOnGrasping(%s, %s)' % (description['item'], description['hand'])
+        elif 'ungrasping' == description['process']:
+            return 'SwitchingOffGrasping(%s, %s)' % (description['item'], description['hand'])
+        elif 'armNearingItemHandle' == description['process']:
+            return 'PickingItem(%s, %s)' % (description['item'], description['hand'])
+        elif 'loweringItem' == description['process']:
+            return 'PlacingItem(%s, %s, %s)' % (description['item'], description['container'], description['hand'])
+        elif 'opening' == description['process']:
+            return 'PullingOpen(%s)' % (description['hand'])
+        elif 'closing' == description['process']:
+            return 'PushingClosed(%s)' % (description['hand'])
+        elif 'transferringContents' == description['process']:
+            return 'Pouring(%s, %s, %s)' % (description['item'], description['container'], description['hand'])
+        elif 'mixing' == description['process']:
+            return 'MixingStuff(%s, %s, %s)' % (description['container'], description['tool'], description['hand'])
+        elif 'lining' == description['process']:
+            return 'LiningContainer(%s, %s, %s)' % (description['item'], description['lining'], description['hand'])
+        elif 'shaping' == description['process']:
+            return 'ShapingStuffInto(%s, %s, %s, %s)' % (description['item'], description['shapedType'], description['destination'], description['hand'])
+        elif 'sprinkling' == description['process']:
+            return 'SprinklingContents(%s, %s, %s)' % (description['item'], description['shaker'], description['hand'])
+        elif 'cuttingItem' == description['process']:
+            return 'Chopping(%s, %s, %s)' % (description['item'], description['tool'], description['hand'])
+        return ''
+    trackedProcs = {'nearing', 'parkingArm', 'grasping', 'ungrasping', 'armNearingItemHandle', 'loweringItem', 'opening', 'closing', 'transferringContents', 'mixing', 'lining', 'shaping', 'sprinkling', 'cuttingItem'}
     garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
-    bps = [copy.deepcopy(x) for x in garden.values() if 'target' in x]
+    acts = [_strP(x) for x in garden.values() if ('process' in x['description']) and (x['description']['process'] in trackedProcs) and _active(x, garden)]
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
         updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': w.getObjectProperty((name,), 'jointPositions')}
         if name == agentName:
-            updates[name]['position'] = {'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
-            updates[name]['orientation'] = {'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
-    return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "currentCommand": str(todos["command"]), "abeActions": bps}}
+            updates[name]['position'] = {'base': [updates[name]['joints']['world_to_base_x'], updates[name]['joints']['base_x_to_base_y'], 0], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
+            halfYaw = 0.5*updates[name]['joints']['base_y_to_base_yaw']
+            updates[name]['orientation'] = {'base': [0,0, math.sin(halfYaw), math.cos(halfYaw)], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
+    return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "currentCommand": str(todos["command"]), "abeActions": acts}}
 
 def toGetLocation(requestData, w, agentName, todos):
     def _freeOfContent(o):
