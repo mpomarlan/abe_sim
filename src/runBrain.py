@@ -26,6 +26,7 @@ from abe_sim.shaping import updateShaping, updateShaped
 from abe_sim.stickiness import updateStickiness
 from abe_sim.mixing import updateMixing
 from abe_sim.clopening import updateClopening
+from abe_sim.temperature import updateTemperatureGetter
 
 from abe_sim.customDynamics import buildSpecs
 from abe_sim.commands import commandFns
@@ -108,7 +109,7 @@ def runBrain():
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation]')
     arguments = parser.parse_args()
-    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening]]
+    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening]]
 
     objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
     objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}

@@ -116,7 +116,7 @@ import copy
 dirPath = os.path.dirname(os.path.realpath(__file__))
 
 class World():
-    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None):
+    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, backgroundTemperature=None, heatExchangeCoefficient=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None):
         self._name = name
         self._limbo = []
         self._ylem = {}
@@ -147,6 +147,12 @@ class World():
             gravity = (0, 0, 0)
         self._down = (0,0,-1)
         self._up = (0,0,1)
+        if backgroundTemperature is None:
+            backgroundTemperature = 20.0
+        if heatExchangeCoefficient is None:
+            heatExchangeCoefficient = 0.05
+        self._backgroundTemperature = backgroundTemperature
+        self._heatExchangeCoefficient = heatExchangeCoefficient
         self.setGravity(gravity)
         self._newObjectCounter = 0
         self._processKnowledge = {}
@@ -175,6 +181,7 @@ class World():
           'getGravity': (lambda : self.getGravity()), 
           'getDown': (lambda : self.getDown()), 
           'getUp': (lambda : self.getUp()), 
+          'getBackgroundTemperature': (lambda : self.getBackgroundTemperature()), 
           'getObjectTypeKnowledge': (lambda x : self.getObjectTypeKnowledge(x)),
           'getProcessOutcome': (lambda x : self.getProcessOutcome(x)), 
           'getProcessResource': (lambda x: self.getProcessResource(x))}
@@ -200,6 +207,8 @@ class World():
         return self._down
     def getUp(self):
         return self._up
+    def getBackgroundTemperature(self):
+        return self._backgroundTemperature, self._heatExchangeCoefficient
     def setGravity(self, gravity):
         self._gravity = gravity
         stubbornTry(lambda : pybullet.setGravity(self._gravity[0], self._gravity[1], self._gravity[2], self._pybulletConnection))
