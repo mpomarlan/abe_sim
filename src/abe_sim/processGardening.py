@@ -63,7 +63,7 @@ def quaternionCloseness(a, b, t):
     ay = stubbornTry(lambda : pybullet.rotateVector(a, [0,1,0]))
     bx = stubbornTry(lambda : pybullet.rotateVector(b, [1,0,0]))
     by = stubbornTry(lambda : pybullet.rotateVector(b, [0,1,0]))
-    return bool((t < numpy.dot(ax, bx)) or (t < numpy.dot(ay, by)))
+    return bool((t < numpy.dot(ax, bx)) and (t < numpy.dot(ay, by)))
 
 def getBaseEFPosition(customDynamicsAPI, name):
     baseLink = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'mobileBaseLink'))
@@ -97,9 +97,6 @@ def _makeGoal(description, goal, numerics=None):
     descriptionC['goal'] = goal
     return {'type': 'G', 'description': descriptionC, 'children': [], 'previousStatus': None, 'numerics': copy.deepcopy(numerics)}
 
-def getUprightOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis):
-    return customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'upright'), [0,0,0,1])
-    
 def getTippedOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis):
     return customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'tipped'), [-0.707,0,0,0.707])
     
@@ -300,33 +297,6 @@ def _checkTransferredContents(customDynamicsAPI, name, description, node):
     container = description['container']
     amount = description['amount']
     return checkTransferred(customDynamicsAPI, name, item, pouredType, amount, container)
-
-def _checkTippedItemAboveLocation(customDynamicsAPI, name, description, node):
-    item = description['item']
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    previous = node.get('previousStatus', False)
-    ornTh = 0.99
-    if previous:
-        ornTh = 0.95
-    return quaternionCloseness(itemOrientation, node['numerics'].get('tippedOrientation', None), ornTh)
-
-def _checkPreparedItemForTipping(customDynamicsAPI, name, description, node):
-    item = description['item']
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    previous = node.get('previousStatus', False)
-    if not previous:
-        previous = quaternionCloseness(itemOrientation, node['numerics'].get('entryOrientation', None), 0.99)
-    return previous    
-
-def _checkLiftedItemToPouringEntry(customDynamicsAPI, name, description, node):
-    hand = description['hand']
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    positionHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    previous = node.get('previousStatus', False)
-    dTh = 0.01
-    if previous:
-        dTh = 0.03
-    return dTh > abs(node['numerics'].get('entryHeight') - positionHand[2])
 
 def _checkConstraintFollowed(customDynamicsAPI, name, description, node): # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     def _equalp(a, b, t):
@@ -743,53 +713,83 @@ def _getTransferringAndUprightingConditions(customDynamicsAPI, name, description
     hand = description['hand']
     container = description['container']
     amount = description['amount']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    return [_makeGoal({'amount': amount, 'container': container, 'hand': hand, 'item': item, 'pouredType': pouredType}, 'transferredContents',
-                      numerics={'positionInHand': positionInHand, 'orientationInHand': orientationInHand})]
+    handLink = getHandLink(customDynamicsAPI, name, hand)
+    handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
+    handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
+    entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': container}, {})
+    _, handParkedQ, _ = getParkedPose(customDynamicsAPI, name, hand)
+    #For uprighting:
+    #  we want U: hand at parked orientation
+    #  We can achieve U by an uprighting process that maintains z: handZ at entryHeight
+    conU = ['equalq', 'handQ', 'handParkedQ']
+    tolU = [0.99, 0.95]
+    constraintConjunctions = [[conU]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpU = [[handP[0], handP[1], entryHeight], handParkedQ, None, None, None, None, None]
+    waypoints = [wpU]
+    tolerances = [[tolU]]
+    entities = {'handP': handP, 'handQ': handQ, 'handParkedQ': handParkedQ, 'entryHeight': entryHeight}
+    return [_makeGoal({'amount': amount, 'container': container, 'hand': hand, 'item': item, 'pouredType': pouredType}, 'transferredContents'),
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+                      numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
 def _getTransferringContentsConditions(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
     container = description['container']
+    down = customDynamicsAPI['getDown']()
     handLink = getHandLink(customDynamicsAPI, name, hand)
-    orientationHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    containerPosition = customDynamicsAPI['getObjectProperty']((container,), 'position')
-    containerOrientation = customDynamicsAPI['getObjectProperty']((container,), 'orientation')
-    pouringAxis = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'axis'), [1,0,0])
-    position = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'pouring', 'into', 'point'))
-    position, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerPosition, containerOrientation, position, [0,0,0,1])
-    tippedOrientation = getTippedOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis)
-    entryOrientation = getUprightOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis)
+    _, handParkedQ, _ = getParkedPose(customDynamicsAPI, name, hand)
+    handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
+    handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
+    itemP = customDynamicsAPI['getObjectProperty']((item,), 'position')
+    itemQ = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
     entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': container}, {})
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    position = [position[0], position[1], getItemEntryHeight(entryHeight, positionInHand, orientationHand)]
+    containerP = customDynamicsAPI['getObjectProperty']((container,), 'position')
+    containerQ = customDynamicsAPI['getObjectProperty']((container,), 'orientation')
+    containerEntryInContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'pouring', 'into', 'point'))
+    containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerP, containerQ, containerEntryInContainer, [0,0,0,1])
+    pourPointInItem = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'point'))
+    pourAxisInItem = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'axis'))
+    pourPoint, _ = customDynamicsAPI['objectPoseRelativeToWorld'](itemP, itemQ, pourPointInItem, [0,0,0,1])
+    pourPointInHand, itemQInHand = customDynamicsAPI['objectPoseRelativeToObject'](handP, handQ, pourPoint, itemQ)
+    pouringAxisInItem = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'axis'), [1,0,0])
+    pourAxis = stubbornTry(lambda : pybullet.rotateVector(itemQ, pourAxisInItem))
+    pourAxisInHand = stubbornTry(lambda : pybullet.rotateVector(itemQInHand, pourAxisInItem))
+    entryHeightPourPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, pourPointInHand))[2]
+    if item in getHeld(customDynamicsAPI, name, hand):
+        fwdInHand = [1,0,0]
+        facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
+        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        #axis = numpy.cross(mixAxisInHand, down)
+        #angle = math.acos(numpy.dot(mixAxisInHand, down))
+        tippedQ = quatFromVecPairs((fwdInHand, fwd), (pourAxisInHand, down))
+    else:
+        tippedQ = [0,0,0,1]
+    #For tipping:
+    #  we want XYZ/T: pourpointXY at container entryXY, handZ at entryHeight, hand orientation at parked orientation
+    #  we can achieve XYZ/T by a tipping process that maintains XYZ: pourpointXY at container entryXY, handZ at entryHeight
+    #  we can achieve XY by a bringing process that maintains Z: handZ at entryHeight
+    # we can achieve Z by a lifting process
+    conT = ['equalq', 'itemQ', 'tippedQ']
+    tolT = [0.99, 0.95]
+    conXY = ['equalxy', 'pourPoint', 'containerEntry']
+    tolXY = [0.01, 0.05]
+    conZ = ['equalz', 'handP', 'entryHeight']
+    tolZ = [0.01, 0.05]
+    constraintConjunctions = [[conT, conXY, conZ], [conXY, conZ], [conZ]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpXYZT = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedQ, None, pourPointInHand, None, None, None]
+    wpXYZ = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], handParkedQ, None, pourPointInHand, None, None, None]
+    wpZ = [[handP[0], handP[1], entryHeight], handParkedQ, None, None, None, None, None]
+    waypoints = [wpXYZT, wpXYZ, wpZ]
+    tolerances = [[tolT, tolXY, tolZ], [tolXY, tolZ], [tolZ]]
+    entities = {'handP': handP, 'itemQ': itemQ, 'tippedQ': tippedQ, 'entryHeight': entryHeight, 'pourPoint': pourPoint, 'containerEntry': containerEntry}
     return [_makeGoal({'hand': hand, 'item': item}, 'pickedItem'),
             _makeGoal({'relatum': container}, 'near'),
-            _makeGoal({'hand': hand, 'item': item, 'relatum': container}, 'tippedItemAboveLocation',
-                      numerics={'position': position, 'tippedOrientation': tippedOrientation, 'entryOrientation': entryOrientation, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand, 'entryHeight': entryHeight})]
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+                      numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
-def _getTippingItemAboveLocationConditions(customDynamicsAPI, name, description, node):
-    relatum = description['relatum']
-    item = description['item']
-    hand = description['hand']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    position = node['numerics'].get('position', None)
-    entryOrientation = node['numerics'].get('entryOrientation', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    return [_makeGoal({'hand': hand, 'item': item, 'relatum': relatum}, 'preparedItemForTipping',
-                      numerics={'position': position, 'entryOrientation': entryOrientation, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand, 'entryHeight': entryHeight})]
-    
-def _getPreparingItemForTippingConditions(customDynamicsAPI, name, description, node):
-    relatum = description['relatum']
-    item = description['item']
-    hand = description['hand']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryOrientation = node['numerics'].get('entryOrientation', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    return [_makeGoal({'hand': hand, 'item': item, 'relatum': relatum}, 'liftedItemToPouringEntry',
-                      numerics={'entryOrientation': entryOrientation, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand, 'entryHeight': entryHeight})]
-                      
 def _getConstraintFollowingConditions(customDynamicsAPI, name, description, node):
     constraintConjunctions = description['constraintConjunctions']
     hand = description['hand']
@@ -1326,63 +1326,13 @@ def _suggestTransferredAndStored(customDynamicsAPI, name, description, node):
 def _suggestTransferredAndUprighted(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
-    itemPosition = customDynamicsAPI['getObjectProperty']((item,), 'position')
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    pouringPoint = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'point'))
-    positionInHand, orientationInHand = getObjectInHand(customDynamicsAPI, name, hand, item, itemPoint=pouringPoint)
-    targetPosition, _ = customDynamicsAPI['objectPoseRelativeToWorld'](itemPosition, itemOrientation, pouringPoint, [0,0,0,1])
-    targetOrientation = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'upright'), [0,0,0,1])
-    return [_makeProcess({'amount': description['amount'], 'container': description['container'], 'hand': hand, 'item': item, 'pouredType': description['pouredType']}, 'transferringAndUprighting',
-                         numerics={'positionInHand': positionInHand, 'orientationInHand': orientationInHand},
-                         target={hand: {'target': [targetPosition, targetOrientation], 'positionInLink': positionInHand, 'orientationInLink': orientationInHand, 'clopeningAction': None}})]
+    return [_makeProcess({'amount': description['amount'], 'container': description['container'], 'hand': hand, 'item': item, 'pouredType': description['pouredType']}, 'transferringAndUprighting')]
                          
 def _suggestTransferredContents(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
     container = description['container']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    return [_makeProcess({'container': container, 'hand': hand, 'item': item}, 'transferringContents',
-                         numerics={'positionInHand': positionInHand, 'orientationInHand': orientationInHand})]
-
-def _suggestTippedItemAboveLocation(customDynamicsAPI, name, description, node):
-    item = description['item']
-    hand = description['hand']
-    relatum = description['relatum']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    position = node['numerics'].get('position', None)
-    orientation = node['numerics'].get('tippedOrientation', None)
-    return [_makeProcess({'hand': hand, 'item': item, 'relatum': relatum}, 'tippingItemAboveLocation',
-                         numerics={'position': position, 'entryOrientation': node['numerics'].get('entryOrientation'), 'entryHeight': entryHeight, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand},
-                         target={hand: {'target': [position, orientation], 'positionInLink': positionInHand, 'orientationInLink': orientationInHand, 'clopeningAction': None}})]
-
-def _suggestPreparedItemForTipping(customDynamicsAPI, name, description, node): # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
-    item = description['item']
-    hand = description['hand']
-    relatum = description['relatum']
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    positionHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    orientationHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    position, _ = customDynamicsAPI['objectPoseRelativeToWorld'](positionHand, orientationHand, positionInHand, orientationInHand)
-    position = [position[0], position[1], getItemEntryHeight(entryHeight, positionInHand, orientationHand)]
-    orientation = node['numerics'].get('entryOrientation', None)
-    return [_makeProcess({'hand': hand, 'item': item, 'relatum': relatum}, 'preparingItemForTipping',
-                         numerics={'position': position, 'entryOrientation': node['numerics'].get('entryOrientation'), 'entryHeight': entryHeight, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand},
-                         target={hand: {'target': [position, orientation], 'positionInLink': None, 'orientationInLink': None, 'clopeningAction': None}})]
-
-def _suggestLiftedItemToPouringEntry(customDynamicsAPI, name, description, node): # hand, item, relatum | entryOrientation, positionInHand, orientationInHand, entryHeight
-    item = description['item']
-    hand = description['hand']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    orientation = node['numerics'].get('entryOrientation', None)
-    parkedP, _, _ = getParkedPose(customDynamicsAPI, name, hand)
-    position = [parkedP[0], parkedP[1], entryHeight]
-    return [_makeProcess({'hand': hand, 'item': item}, 'liftingItemToPouringEntry',
-                         numerics={},
-                         target={hand: {'target': [position, orientation], 'positionInLink': None, 'orientationInLink': orientationInHand, 'clopeningAction': None}})]
+    return [_makeProcess({'container': container, 'hand': hand, 'item': item}, 'transferringContents')]
 
 def _suggestConstraintFollowed(customDynamicsAPI, name, description, node): # constraintConjunctions, hand, isTop | waypoints, tolerances
     waypoints = node['numerics']['waypoints']
@@ -1561,9 +1511,6 @@ goalCheckers = {
     'transferredAndStored': _checkTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _checkTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _checkTransferredContents, # amount, container, hand, item, pouredType |
-    'tippedItemAboveLocation': _checkTippedItemAboveLocation, # hand, item, relatum | position, tippedOrientation, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'preparedItemForTipping': _checkPreparedItemForTipping, # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'liftedItemToPouringEntry': _checkLiftedItemToPouringEntry, # hand, item, relatum | entryOrientation, positionInHand, orientationInHand, entryHeight
     'constraintFollowed': _checkConstraintFollowed, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixedAndStored': _checkMixedAndStored, # container, hand, mixedType, storage, tool, toolLink |
     'mixedAndUprighted': _checkMixedAndUprighted, # container, hand, mixedType, storage, tool, toolLink |
@@ -1596,9 +1543,6 @@ processSuggesters = {
     'transferredAndStored': _suggestTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _suggestTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _suggestTransferredContents, # amount, container, hand, item, pouredType |
-    'tippedItemAboveLocation': _suggestTippedItemAboveLocation, # hand, item, relatum | position, tippedOrientation, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'preparedItemForTipping': _suggestPreparedItemForTipping, # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'liftedItemToPouringEntry': _suggestLiftedItemToPouringEntry, # hand, item, relatum | entryOrientation, positionInHand, orientationInHand, entryHeight
     'constraintFollowed': _suggestConstraintFollowed, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixedAndStored': _suggestMixedAndStored, # container, hand, mixedType, storage, tool, toolLink |
     'mixedAndUprighted': _suggestMixedAndUprighted, # container, hand, mixedType, tool, toolLink |
@@ -1631,8 +1575,6 @@ conditionListers = {
     'transferringAndStoring': _getTransferringAndStoringConditions, # amount, container, hand, item, pouredType, storage |
     'transferringAndUprighting': _getTransferringAndUprightingConditions, # amount, container, hand, item, pouredType, storage | positionInHand, orientationInHand
     'transferringContents': _getTransferringContentsConditions, # container, hand, item | positionInHand, orientationInHand
-    'tippingItemAboveLocation': _getTippingItemAboveLocationConditions, # hand, item, relatum | position, tippedOrientation, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'preparingItemForTipping': _getPreparingItemForTippingConditions, # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
     'constraintFollowing': _getConstraintFollowingConditions, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixingAndStoring': _getMixingAndStoringConditions, # container, hand, mixedType, storage, tool, toolLink |
     'mixingAndUprighting': _getMixingAndUprightingConditions, # container, hand, mixedType, tool, toolLink |
@@ -1840,19 +1782,6 @@ def getComponentHeight(customDynamicsAPI, container, component):
             if container is None:
                 break
     return retq
-
-#def getTippedOrientation(itemOrientation, pouringAxis):
-#    v = stubbornTry(lambda : pybullet.rotateVector(itemOrientation, pouringAxis))
-#    dv = numpy.dot(v, [0,0,-1])
-#    if dv > 0.95:
-#        return itemOrientation
-#    if dv < -0.95:
-#        return stubbornTry(lambda: pybullet.multiplyTransforms([0,0,0], [1,0,0,0], [0,0,0], itemOrientation))[1]
-#    av = numpy.cross(v, [0,0,-1])
-#    sa = numpy.linalg.norm(av)
-#    av = av/sa
-#    print("XXX", list(av), sa)
-#    return stubbornTry(lambda: pybullet.multiplyTransforms([0,0,0], pybullet.getQuaternionFromAxisAngle(list(av), math.asin(sa)), [0,0,0], itemOrientation))[1]
 
 def toOriginAABB(aabb, pos):
     return [[x-y for x,y in zip(aabb[0],pos)], [x-y for x,y in zip(aabb[1],pos)]]

@@ -33,8 +33,10 @@ def updateTransporting(name, customDynamicsAPI):
             relativeStillness = False
     if relativeStillness:
         atOrientation = customDynamicsAPI['getObjectProperty']((at,), 'orientation')
-        tippedOrientation = customDynamicsAPI['getObjectProperty']((at,), ('fn', 'containment', 'pouring', 'outof', 'tipped'))
-        tipped = ornCloseness(atOrientation, tippedOrientation, 0.95)
+        pourAxisInAt = customDynamicsAPI['getObjectProperty']((at,), ('fn', 'containment', 'pouring', 'outof', 'axis'), (0,1,0))
+        pourAxis = stubbornTry(lambda : pybullet.rotateVector(atOrientation, pourAxisInAt))
+        down = customDynamicsAPI['getDown']()
+        tipped = bool(0.9 < numpy.dot(down, pourAxis))
         # is this itself grasped? : if so, remove
         if not tipped:
             aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')

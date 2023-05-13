@@ -11,6 +11,6 @@ def updateTemperatureGetter(name, customDynamicsAPI):
         atTemperature = customDynamicsAPI['getObjectProperty']((at,), ('customStateVariables', 'temperature'))
         if atTemperature is not None:
             targetTemperature = atTemperature
-    newTemperature += heatExchangeCoefficient*(targetTemperature - ownTemperature)
+    newTemperature = ownTemperature + heatExchangeCoefficient*(targetTemperature - ownTemperature)
     customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'temperature'), newTemperature)
 

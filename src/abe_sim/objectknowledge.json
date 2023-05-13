@@ -523,6 +523,16 @@
                      "graspable": true,
                      "pourable": true,
                      "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -995,6 +1005,16 @@
                      "canContain": true,
                      "graspable": true,
                      "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "mediumbowl",
+                            "axis": {
+                                   "mediumbowl": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "containment": {
                             "height": {
                                    "mediumbowl": 0.5
@@ -1136,6 +1156,16 @@
                      "graspable": true,
                      "pourable": true,
                      "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -1587,6 +1617,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -1631,6 +1671,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -1675,6 +1725,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -1718,6 +1778,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -2634,7 +2704,14 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "grasping": {
-                            "handle": "handle"
+                            "handle": "handle",
+                            "axis": {
+                                   "handle": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
                      },
                      "containment": {
                             "largeConcavity": true,
@@ -3518,6 +3595,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
@@ -3582,6 +3669,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "bag"
