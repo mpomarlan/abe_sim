@@ -90,9 +90,6 @@ def _makeGoal(description, goal, numerics=None):
     descriptionC['goal'] = goal
     return {'type': 'G', 'description': descriptionC, 'children': [], 'previousStatus': None, 'numerics': copy.deepcopy(numerics)}
 
-def getTippedOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis):
-    return customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'tipped'), [-0.707,0,0,0.707])
-    
 def getComponentUnderHandHeight(customDynamicsAPI, name, hand, handPosition, defaultHeight=1.0):
     handLink = getHandLink(customDynamicsAPI, name, hand)
     held = getHeld(customDynamicsAPI, name, hand)
@@ -1058,13 +1055,23 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
     upright = bool(uTh > abs(numpy.dot(pourAxis, down)))
     node['upright'] = upright
     pourPointInHand, shakerOrientationInHand = customDynamicsAPI['objectPoseRelativeToObject'](handP, handQ, pourPoint, shakerQ)
+    pourAxisInHand = stubbornTry(lambda : pybullet.rotateVector(shakerOrientationInHand, pourAxisInShaker))
     entryHeightPourPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, pourPointInHand))[2]
-    tippedOrientation = getTippedOrientation(customDynamicsAPI, shaker, shakerQ, pourAxis)
+    if shaker in getHeld(customDynamicsAPI, name, hand):
+        fwdInHand = [1,0,0]
+        facingYaw = getFacingYaw(customDynamicsAPI, item, itemP)
+        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        #axis = numpy.cross(mixAxisInHand, down)
+        #angle = math.acos(numpy.dot(mixAxisInHand, down))
+        tippedQ = quatFromVecPairs((fwdInHand, fwd), (pourAxisInHand, down))
+    else:
+        tippedQ = [0,0,0,1]
+
     _, shakerParkedQ = customDynamicsAPI['objectPoseRelativeToWorld']([0,0,0], handParkedQ, [0,0,0], shakerOrientationInHand)
     handHoverP = handParkedP
     handHoverQ = handParkedQ
     if pouring:
-        handHoverP, handHoverQ = customDynamicsAPI['handPoseToBringObjectToPose'](pourPointInHand, shakerOrientationInHand, [containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedOrientation)
+        handHoverP, handHoverQ = customDynamicsAPI['handPoseToBringObjectToPose'](pourPointInHand, shakerOrientationInHand, [containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedQ)
     if not allSprinkled:
         #For sprinkling:
         #  we want xy/ad/ez: pourpointXY at containerEntryXY and pouraxis down and handZ at entryHeight
@@ -1081,7 +1088,7 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
         tolpo = [0.99, 0.9]
         constraintConjunctions = [[conad, conxy, conez], [conxy, conez], [conez]]
         #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
-        wpadxyez = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedOrientation, None, pourPointInHand, shakerOrientationInHand, None, None]
+        wpadxyez = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedQ, None, pourPointInHand, shakerOrientationInHand, None, None]
         wpxyez = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], handHoverQ, None, pourPointInHand, None, None, None]
         wpez = [[handHoverP[0], handHoverP[1], entryHeight], handHoverQ, None, None, None, None, None]
         waypoints = [wpadxyez, wpxyez, wpez]
@@ -1096,8 +1103,8 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
         #  we want po/xy/ez: handOrientation at parkedOrientation and handXY at container entryXY and handZ at entryHeight
         #  we can achieve po/xy/ez by an uprighting process
         ### TODO: a more robust uprighting: take shakerOrientationInHand into account rather than assume hand pitch 0 will do it
-        roll, _, yaw = stubbornTry(lambda : pybullet.getEulerFromQuaternion(handQ))
-        handUprightQ = stubbornTry(lambda : pybullet.getQuaternionFromEuler((roll, 0, yaw)))
+        #roll, _, yaw = stubbornTry(lambda : pybullet.getEulerFromQuaternion(handQ))
+        handUprightQ = handParkedQ#stubbornTry(lambda : pybullet.getQuaternionFromEuler((roll, 0, yaw)))
         conpo = ['equalq', 'handQ', 'handUprightQ']
         ##conpo = ['equalq', 'handQ', 'handParkedQ']
         tolpo = [0.99, 0.9]
@@ -1771,8 +1778,18 @@ def getItemPlacement(customDynamicsAPI, name, item, container, component, target
         components = list(set(components).intersection(allowedComponents))
     if 'heap' == arrangement:
         component = components[0]
+        aabbComponent = customDynamicsAPI['getObjectProperty']((container, component), 'aabb')
+        aabbOverComponent = [list(aabbComponent[0]), list(aabbComponent[1])]
+        aabbOverComponent[0][2] = aabbComponent[1][2]
+        aabbOverComponent[1][2] = aabbComponent[1][2] + 0.02
+        overlaps = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbOverComponent)])
+        for e in overlaps:
+            if (e not in [name, item, container]):
+                atContainer, atComponent = customDynamicsAPI['getObjectProperty']((e,), 'at')
+                if (container == atContainer) and (component == atComponent):
+                    return None, None
         targetPosition = list(customDynamicsAPI['getObjectProperty']((container, component), 'position'))
-        targetPosition[2] = customDynamicsAPI['getObjectProperty']((container, component), 'aabb')[1][2] - aabb[0][2]
+        targetPosition[2] = aabbComponent[1][2] - aabb[0][2]
         return component, targetPosition
     ### Assuming side by side arrangement
     if component is not None:
