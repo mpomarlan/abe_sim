@@ -3583,5 +3583,852 @@
                             }
                      }
               }
+       },
+       {
+              "type": "BlackBean",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackBean/blackBean.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BlackBeanCan",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackBean/blackBeanCan.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "black"
+                            ],
+                            "hp": {
+                                   "black": 240
+                            },
+                            "axis": {
+                                   "black": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.04862,
+                                                 0.02352
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "black": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "WaterParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Water/waterParticle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "WaterBottle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Water/water.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "cap"
+                            ],
+                            "hp": {
+                                   "cap": 240
+                            },
+                            "axis": {
+                                   "cap": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0.02803
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "black": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "CranberryBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cranberry/cranberry_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "Cranberry",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cranberry/cranberry.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GratedHorseradish",
+              "simtype": "ktree",
+              "filename": "3DObjects/GratedHorseradish/grated_horseradish.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GratedHorseradishBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/GratedHorseradish/grated_horseradish_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "ShreddedCoconut",
+              "simtype": "ktree",
+              "filename": "3DObjects/ShreddedCoconut/shredded_coconut.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ShreddedCoconutBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/ShreddedCoconut/shredded_coconut_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "AlmondFlake",
+              "simtype": "ktree",
+              "filename": "3DObjects/AlmondFlakes/almond_flake.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "AlmondFlakesBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/AlmondFlakes/almond_flakes_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "BakingPowderParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingPowder/baking_powder_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BakingPowderBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingPowder/baking_powder_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "BakingSodaParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingSoda/baking_soda_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BakingSodaBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingSoda/baking_soda_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "BisquickBakingMixParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/BisquickBakingMix/baking_mix_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BisquickBakingMixBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/BisquickBakingMix/baking_mix_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "CasterSugarParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/CasterSugar/caster_sugar_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CasterSugarBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/CasterSugar/caster_sugar_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "PowderedWhiteSugarParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/PowderedWhiteSugar/powdered_white_sugar_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "PowderedWhiteSugarBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/PowderedWhiteSugar/powdered_white_sugar_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "SelfRisingFlourParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/SelfRisingFlour/selfrising_flour_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "SelfRisingFlourBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/SelfRisingFlour/selfrising_flour_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "WholeWheatFlourParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/WholeWheatFlour/whole_wheat_flour_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "WholeWheatFlourBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/WholeWheatFlour/whole_wheat_flour_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "CocoaPowderParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/CocoaPowder/cocoa_powder_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CocoaPowderBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/CocoaPowder/cocoa_powder_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
        }
 ]
