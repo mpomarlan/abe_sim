@@ -19,31 +19,33 @@ def updateTransporting(name, customDynamicsAPI):
         return (th < numpy.dot(ax, bx)) and (th < numpy.dot(ay, by))
     transportedBy = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'transporting', 'constraint'), None)
     newTransportedBy = None
-    at = customDynamicsAPI['getObjectProperty']((name,), 'at')
+    at = customDynamicsAPI['getObjectProperty']((name,), 'atComponent')
     if (at is None) and (transportedBy is not None):
-        at = customDynamicsAPI['getObjectProperty']((transportedBy,), 'parent')
-    atGraspable = customDynamicsAPI['getObjectProperty']((at,), ('fn', 'graspable'), False)
+        at = (customDynamicsAPI['getObjectProperty']((transportedBy,), 'parent'), customDynamicsAPI['getObjectProperty']((transportedBy,), 'parentLink'))
+    if at is None:
+        return
+    atGraspable = customDynamicsAPI['getObjectProperty']((at[0],), ('fn', 'graspable'), False)
     relativeStillness = atGraspable
     if atGraspable and (transportedBy is None):
-        atVelocity = customDynamicsAPI['getObjectProperty']((at,), 'linearVelocity')
+        atVelocity = customDynamicsAPI['getObjectProperty'](at, 'linearVelocity')
         nameVelocity = customDynamicsAPI['getObjectProperty']((name,), 'linearVelocity')
         dv = [x-y for x,y in zip(atVelocity, nameVelocity)]
         dv = numpy.dot(dv, dv)
         if 0.0001 < dv:
             relativeStillness = False
     if relativeStillness:
-        atOrientation = customDynamicsAPI['getObjectProperty']((at,), 'orientation')
-        pourAxisInAt = customDynamicsAPI['getObjectProperty']((at,), ('fn', 'containment', 'pouring', 'outof', 'axis'), (0,1,0))
+        atOrientation = customDynamicsAPI['getObjectProperty']((at[0],), 'orientation')
+        pourAxisInAt = customDynamicsAPI['getObjectProperty']((at[0],), ('fn', 'containment', 'pouring', 'outof', 'axis'), (0,1,0))
         pourAxis = stubbornTry(lambda : pybullet.rotateVector(atOrientation, pourAxisInAt))
         down = customDynamicsAPI['getDown']()
         tipped = bool(0.9 < numpy.dot(down, pourAxis))
         # is this itself grasped? : if so, remove
         if not tipped:
-            aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
-            graspingOverlaps = [x for x in set(customDynamicsAPI['checkOverlap'](aabb)) if customDynamicsAPI['getObjectProperty']((x,), ('fn', 'canGrasp'), False)]
+            childOf = customDynamicsAPI['getObjectProperty']((name,), 'childOf')
             grasped = False
-            for x in graspingOverlaps:
-                for _, grasps in customDynamicsAPI['getObjectProperty']((x,), ('customStateVariables', 'grasping', 'actuallyGrasping'), {}).items():
+            for x in childOf:
+                parent = customDynamicsAPI['getObjectProperty']((x,), 'parent')
+                for _, grasps in customDynamicsAPI['getObjectProperty']((parent,), ('customStateVariables', 'grasping', 'actuallyGrasping'), {}).items():
                     for grasp in grasps:
                         if name == grasp[0][0]:
                             grasped = True
@@ -55,9 +57,9 @@ def updateTransporting(name, customDynamicsAPI):
             if not grasped:
                 newTransportedBy = transportedBy
                 if newTransportedBy is None:
-                    atBaseLink = customDynamicsAPI['getObjectProperty']((at,), 'baseLinkName')
                     nameBaseLink = customDynamicsAPI['getObjectProperty']((name,), 'baseLinkName')
-                    newTransportedBy = ('GRASPING_%s_%s_%s_%s' % (at, atBaseLink, name, nameBaseLink))
-                    maxForce = customDynamicsAPI['getObjectProperty']((at,), ('fn', 'transporting', 'maxForce'), 1000)
-                    customDynamicsAPI['addObject']({'fn': {'transportingConstraint': True}, 'name': newTransportedBy, 'simtype': 'kcon', 'parent': at, 'child': name, 'parentLink': atBaseLink, 'childLink': nameBaseLink, 'jointType': 'fixed', 'maxForce': maxForce})
+                    newTransportedBy = ('GRASPING_%s_%s_%s_%s' % (at[0], at[1], name, nameBaseLink))
+                    maxForce = customDynamicsAPI['getObjectProperty']((at[0],), ('fn', 'transporting', 'maxForce'), 1000)
+                    customDynamicsAPI['addObject']({'fn': {'transportingConstraint': True}, 'name': newTransportedBy, 'simtype': 'kcon', 'parent': at[0], 'child': name, 'parentLink': at[1], 'childLink': nameBaseLink, 'jointType': 'fixed', 'maxForce': maxForce})
     customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'transporting', 'constraint'), newTransportedBy)
+

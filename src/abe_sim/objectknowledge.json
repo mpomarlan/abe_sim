@@ -917,7 +917,12 @@
                                    "fridge_door": null
                             }
                      },
-                     "temperature": 4
+                     "temperature": {
+                         "fridge_shelf_top": 4,
+                         "fridge_shelf_bottom": 4,
+                         "freezer_shelf_top": -8,
+                         "freezer_shelf_bottom": -8
+                     }
               }
        },
        {
@@ -1139,13 +1144,9 @@
                      }
               },
               "customStateVariables": {
-                     "clopening": {
-                            "action": {
-                                   "freezer_door": null,
-                                   "fridge_door": null
-                            }
-                     },
-                     "temperature": 180
+                     "temperature": {
+                         "shelf": 180
+                     }
               }
        },
        {

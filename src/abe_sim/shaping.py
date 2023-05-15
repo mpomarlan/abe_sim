@@ -8,7 +8,7 @@ from abe_sim.world import getDictionaryEntry, stubbornTry
 def updateShaped(name, customDynamicsAPI):
     aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
     aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, 1.0)
-    closeObjects = set(customDynamicsAPI['checkOverlap'](aabbAdj))
+    closeObjects = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
     for e in closeObjects:
         if name in customDynamicsAPI['getObjectProperty']((e,), ('customStateVariables', 'provenance'), []):
             customDynamicsAPI['removeObject']()
@@ -26,7 +26,7 @@ def updateShaping(name, customDynamicsAPI):
         handLink = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'efLink', a))
         aabb = customDynamicsAPI['getObjectProperty']((name, handLink), 'aabb')
         aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, radius)
-        closeObjects = set(customDynamicsAPI['checkOverlap'](aabbAdj))
+        closeObjects = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
         if 0 == len(ingredients.difference(closeObjects)):
             handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
             handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')

@@ -206,7 +206,7 @@ def toGetLocation(requestData, w, agentName, todos):
         if not w.getObjectProperty((o,), ('fn', 'canContain'), False):
             return True
         aabb = w.getObjectProperty((o,), 'aabb')
-        overlaps = w.checkOverlap(aabb)
+        overlaps = set([x[0] for x in w.checkOverlap(aabb)])
         return 0 == len([x for x in overlaps if o == w.getObjectProperty((x,), 'at')])
     varname = requestData.get('availableLocation', None)
     otype = requestData.get('type', None)
