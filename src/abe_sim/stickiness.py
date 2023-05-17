@@ -14,7 +14,8 @@ def updateStickiness(name, customDynamicsAPI):
     stickiness = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'stickiness', 'stickiness'), 0.93)
     position = customDynamicsAPI['getObjectProperty']((name,), 'position')
     velocity = customDynamicsAPI['getObjectProperty']((name,), 'linearVelocity')
-    force = [-mass*240*stickiness*velocity[0], -mass*240*stickiness*velocity[1], 0]
+    sfr = customDynamicsAPI['getSFR']()
+    force = [-mass*sfr*stickiness*velocity[0], -mass*sfr*stickiness*velocity[1], 0]
     vp = numpy.array(velocity)
     fp = numpy.array(force)/mass
     customDynamicsAPI['applyExternalForce']((name,), force, position, inWorldFrame=True)

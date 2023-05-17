@@ -102,6 +102,8 @@ def handleINT(signum, frame):
 
 def runBrain():
     parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='Text at the bottom of help')
+    parser.add_argument('-fdf', '--frameDelayFactor', default="1.0", help='Adjust the minimum time spent on computing one simulated frame. A value below 1 will attempt to compute frames faster than real time.')
+    parser.add_argument('-sfr', '--simFrameRate', default="240", help='Number of frames in one second of simulated time. Should be above 60.')
     parser.add_argument('-a', '--agent', help='Name of the agent to control in the loaded scene')
     parser.add_argument('-g', '--useGUI', action='store_true', help='Flag to enable the GUI')
     parser.add_argument('-o', '--useOpenGL', action='store_true', help='Flag to enable hardware acceleration. Warning: often unstable on Linux; ignored on MacOS')
@@ -122,6 +124,8 @@ def runBrain():
     gravity = (0,0,-10) # TODO argparse
     loadWorldDump = arguments.loadWorldDump
     loadObjectList = arguments.loadObjectList
+    frameDelayFactor = float(arguments.frameDelayFactor)
+    sfr = int(arguments.simFrameRate)
     agentName = arguments.agent
 
     if useOpenGL:
@@ -133,9 +137,9 @@ def runBrain():
     ## WORLD CREATION line: adjust this as needed on your system.
     # TODO if you want to run headless: useGUI=False in World()
     if not isAMac:
-        w = world.World(pybulletOptions = pybulletOptions, useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge)
+        w = world.World(pybulletOptions = pybulletOptions, useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge, simFrameRate=sfr)
     else:
-        w = world.World(pybulletOptions = "", useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge) # Hardware-accelerated rendering. Seems necessary on newer Macs.
+        w = world.World(pybulletOptions = "", useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge, simFrameRate=sfr) # Hardware-accelerated rendering. Seems necessary on newer Macs.
         
     w.setGravity(gravity)
 
@@ -207,8 +211,9 @@ def runBrain():
                         w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), todos["goals"][0])
                         todos["goals"] = todos["goals"][1:]
         stepEnd = time.time()
+        #print(w.getObjectProperty(('abe', 'hand_right_roll'), 'position'), w.getObjectProperty(('abe', 'hand_right_roll'), 'linearVelocity'), pybullet.getContactPoints(bodyA=w._kinematicTrees['abe']['idx']))
         if not isAMac:
-            time.sleep(max((1.0/240.0)-(stepEnd-stepStart), 0))
+            time.sleep(max((frameDelayFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))
 
 if "__main__" == __name__:
     runBrain()

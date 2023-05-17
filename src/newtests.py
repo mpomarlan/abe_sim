@@ -32,12 +32,13 @@ def addObjectInstance(w, otype, objKnowledge, position, orientation, linearVeloc
     return newDescription['name']
 
 def timestepWorld(w, timestep):
-    frames = int(timestep*240)
+    simFrameRate = w.getSFR()
+    frames = int(timestep*simFrame)
     for k in range(frames):
         s = time.time()
         w.update()
         e = time.time()
-        time.sleep(max(0, 1.0/240.0 - e + s))
+        time.sleep(max(0, 1.0/(simFrameRate*1.0) - e + s))
 
 def preload(w, description, name, position):
     newDescription = copy.deepcopy(description)

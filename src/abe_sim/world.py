@@ -119,7 +119,7 @@ import copy
 dirPath = os.path.dirname(os.path.realpath(__file__))
 
 class World():
-    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, backgroundTemperature=None, heatExchangeCoefficient=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None):
+    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, backgroundTemperature=None, heatExchangeCoefficient=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None, simFrameRate=None):
         self._name = name
         self._limbo = []
         self._ylem = {}
@@ -131,6 +131,9 @@ class World():
         self._customDynamics = []
         if customDynamics is not None:
             self._customDynamics = list(customDynamics)
+        self._sfr = 240
+        if simFrameRate is not None:
+            self._sfr = simFrameRate
         self._customDynamicsUpdaters = {'ktree': {}, 'kcon': {}, 'marker': {}}
         self._debugVisualizationsEnabled = True ### TODO: infer from pybulletOptions
         self._collisionShapes = {}
@@ -143,6 +146,7 @@ class World():
         else:
             self._pybulletConnection = stubbornTry(lambda : pybullet.connect(pybullet.DIRECT, options=pybulletOptions))
         # TODO: record a list of search paths, coz pybullet will only remember one otherwise.
+        stubbornTry(lambda : pybullet.setTimeStep(1.0/(1.0*self._sfr), self._pybulletConnection))
         stubbornTry(lambda : pybullet.setAdditionalSearchPath(dirPath))
         self._byssos = stubbornTry(lambda : pybullet.loadURDF(os.path.join(pybullet_data.getDataPath(), 'plane.urdf'), (0,0,-100), (0,0,0,1)))
         self._colliderProbe = stubbornTry(lambda : pybullet.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'collider_probe.urdf'), (0,0,-110), (0,0,0,1)))
@@ -165,6 +169,7 @@ class World():
         if objectKnowledge is not None:
             self._objectKnowledge = copy.deepcopy(objectKnowledge)
         self._customDynamicsAPIBase = {
+          'getSFR' : (lambda : self.getSFR()),
           'addObject': (lambda x : self.addNewObject(x)), 
           'getObjectProperty': (lambda x,y,defaultValue=None: self.getObjectProperty(x,y,defaultValue=defaultValue)),
           'getDistance': (lambda x,y,z,hypotheticalPoses=None: self.getDistance(x,y,z,hypotheticalPoses=hypotheticalPoses)), 
@@ -199,6 +204,8 @@ class World():
         return self._name
     def getSimulatorConnection(self):
         return self._pybulletConnection
+    def getSFR(self):
+        return self._sfr
     def adjustAABBRadius(self, aabb, radius):
         center = [(x+y)/2 for x,y in zip(aabb[0], aabb[1])]
         return tuple([tuple([x-radius for x in center]), tuple([x+radius for x in center])])
@@ -419,7 +426,7 @@ class World():
             if maxForce is None:
                 maxForce = jdata[10]
                 _setDictionaryEntry(objData, ('fn', 'maxForce', lname), maxForce)
-            stubbornTry(lambda : pybullet.setJointMotorControl2(objData['idx'], k, pybullet.TORQUE_CONTROL, force=maxForce, physicsClientId=self._pybulletConnection))
+            stubbornTry(lambda : pybullet.setJointMotorControl2(objData['idx'], k, pybullet.VELOCITY_CONTROL, force=maxForce, physicsClientId=self._pybulletConnection))
         objData['localAABB'] = {}
         mcs = None
         Mcs = None
