@@ -102,7 +102,7 @@ def handleINT(signum, frame):
 
 def runBrain():
     parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='Text at the bottom of help')
-    parser.add_argument('-fdf', '--frameDelayFactor', default="1.0", help='Adjust the minimum time spent on computing one simulated frame. A value below 1 will attempt to compute frames faster than real time.')
+    parser.add_argument('-fdf', '--frameDurationFactor', default="1.0", help='Attempts to adjust the ratio of real time of frame to simulated time of frame. A frame will always last, in real time, at least as long as it is computed. WARNING: runBrain will become unresponsive to HTTP API calls if this is set too low. Recommended values are above 0.2.')
     parser.add_argument('-sfr', '--simFrameRate', default="240", help='Number of frames in one second of simulated time. Should be above 60.')
     parser.add_argument('-a', '--agent', help='Name of the agent to control in the loaded scene')
     parser.add_argument('-g', '--useGUI', action='store_true', help='Flag to enable the GUI')
@@ -124,7 +124,7 @@ def runBrain():
     gravity = (0,0,-10) # TODO argparse
     loadWorldDump = arguments.loadWorldDump
     loadObjectList = arguments.loadObjectList
-    frameDelayFactor = float(arguments.frameDelayFactor)
+    frameDurationFactor = float(arguments.frameDurationFactor)
     sfr = int(arguments.simFrameRate)
     agentName = arguments.agent
 
@@ -213,7 +213,7 @@ def runBrain():
         stepEnd = time.time()
         #print(w.getObjectProperty(('abe', 'hand_right_roll'), 'position'), w.getObjectProperty(('abe', 'hand_right_roll'), 'linearVelocity'), pybullet.getContactPoints(bodyA=w._kinematicTrees['abe']['idx']))
         if not isAMac:
-            time.sleep(max((frameDelayFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))
+            time.sleep(max((frameDurationFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))
 
 if "__main__" == __name__:
     runBrain()
