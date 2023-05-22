@@ -456,20 +456,28 @@ def _checkStoppedOpening(customDynamicsAPI, name, description, node):
         clactions = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'clopening', 'action'), {})
         return not any(['open' == v for _, v in clactions.items()])
 
-def _checkOpened(customDynamicsAPI, name, description, node):
-    container = description.get('container', None)
-    component = description.get('component', None)
+def _checkStoppedClosing(customDynamicsAPI, name, description, node):
+    return _checkStoppedOpening(customDynamicsAPI, name, description, node)
+
+def checkOpened(customDynamicsAPI, container, component):
     handle, door = getHandleAndDoor(customDynamicsAPI, container, component)
+    openMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMin', door), None)
+    openMaxThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMax', door), None)
+    jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
     if handle is not None:
-        openMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMin', door), None)
-        openMaxThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMax', door), None)
-        jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
         return ((openMinThreshold is None) or bool(openMinThreshold < jointValue)) and ((openMaxThreshold is None) or bool(openMaxThreshold > jointValue))
     return True
 
-def _checkClosed(customDynamicsAPI, name, description, node):
+def _checkOpened(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
+    hand = description.get('hand', None)
+    parked = node.get('parked', False)
+    parked = checkParked(customDynamicsAPI, name, hand, parked)
+    node['parked'] = parked
+    return checkOpened(customDynamicsAPI, container, component) and parked
+
+def checkClosed(customDynamicsAPI, container, component):
     handle, door = getHandleAndDoor(customDynamicsAPI, container, component)
     if handle is not None:
         closedMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'closedMin', door), None)
@@ -477,6 +485,15 @@ def _checkClosed(customDynamicsAPI, name, description, node):
         jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
         return ((closedMinThreshold is None) or bool(closedMinThreshold < jointValue)) and ((closedMaxThreshold is None) or bool(closedMaxThreshold > jointValue))
     return True
+
+def _checkClosed(customDynamicsAPI, name, description, node):
+    container = description.get('container', None)
+    component = description.get('component', None)
+    hand = description.get('hand', None)
+    parked = node.get('parked', False)
+    parked = checkParked(customDynamicsAPI, name, hand, parked)
+    node['parked'] = parked
+    return checkClosed(customDynamicsAPI, container, component) and parked
 
 def _checkBroughtNear(customDynamicsAPI, name, description, node):
     trajector = description.get('trajector', None)
@@ -537,7 +554,9 @@ def _getParkingArmConditions(customDynamicsAPI, name, description, node):
     waypoints = [wpPU, wpxyU, wpUZ, wpZ]
     tolerances = [[tolP, tolU], [tolxy, tolU], [tolU, tolZ], [tolZ]]
     entities = {'handP': handP, 'handQ': handQ, 'handParkedP': handParkedP, 'handParkedQ': handParkedQ, 'entryHeight': entryHeight}
-    return [_makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+    return [_makeGoal({'hand': hand}, 'stoppedOpening'),
+            _makeGoal({'hand': hand}, 'stoppedClosing'),
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
                       numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
 def _getArmNearingItemHandleConditions(customDynamicsAPI, name, description, node):
@@ -1239,7 +1258,9 @@ def _getNearingConditionsA(customDynamicsAPI, name, description, node):
     waypoints = [wppf, wpf, wpz]
     tolerances = [[tolp, tolf], [tolf2], [tolz]]
     entities = {'zeroP': [0,0,0], 'baseP': baseP, 'baseFwdP': baseFwdP, 'baseQ': baseQ, 'targetP': targetPosition, 'targetQ': facingQ}
-    return [_makeGoal({}, 'stoppedHands'),
+    return [_makeGoal({'hand': 'hand_left'}, 'parkedArm'),
+            _makeGoal({'hand': 'hand_right'}, 'parkedArm'),
+            _makeGoal({}, 'stoppedHands'),
             _makeGoal({'hand': 'base', 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
                       numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
                       
@@ -1394,13 +1415,17 @@ def _suggestOpened(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
     hand = description.get('hand', None)
-    return [{'type': 'P', 'description': {'process': 'opening', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    if not checkOpened(customDynamicsAPI, container, component):
+        return [{'type': 'P', 'description': {'process': 'opening', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    return [_makeProcess({'hand': hand}, 'parkingArm')]
 
 def _suggestClosed(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
     hand = description.get('hand', None)
-    return [{'type': 'P', 'description': {'process': 'closing', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    if not checkClosed(customDynamicsAPI, container, component):
+        return [{'type': 'P', 'description': {'process': 'closing', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    return [_makeProcess({'hand': hand}, 'parkingArm')]
 
 def _suggestStoppedOpening(customDynamicsAPI, name, description, node):
     hand = description.get('hand', None)
@@ -1420,7 +1445,7 @@ def _suggestStoppedClosing(customDynamicsAPI, name, description, node):
             target[hand] = {'clopeningAction': None}
     else:
         target[hand] = {'clopeningAction': None}
-    return [{'type': 'P', 'description': {'process': 'stopOpening'}, 'target': target}] # bpt: (clopening, closing, _Hand): (False)
+    return [{'type': 'P', 'description': {'process': 'stopClosing'}, 'target': target}] # bpt: (clopening, closing, _Hand): (False)
 
 def _suggestBakedItem(customDynamicsAPI, name, description, node):
     item = description.get('item', None)
@@ -1486,6 +1511,7 @@ goalCheckers = {
     'cutItem': _checkCutItem, # hand, item, storage, tool |
     'armTriggeredPortalHandle': _checkArmTriggeredPortalHandle,
     'stoppedOpening': _checkStoppedOpening,
+    'stoppedClosing': _checkStoppedClosing,
     'opened': _checkOpened,
     'closed': _checkClosed,
     'broughtNear': _checkBroughtNear,
