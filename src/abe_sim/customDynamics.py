@@ -70,8 +70,8 @@ def getCandidates(name, customDynamicsAPI, description):
         aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
         aabbAdj = customDynamicsAPI['addAABBRadius'](aabb, radius)
         closeObjects = customDynamicsAPI['checkOverlap'](aabbAdj)
-        for cob in closeObjects:
-            closePoints = customDynamicsAPI['checkClosestPoints']((name,), (cob,), maxDistance=radius)
+        for cob, clnk in closeObjects:
+            closePoints = customDynamicsAPI['checkClosestPoints']((name,), (cob, clnk), maxDistance=radius)
             for closePoint in closePoints:
                 identifierA, identifierB, posA, posB, normal, distance = closePoint
                 retq.append({'relatumId': identifierA, 'trajectorId': identifierB, 'posOnRelatum': posA, 'posOnTrajector': posB, 'normal': normal, 'distance': distance, 'force': 0})

@@ -22,11 +22,12 @@ def updateClopening(name, customDynamicsAPI):
         closeObjects = customDynamicsAPI['checkOverlap'](aabbAdj)
         action = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'clopening', 'action', link), None)
         for candidate in closeObjects:
-            if customDynamicsAPI['getObjectProperty']((candidate,), ('fn', 'canClopen'), False):
-                for clopenerEF in customDynamicsAPI['getObjectProperty']((candidate,), ('fn', 'clopening', 'clopeningEFs'), []):
-                    actionCandidate = customDynamicsAPI['getObjectProperty']((candidate,), ('customStateVariables', 'clopening', 'action', clopenerEF), None)
-                    if (action is None) or (actionCandidate is not None):
-                        action = actionCandidate
+            obj, lnk = candidate
+            ef = customDynamicsAPI['getObjectProperty']((obj,), ('fn', 'grasping', 'link2EF', lnk), None)
+            if customDynamicsAPI['getObjectProperty']((obj,), ('fn', 'canClopen'), False) and ef in customDynamicsAPI['getObjectProperty']((obj,), ('fn', 'clopening', 'clopeningEFs'), []):
+                actionCandidate = customDynamicsAPI['getObjectProperty']((obj,), ('customStateVariables', 'clopening', 'action', ef), None)
+                if (action is None) or (actionCandidate is not None):
+                    action = actionCandidate
         customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'clopening', 'action', link), action)
         angle = None
         if 'open' == action:

@@ -91,7 +91,10 @@ import copy
 #    jointVelocities: a dictionary mapping joint names to velocity values
 #    jointReactionForces: a dictionary mapping joint names to vectors of 6 components giving forces and torques on the joint
 #    jointAppliedTorques: a dictionary mapping joint names to the last applied torque
-#    at: None or a string identifying a kinematic tree that is construed as a reference for location for this kinematic tree
+#    at: None or a string identifying a kinematic tree that is construed as a reference for location for this kinematic tree; not writable
+#    atComponent: None or a pair of strings identifying a kinematic tree and its link which is construed as a reference for location for this kinematic tree; not writable
+#    parentTo: a list of names of constraints that this ktree is a parent of; not writable
+#    childOf: a list of names of constraints that this ktree is a child of; not writable
 #    filename: path to the file describing the kinematic tree
 #    immobile: boolean indicating whether to use a fixed base; not writeable
 #
@@ -116,7 +119,7 @@ import copy
 dirPath = os.path.dirname(os.path.realpath(__file__))
 
 class World():
-    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None):
+    def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, backgroundTemperature=None, heatExchangeCoefficient=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None, simFrameRate=None):
         self._name = name
         self._limbo = []
         self._ylem = {}
@@ -128,6 +131,9 @@ class World():
         self._customDynamics = []
         if customDynamics is not None:
             self._customDynamics = list(customDynamics)
+        self._sfr = 240
+        if simFrameRate is not None:
+            self._sfr = simFrameRate
         self._customDynamicsUpdaters = {'ktree': {}, 'kcon': {}, 'marker': {}}
         self._debugVisualizationsEnabled = True ### TODO: infer from pybulletOptions
         self._collisionShapes = {}
@@ -140,6 +146,7 @@ class World():
         else:
             self._pybulletConnection = stubbornTry(lambda : pybullet.connect(pybullet.DIRECT, options=pybulletOptions))
         # TODO: record a list of search paths, coz pybullet will only remember one otherwise.
+        stubbornTry(lambda : pybullet.setTimeStep(1.0/(1.0*self._sfr), self._pybulletConnection))
         stubbornTry(lambda : pybullet.setAdditionalSearchPath(dirPath))
         self._byssos = stubbornTry(lambda : pybullet.loadURDF(os.path.join(pybullet_data.getDataPath(), 'plane.urdf'), (0,0,-100), (0,0,0,1)))
         self._colliderProbe = stubbornTry(lambda : pybullet.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'collider_probe.urdf'), (0,0,-110), (0,0,0,1)))
@@ -147,6 +154,12 @@ class World():
             gravity = (0, 0, 0)
         self._down = (0,0,-1)
         self._up = (0,0,1)
+        if backgroundTemperature is None:
+            backgroundTemperature = 20.0
+        if heatExchangeCoefficient is None:
+            heatExchangeCoefficient = 0.05
+        self._backgroundTemperature = backgroundTemperature
+        self._heatExchangeCoefficient = heatExchangeCoefficient
         self.setGravity(gravity)
         self._newObjectCounter = 0
         self._processKnowledge = {}
@@ -156,6 +169,7 @@ class World():
         if objectKnowledge is not None:
             self._objectKnowledge = copy.deepcopy(objectKnowledge)
         self._customDynamicsAPIBase = {
+          'getSFR' : (lambda : self.getSFR()),
           'addObject': (lambda x : self.addNewObject(x)), 
           'getObjectProperty': (lambda x,y,defaultValue=None: self.getObjectProperty(x,y,defaultValue=defaultValue)),
           'getDistance': (lambda x,y,z,hypotheticalPoses=None: self.getDistance(x,y,z,hypotheticalPoses=hypotheticalPoses)), 
@@ -175,6 +189,7 @@ class World():
           'getGravity': (lambda : self.getGravity()), 
           'getDown': (lambda : self.getDown()), 
           'getUp': (lambda : self.getUp()), 
+          'getBackgroundTemperature': (lambda : self.getBackgroundTemperature()), 
           'getObjectTypeKnowledge': (lambda x : self.getObjectTypeKnowledge(x)),
           'getProcessOutcome': (lambda x : self.getProcessOutcome(x)), 
           'getProcessResource': (lambda x: self.getProcessResource(x))}
@@ -189,6 +204,8 @@ class World():
         return self._name
     def getSimulatorConnection(self):
         return self._pybulletConnection
+    def getSFR(self):
+        return self._sfr
     def adjustAABBRadius(self, aabb, radius):
         center = [(x+y)/2 for x,y in zip(aabb[0], aabb[1])]
         return tuple([tuple([x-radius for x in center]), tuple([x+radius for x in center])])
@@ -200,6 +217,8 @@ class World():
         return self._down
     def getUp(self):
         return self._up
+    def getBackgroundTemperature(self):
+        return self._backgroundTemperature, self._heatExchangeCoefficient
     def setGravity(self, gravity):
         self._gravity = gravity
         stubbornTry(lambda : pybullet.setGravity(self._gravity[0], self._gravity[1], self._gravity[2], self._pybulletConnection))
@@ -346,6 +365,8 @@ class World():
         cq = (0,0,0,1)
         objData['idx'] = stubbornTry(lambda : pybullet.createConstraint(pidx, plidx, cidx, clidx, jtype, jaxis, ppos, cpos, parentFrameOrientation=pq, childFrameOrientation=cq, physicsClientId=self._pybulletConnection))
         stubbornTry(lambda : pybullet.changeConstraint(objData['idx'], maxForce=objData.get('maxForce', 1000.0)))
+        self._kinematicTrees[objData['parent']]['parentTo'].append(objData['name'])
+        self._kinematicTrees[objData['child']]['childOf'].append(objData['name'])
     def _addKinematicConstraint(self, description):
         if ('parent' not in description) or ('child' not in description) or ('parentLink' not in description) or ('childLink' not in description):
             return None
@@ -382,6 +403,8 @@ class World():
         objData['idx2Link'] = {}
         objData['idx2Joint'] = {}
         objData['dofList'] = []
+        objData['parentTo'] = []
+        objData['childOf'] = []
         baseLinkIdx = 0 # or 1 if using maximal coordinates
         baseName = stubbornTry(lambda : pybullet.getBodyInfo(objData['idx'], self._pybulletConnection))[baseLinkIdx].decode('ascii')
         objData['links'][baseName]= {'idx': -1}
@@ -403,7 +426,7 @@ class World():
             if maxForce is None:
                 maxForce = jdata[10]
                 _setDictionaryEntry(objData, ('fn', 'maxForce', lname), maxForce)
-            stubbornTry(lambda : pybullet.setJointMotorControl2(objData['idx'], k, pybullet.TORQUE_CONTROL, force=maxForce, physicsClientId=self._pybulletConnection))
+            stubbornTry(lambda : pybullet.setJointMotorControl2(objData['idx'], k, pybullet.VELOCITY_CONTROL, force=maxForce, physicsClientId=self._pybulletConnection))
         objData['localAABB'] = {}
         mcs = None
         Mcs = None
@@ -454,6 +477,7 @@ class World():
         self._kinematicTrees[name] = objData
         self._idx2KinematicTree[objData['idx']] = name
         objData['at'] = self.at((name,))
+        objData['atComponent'] = self.atComponent((name,))
         for e in toRestore:
             #print("RESTORE", e)
             self._addKinematicConstraint(e)
@@ -522,6 +546,8 @@ class World():
         return self._addKinematicTree(description)
     def _removeKinematicConstraint(self, name, sendToLimbo=False):
         stubbornTry(lambda : pybullet.removeConstraint(self._kinematicConstraints[name]['idx'], self._pybulletConnection))
+        self._kinematicTrees[self._kinematicConstraints[name]['parent']]['parentTo'].remove(name)
+        self._kinematicTrees[self._kinematicConstraints[name]['child']]['childOf'].remove(name)
         self._kinematicConstraints.pop(name)
         return True
     def _removeKinematicTree(self, name, sendToLimbo=False):
@@ -540,9 +566,8 @@ class World():
         # TODO
         return
     def _removeAttachedConstraints(self, name):
-        for e in list(self._kinematicConstraints.keys()):
-            if name in [self._kinematicConstraints[e]['parent'], self._kinematicConstraints[e]['child']]:
-                self._removeKinematicConstraint(e)
+        for e in list(self._kinematicTrees[name]['parentTo'] + self._kinematicTrees[name]['childOf']):
+            self._removeKinematicConstraint(e)
         return True
     def _removeCustomDynamics(self, objType, objMap, identifier):
         if identifier[0] in objMap:
@@ -575,24 +600,29 @@ class World():
                     aabbMax[k] = e
         return aabbMin, aabbMax
     def at(self, identifier):
+        retq = self.atComponent(identifier)
+        if retq is None:
+            return None
+        return retq[0]
+    def atComponent(self, identifier):
         aabbMin, aabbMax = self.getAABB(identifier)
         if aabbMin is None:
             return None
         #center = [(a+b)*0.5 for a,b in zip(aabbMin,aabbMax)]
         aabbMin = [aabbMin[0], aabbMin[1], aabbMin[2] - 0.03]
-        aabbMax = [aabbMax[0], aabbMax[1], aabbMin[2]] # Yep, min -- wouldn't want to trigger overlaps with contained containers.
+        aabbMax = [aabbMax[0], aabbMax[1], aabbMin[2] + 0.03] # Yep, min -- wouldn't want to trigger overlaps with contained containers.
         closeObjects = self.checkOverlap((aabbMin, aabbMax))
         retq = None
         minD = None
-        pos = self.getObjectProperty(identifier, "position")
-        for o in closeObjects:
-            if (o == identifier[0]) or (not self.getObjectProperty((o,), ("fn", "canContain"), False)):
+        for o,c in closeObjects:
+            if (o == identifier[0]) or (not self.getObjectProperty((o,), ("fn", "canContain"), False)) or (c not in self.getObjectProperty((o,), ("fn", "containment", "links"), [])):
                 continue
-            d = [a-b for a,b in zip(pos, self.getObjectProperty((o,), "position"))]
-            d = math.sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2])
-            if (None==minD) or (d < minD):
-                minD = d
-                retq = o
+            ds = [x[-1] for x in self.checkClosestPoints((identifier), (o,c), maxDistance=0.1)]
+            if 0 < len(ds):
+                d = min(ds)
+                if (None==minD) or (d < minD):
+                    minD = d
+                    retq = [o,c]
         return retq
     def getObjectProperty(self, identifier, propertyIdentifier, defaultValue=None):
         if not self._isIdentifier(identifier):
@@ -668,6 +698,12 @@ class World():
                 return objData['idx2Link'][-1]
             elif 'at' == propertyIdentifier:
                 return self.at(identifier)
+            elif 'atComponent' == propertyIdentifier:
+                return self.atComponent(identifier)
+            elif 'parentTo' == propertyIdentifier:
+                return objData['parentTo']
+            elif 'childOf' == propertyIdentifier:
+                return objData['childOf']
             elif 'aabb' == propertyIdentifier:
                 return self.getAABB(identifier)
             elif ('localAABB' == propertyIdentifier) or ('localAABB' == propertyIdentifier):
@@ -750,7 +786,7 @@ class World():
                 self._addKinematicConstraintInternal(copy.deepcopy(objData))
                 self._setCustomUpdaters('kcon', objData['name'])
         elif objData['simtype'] in ['ktree', 'marker']:
-            if propertyIdentifier in ['name', 'simtype', 'idx', 'type', 'links', 'joints', 'idx2Joint', 'idx2Link', 'baseLinkName', 'dofList', 'aabb', 'localAABB', 'at', 'jointReactionForces', 'jointReactionForce', 'jointAppliedTorques', 'jointAppliedTorque', 'localInertiaPosition', 'localInertiaOrientation', 'upperLimit', 'lowerLimit', 'jointPositions', 'jointVelocities', 'immobile']:
+            if propertyIdentifier in ['name', 'simtype', 'idx', 'type', 'links', 'joints', 'idx2Joint', 'idx2Link', 'baseLinkName', 'dofList', 'aabb', 'localAABB', 'at', 'atComponent', 'parentTo', 'childOf', 'jointReactionForces', 'jointReactionForce', 'jointAppliedTorques', 'jointAppliedTorque', 'localInertiaPosition', 'localInertiaOrientation', 'upperLimit', 'lowerLimit', 'jointPositions', 'jointVelocities', 'immobile']:
                 return None
             elif ('filename' == propertyIdentifier):
                 return (newValue == objData['filename']) or self.reloadObject(objData['name'], objData['type'], newValue)
@@ -857,10 +893,14 @@ class World():
             objData = self._describeObject(name)
             if objData.get('fn', {}).get('aggregates', False):
                 pType = objData.get('type', 'particle')
-                at = objData.get('at', '_null')
-                aggName = '%s@%s' % (pType, at)
+                at = objData.get('atComponent')
+                if at is None:
+                    atStr = '_null'
+                else:
+                    atStr = '%s_%s' % (at[0], at[1])
+                aggName = '%s@%s' % (pType, atStr)
                 if aggName not in retq:
-                    retq[aggName] = {'name': aggName, 'simtype': 'aggregate', 'type': pType, 'at': at, 'particles': []}
+                    retq[aggName] = {'name': aggName, 'simtype': 'aggregate', 'type': pType, 'at': objData.get('at'), 'atComponent': objData.get('atComponent'), 'particles': []}
                 retq[aggName]['particles'].append(objData)
             else:
                 retq[name] = objData
@@ -1082,9 +1122,10 @@ class World():
             retq = []
             for idx in overlaps:
                 if idx in tempIdx2Identifier:
-                    retq.append(tempIdx2Identifier[idx][0])
+                    retq.append(tempIdx2Identifier[idx])
                 else:
-                    retq.append(self._idx2KinematicTree[idx[0]])
+                    name = self._idx2KinematicTree[idx[0]]
+                    retq.append((name, self._kinematicTrees[name]['idx2Link'][idx[1]]))
             return retq
         def _checkMeshOverlap(regionSpec, tempIdx2Identifier, identifier2TempIdx):
             colShape = self._getCollisionShape(regionSpec['mesh'])
@@ -1321,6 +1362,7 @@ class World():
             retq['customStateVariables'] = objData.get('customStateVariables', {})
         elif retq['simtype'] in ['ktree', 'marker']:
             retq['at'] = self.at((name,))
+            retq['atComponent'] = self.atComponent((name,))
             retq['filename'] = objData.get('filename', '')
             pos, orn = stubbornTry(lambda : pybullet.getBasePositionAndOrientation(objData['idx'], self._pybulletConnection))
             lin, ang = stubbornTry(lambda : pybullet.getBaseVelocity(objData['idx'], self._pybulletConnection))

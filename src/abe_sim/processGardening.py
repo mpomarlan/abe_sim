@@ -63,14 +63,7 @@ def quaternionCloseness(a, b, t):
     ay = stubbornTry(lambda : pybullet.rotateVector(a, [0,1,0]))
     bx = stubbornTry(lambda : pybullet.rotateVector(b, [1,0,0]))
     by = stubbornTry(lambda : pybullet.rotateVector(b, [0,1,0]))
-    return bool((t < numpy.dot(ax, bx)) or (t < numpy.dot(ay, by)))
-
-def getBaseEFPosition(customDynamicsAPI, name):
-    baseLink = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'mobileBaseLink'))
-    basePosition = customDynamicsAPI['getObjectProperty']((name, baseLink), 'position')
-    baseOrientation = customDynamicsAPI['getObjectProperty']((name, baseLink), 'orientation')
-    baseEFPosition, _ = customDynamicsAPI['objectPoseRelativeToWorld'](basePosition, baseOrientation, baseFwdOffset, (0,0,0,1))
-    return baseEFPosition
+    return bool((t < numpy.dot(ax, bx)) and (t < numpy.dot(ay, by)))
 
 def _copyForModeSwitch(description):
     retq = copy.deepcopy(description)
@@ -97,13 +90,7 @@ def _makeGoal(description, goal, numerics=None):
     descriptionC['goal'] = goal
     return {'type': 'G', 'description': descriptionC, 'children': [], 'previousStatus': None, 'numerics': copy.deepcopy(numerics)}
 
-def getUprightOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis):
-    return customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'upright'), [0,0,0,1])
-    
-def getTippedOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis):
-    return customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'tipped'), [-0.707,0,0,0.707])
-    
-def getComponentUnderHandHeight(customDynamicsAPI, name, hand, handPosition):
+def getComponentUnderHandHeight(customDynamicsAPI, name, hand, handPosition, defaultHeight=1.0):
     handLink = getHandLink(customDynamicsAPI, name, hand)
     held = getHeld(customDynamicsAPI, name, hand)
     aabbs = [customDynamicsAPI['getObjectProperty']((x,), 'aabb') for x in held]
@@ -117,19 +104,20 @@ def getComponentUnderHandHeight(customDynamicsAPI, name, hand, handPosition):
             if e[1][k] > aabb[1][k]:
                 aabb[1][k] = e[1][k]
     aabb[0][2] = -0.1
-    overlaps = [x for x in customDynamicsAPI['checkOverlap'](aabb) if (x != name) and (x not in held) and customDynamicsAPI['getObjectProperty']((x,), ('fn', 'canContain'), False)]
+    overlaps = [x for x in customDynamicsAPI['checkOverlap'](aabb) if (x[0] != name) and (x[0] not in held) and customDynamicsAPI['getObjectProperty']((x[0],), ('fn', 'canContain'), False)]
     maxO = None
     for overlap in overlaps:
-        aabbsOverlap = [(x, customDynamicsAPI['getObjectProperty']((overlap, x), 'aabb')) for x in customDynamicsAPI['getObjectProperty']((overlap,), ('fn', 'containment', 'links'), [])]
-        valid = [(x[1][1][2], overlap, x[0]) for x in aabbsOverlap if bool(x[1][1][2] < handPosition[2])]
-        if 0 < len(valid):
-            maxC = max(valid)
-            if (maxO is None) or bool(maxO[0] < maxC[0]):
-                maxO = maxC
+        obj, lnk = overlap
+        if lnk not in customDynamicsAPI['getObjectProperty']((obj,), ('fn', 'containment', 'links'), []):
+            continue
+        aabbOverlap = customDynamicsAPI['getObjectProperty']((obj, lnk), 'aabb')
+        if aabbOverlap[1][2] < handPosition[2]:
+            if (maxO is None) or bool(maxO[0] < aabbOverlap[1][2]):
+                maxO = [aabbOverlap[1][2], obj, lnk]
     if maxO is not None:
         height = getComponentHeight(customDynamicsAPI, maxO[1], maxO[2]) + maxO[0]
     else:
-        height = 1.0
+        height = defaultHeight
     return height
 
 def getEntryHeight(customDynamicsAPI, name, description, numerics):
@@ -164,39 +152,6 @@ def getAxisInWorld(customDynamicsAPI, item, axis):
         return None
     itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
     return stubbornTry(lambda: pybullet.rotateVector(itemOrientation, axisInObject))
-
-def getObjectInHand(customDynamicsAPI, name, hand, item, itemPoint=None):
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    handPosition = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    handOrientation = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
-    itemPosition = customDynamicsAPI['getObjectProperty']((item,), 'position')
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    if itemPoint is not None:
-        itemPosition, itemOrientation = customDynamicsAPI['objectPoseRelativeToWorld'](itemPosition, itemOrientation, itemPoint, [0,0,0,1])
-    return customDynamicsAPI['objectPoseRelativeToObject'](handPosition, handOrientation, itemPosition, itemOrientation)
-
-def getItemEntryHeight(handEntryHeight, positionInHand, orientationHand):
-    positionInWorld = stubbornTry(lambda : pybullet.rotateVector(orientationHand, positionInHand))
-    return handEntryHeight + positionInWorld[2]
-
-def checkIdentifierAboveLocation(customDynamicsAPI, identifier, node):
-    locationP = node['numerics'].get('position', None)
-    locationQ = node['numerics'].get('orientation', None)
-    position = customDynamicsAPI['getObjectProperty'](identifier, 'position')
-    orientation = customDynamicsAPI['getObjectProperty'](identifier, 'orientation')
-    previous = node.get('previousStatus', False)
-    posTh = 0.0001
-    ornTh = 0.98
-    if previous:
-        posTh = 0.0004
-        ornTh = 0.94
-    d = [x-y for x,y in zip(position[:2], locationP[:2])]
-    abovePosition = bool(posTh > numpy.dot(d,d))
-    aligned = True
-    if locationQ is not None:
-        aligned = quaternionCloseness(orientation, locationQ, ornTh)
-    node['previousStatus'] = abovePosition and aligned
-    return node['previousStatus']
 
 def _alwaysFalse(customDynamicsAPI, name, description, node):
     return False
@@ -300,33 +255,6 @@ def _checkTransferredContents(customDynamicsAPI, name, description, node):
     container = description['container']
     amount = description['amount']
     return checkTransferred(customDynamicsAPI, name, item, pouredType, amount, container)
-
-def _checkTippedItemAboveLocation(customDynamicsAPI, name, description, node):
-    item = description['item']
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    previous = node.get('previousStatus', False)
-    ornTh = 0.99
-    if previous:
-        ornTh = 0.95
-    return quaternionCloseness(itemOrientation, node['numerics'].get('tippedOrientation', None), ornTh)
-
-def _checkPreparedItemForTipping(customDynamicsAPI, name, description, node):
-    item = description['item']
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    previous = node.get('previousStatus', False)
-    if not previous:
-        previous = quaternionCloseness(itemOrientation, node['numerics'].get('entryOrientation', None), 0.99)
-    return previous    
-
-def _checkLiftedItemToPouringEntry(customDynamicsAPI, name, description, node):
-    hand = description['hand']
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    positionHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    previous = node.get('previousStatus', False)
-    dTh = 0.01
-    if previous:
-        dTh = 0.03
-    return dTh > abs(node['numerics'].get('entryHeight') - positionHand[2])
 
 def _checkConstraintFollowed(customDynamicsAPI, name, description, node): # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     def _equalp(a, b, t):
@@ -517,7 +445,7 @@ def _checkArmTriggeredPortalHandle(customDynamicsAPI, name, description, node):
         maxDistance = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'radius', door), 0.5)
         if not node.get('previousStatus', False):
             maxDistance = 0.8*maxDistance
-        return doingAction and (0 < len(customDynamicsAPI['checkClosestPoints']((name, handLink), (container, handle), maxDistance=maxDistance)))
+        return action == customDynamicsAPI['getObjectProperty']((container,), ('customStateVariables', 'clopening', 'action', door), None)
     return True
 
 def _checkStoppedOpening(customDynamicsAPI, name, description, node):
@@ -528,20 +456,28 @@ def _checkStoppedOpening(customDynamicsAPI, name, description, node):
         clactions = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'clopening', 'action'), {})
         return not any(['open' == v for _, v in clactions.items()])
 
-def _checkOpened(customDynamicsAPI, name, description, node):
-    container = description.get('container', None)
-    component = description.get('component', None)
+def _checkStoppedClosing(customDynamicsAPI, name, description, node):
+    return _checkStoppedOpening(customDynamicsAPI, name, description, node)
+
+def checkOpened(customDynamicsAPI, container, component):
     handle, door = getHandleAndDoor(customDynamicsAPI, container, component)
+    openMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMin', door), None)
+    openMaxThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMax', door), None)
+    jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
     if handle is not None:
-        openMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMin', door), None)
-        openMaxThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'openMax', door), None)
-        jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
         return ((openMinThreshold is None) or bool(openMinThreshold < jointValue)) and ((openMaxThreshold is None) or bool(openMaxThreshold > jointValue))
     return True
 
-def _checkClosed(customDynamicsAPI, name, description, node):
+def _checkOpened(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
+    hand = description.get('hand', None)
+    parked = node.get('parked', False)
+    parked = checkParked(customDynamicsAPI, name, hand, parked)
+    node['parked'] = parked
+    return checkOpened(customDynamicsAPI, container, component) and parked
+
+def checkClosed(customDynamicsAPI, container, component):
     handle, door = getHandleAndDoor(customDynamicsAPI, container, component)
     if handle is not None:
         closedMinThreshold = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'clopening', 'closedMin', door), None)
@@ -549,6 +485,15 @@ def _checkClosed(customDynamicsAPI, name, description, node):
         jointValue = customDynamicsAPI['getObjectProperty']((container, door), 'jointPosition')
         return ((closedMinThreshold is None) or bool(closedMinThreshold < jointValue)) and ((closedMaxThreshold is None) or bool(closedMaxThreshold > jointValue))
     return True
+
+def _checkClosed(customDynamicsAPI, name, description, node):
+    container = description.get('container', None)
+    component = description.get('component', None)
+    hand = description.get('hand', None)
+    parked = node.get('parked', False)
+    parked = checkParked(customDynamicsAPI, name, hand, parked)
+    node['parked'] = parked
+    return checkClosed(customDynamicsAPI, container, component) and parked
 
 def _checkBroughtNear(customDynamicsAPI, name, description, node):
     trajector = description.get('trajector', None)
@@ -609,7 +554,9 @@ def _getParkingArmConditions(customDynamicsAPI, name, description, node):
     waypoints = [wpPU, wpxyU, wpUZ, wpZ]
     tolerances = [[tolP, tolU], [tolxy, tolU], [tolU, tolZ], [tolZ]]
     entities = {'handP': handP, 'handQ': handQ, 'handParkedP': handParkedP, 'handParkedQ': handParkedQ, 'entryHeight': entryHeight}
-    return [_makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+    return [_makeGoal({'hand': hand}, 'stoppedOpening'),
+            _makeGoal({'hand': hand}, 'stoppedClosing'),
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
                       numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
 def _getArmNearingItemHandleConditions(customDynamicsAPI, name, description, node):
@@ -700,7 +647,7 @@ def _getLoweringItemConditions(customDynamicsAPI, name, description, node):
     if description.get('matchOrientation', False) is True:
         placementQ = customDynamicsAPI['getObjectProperty']((container,), 'orientation')
     entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'destination': [container, component]}, node['numerics'])
-    itemEntryHeight = getItemEntryHeight(entryHeight, itemInHandP, itemInHandQ)
+    itemEntryHeight = entryHeight + stubbornTry(lambda : pybullet.rotateVector(itemInHandQ, itemInHandP))[2]
     #For lowering item:
     #  we want p: item at placement
     #  We can achieve p by a lowering process that maintains xy: itemXY at placementXY
@@ -720,7 +667,6 @@ def _getLoweringItemConditions(customDynamicsAPI, name, description, node):
     waypoints = [wpp, wpxy, wpz]
     tolerances = [[tolp], [tolxy], [tolz]]
     entities = {'handP': handP, 'itemP': itemP, 'placementP': placementP, 'entryHeight': entryHeight}
-    print('Placement', customDynamicsAPI['getObjectProperty']((item,), 'at'), placementP, itemP)
     return [_makeGoal({'item': item, 'hand': hand}, 'pickedItem'),
             _makeGoal({'relatum': container}, 'near', numerics={'position': node['numerics'].get('position', None)}),
             _makeGoal({'container': container, 'component': node['numerics'].get('component', None), 'hand': freeHand}, 'opened'),
@@ -743,53 +689,83 @@ def _getTransferringAndUprightingConditions(customDynamicsAPI, name, description
     hand = description['hand']
     container = description['container']
     amount = description['amount']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    return [_makeGoal({'amount': amount, 'container': container, 'hand': hand, 'item': item, 'pouredType': pouredType}, 'transferredContents',
-                      numerics={'positionInHand': positionInHand, 'orientationInHand': orientationInHand})]
+    handLink = getHandLink(customDynamicsAPI, name, hand)
+    handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
+    handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
+    entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': container}, {})
+    _, handParkedQ, _ = getParkedPose(customDynamicsAPI, name, hand)
+    #For uprighting:
+    #  we want U: hand at parked orientation
+    #  We can achieve U by an uprighting process that maintains z: handZ at entryHeight
+    conU = ['equalq', 'handQ', 'handParkedQ']
+    tolU = [0.99, 0.95]
+    constraintConjunctions = [[conU]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpU = [[handP[0], handP[1], entryHeight], handParkedQ, None, None, None, None, None]
+    waypoints = [wpU]
+    tolerances = [[tolU]]
+    entities = {'handP': handP, 'handQ': handQ, 'handParkedQ': handParkedQ, 'entryHeight': entryHeight}
+    return [_makeGoal({'amount': amount, 'container': container, 'hand': hand, 'item': item, 'pouredType': pouredType}, 'transferredContents'),
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+                      numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
 def _getTransferringContentsConditions(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
     container = description['container']
+    down = customDynamicsAPI['getDown']()
     handLink = getHandLink(customDynamicsAPI, name, hand)
-    orientationHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    containerPosition = customDynamicsAPI['getObjectProperty']((container,), 'position')
-    containerOrientation = customDynamicsAPI['getObjectProperty']((container,), 'orientation')
-    pouringAxis = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'axis'), [1,0,0])
-    position = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'pouring', 'into', 'point'))
-    position, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerPosition, containerOrientation, position, [0,0,0,1])
-    tippedOrientation = getTippedOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis)
-    entryOrientation = getUprightOrientation(customDynamicsAPI, item, itemOrientation, pouringAxis)
+    _, handParkedQ, _ = getParkedPose(customDynamicsAPI, name, hand)
+    handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
+    handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
+    itemP = customDynamicsAPI['getObjectProperty']((item,), 'position')
+    itemQ = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
     entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': container}, {})
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    position = [position[0], position[1], getItemEntryHeight(entryHeight, positionInHand, orientationHand)]
+    containerP = customDynamicsAPI['getObjectProperty']((container,), 'position')
+    containerQ = customDynamicsAPI['getObjectProperty']((container,), 'orientation')
+    containerEntryInContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'pouring', 'into', 'point'))
+    containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](containerP, containerQ, containerEntryInContainer, [0,0,0,1])
+    pourPointInItem = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'point'))
+    pourAxisInItem = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'axis'))
+    pourPoint, _ = customDynamicsAPI['objectPoseRelativeToWorld'](itemP, itemQ, pourPointInItem, [0,0,0,1])
+    pourPointInHand, itemQInHand = customDynamicsAPI['objectPoseRelativeToObject'](handP, handQ, pourPoint, itemQ)
+    pouringAxisInItem = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'axis'), [1,0,0])
+    pourAxis = stubbornTry(lambda : pybullet.rotateVector(itemQ, pourAxisInItem))
+    pourAxisInHand = stubbornTry(lambda : pybullet.rotateVector(itemQInHand, pourAxisInItem))
+    entryHeightPourPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, pourPointInHand))[2]
+    if item in getHeld(customDynamicsAPI, name, hand):
+        fwdInHand = [1,0,0]
+        facingYaw = getFacingYaw(customDynamicsAPI, container, containerP)
+        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        #axis = numpy.cross(mixAxisInHand, down)
+        #angle = math.acos(numpy.dot(mixAxisInHand, down))
+        tippedQ = quatFromVecPairs((fwdInHand, fwd), (pourAxisInHand, down))
+    else:
+        tippedQ = [0,0,0,1]
+    #For tipping:
+    #  we want XYZ/T: pourpointXY at container entryXY, handZ at entryHeight, hand orientation at parked orientation
+    #  we can achieve XYZ/T by a tipping process that maintains XYZ: pourpointXY at container entryXY, handZ at entryHeight
+    #  we can achieve XY by a bringing process that maintains Z: handZ at entryHeight
+    # we can achieve Z by a lifting process
+    conT = ['equalq', 'itemQ', 'tippedQ']
+    tolT = [0.99, 0.95]
+    conXY = ['equalxy', 'pourPoint', 'containerEntry']
+    tolXY = [0.01, 0.05]
+    conZ = ['equalz', 'handP', 'entryHeight']
+    tolZ = [0.01, 0.05]
+    constraintConjunctions = [[conT, conXY, conZ], [conXY, conZ], [conZ]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpXYZT = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedQ, None, pourPointInHand, None, None, None]
+    wpXYZ = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], handParkedQ, None, pourPointInHand, None, None, None]
+    wpZ = [[handP[0], handP[1], entryHeight], handParkedQ, None, None, None, None, None]
+    waypoints = [wpXYZT, wpXYZ, wpZ]
+    tolerances = [[tolT, tolXY, tolZ], [tolXY, tolZ], [tolZ]]
+    entities = {'handP': handP, 'itemQ': itemQ, 'tippedQ': tippedQ, 'entryHeight': entryHeight, 'pourPoint': pourPoint, 'containerEntry': containerEntry}
     return [_makeGoal({'hand': hand, 'item': item}, 'pickedItem'),
             _makeGoal({'relatum': container}, 'near'),
-            _makeGoal({'hand': hand, 'item': item, 'relatum': container}, 'tippedItemAboveLocation',
-                      numerics={'position': position, 'tippedOrientation': tippedOrientation, 'entryOrientation': entryOrientation, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand, 'entryHeight': entryHeight})]
+            _makeGoal({'hand': hand, 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
+                      numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
 
-def _getTippingItemAboveLocationConditions(customDynamicsAPI, name, description, node):
-    relatum = description['relatum']
-    item = description['item']
-    hand = description['hand']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    position = node['numerics'].get('position', None)
-    entryOrientation = node['numerics'].get('entryOrientation', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    return [_makeGoal({'hand': hand, 'item': item, 'relatum': relatum}, 'preparedItemForTipping',
-                      numerics={'position': position, 'entryOrientation': entryOrientation, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand, 'entryHeight': entryHeight})]
-    
-def _getPreparingItemForTippingConditions(customDynamicsAPI, name, description, node):
-    relatum = description['relatum']
-    item = description['item']
-    hand = description['hand']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryOrientation = node['numerics'].get('entryOrientation', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    return [_makeGoal({'hand': hand, 'item': item, 'relatum': relatum}, 'liftedItemToPouringEntry',
-                      numerics={'entryOrientation': entryOrientation, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand, 'entryHeight': entryHeight})]
-                      
 def _getConstraintFollowingConditions(customDynamicsAPI, name, description, node):
     constraintConjunctions = description['constraintConjunctions']
     hand = description['hand']
@@ -896,7 +872,6 @@ def _getMixingConditions(customDynamicsAPI, name, description, node): # containe
         tippedOrientation = quatFromVecPairs((fwdInHand, fwd), (mixAxisInHand, down))
     else:
         tippedOrientation = [0,0,0,1]
-    #tippedOrientation = customDynamicsAPI['getObjectProperty']((tool,), ('fn', 'mixing', 'tipped'), [-0.707,0,0,0.707])
     #For mixing:
     #  we want pc/ad: mixpoint at containerEntry and mixaxis down
     #  we can achieve pc/ad by a lowering process that maintains ad/xy: mixaxis down and mixpointXY at containerEntryXY
@@ -1099,13 +1074,23 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
     upright = bool(uTh > abs(numpy.dot(pourAxis, down)))
     node['upright'] = upright
     pourPointInHand, shakerOrientationInHand = customDynamicsAPI['objectPoseRelativeToObject'](handP, handQ, pourPoint, shakerQ)
+    pourAxisInHand = stubbornTry(lambda : pybullet.rotateVector(shakerOrientationInHand, pourAxisInShaker))
     entryHeightPourPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, pourPointInHand))[2]
-    tippedOrientation = getTippedOrientation(customDynamicsAPI, shaker, shakerQ, pourAxis)
+    if shaker in getHeld(customDynamicsAPI, name, hand):
+        fwdInHand = [1,0,0]
+        facingYaw = getFacingYaw(customDynamicsAPI, item, itemP)
+        fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+        #axis = numpy.cross(mixAxisInHand, down)
+        #angle = math.acos(numpy.dot(mixAxisInHand, down))
+        tippedQ = quatFromVecPairs((fwdInHand, fwd), (pourAxisInHand, down))
+    else:
+        tippedQ = [0,0,0,1]
+
     _, shakerParkedQ = customDynamicsAPI['objectPoseRelativeToWorld']([0,0,0], handParkedQ, [0,0,0], shakerOrientationInHand)
     handHoverP = handParkedP
     handHoverQ = handParkedQ
     if pouring:
-        handHoverP, handHoverQ = customDynamicsAPI['handPoseToBringObjectToPose'](pourPointInHand, shakerOrientationInHand, [containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedOrientation)
+        handHoverP, handHoverQ = customDynamicsAPI['handPoseToBringObjectToPose'](pourPointInHand, shakerOrientationInHand, [containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedQ)
     if not allSprinkled:
         #For sprinkling:
         #  we want xy/ad/ez: pourpointXY at containerEntryXY and pouraxis down and handZ at entryHeight
@@ -1122,7 +1107,7 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
         tolpo = [0.99, 0.9]
         constraintConjunctions = [[conad, conxy, conez], [conxy, conez], [conez]]
         #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
-        wpadxyez = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedOrientation, None, pourPointInHand, shakerOrientationInHand, None, None]
+        wpadxyez = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], tippedQ, None, pourPointInHand, shakerOrientationInHand, None, None]
         wpxyez = [[containerEntry[0], containerEntry[1], entryHeightPourPoint], handHoverQ, None, pourPointInHand, None, None, None]
         wpez = [[handHoverP[0], handHoverP[1], entryHeight], handHoverQ, None, None, None, None, None]
         waypoints = [wpadxyez, wpxyez, wpez]
@@ -1137,8 +1122,8 @@ def _getSprinklingConditions(customDynamicsAPI, name, description, node):
         #  we want po/xy/ez: handOrientation at parkedOrientation and handXY at container entryXY and handZ at entryHeight
         #  we can achieve po/xy/ez by an uprighting process
         ### TODO: a more robust uprighting: take shakerOrientationInHand into account rather than assume hand pitch 0 will do it
-        roll, _, yaw = stubbornTry(lambda : pybullet.getEulerFromQuaternion(handQ))
-        handUprightQ = stubbornTry(lambda : pybullet.getQuaternionFromEuler((roll, 0, yaw)))
+        #roll, _, yaw = stubbornTry(lambda : pybullet.getEulerFromQuaternion(handQ))
+        handUprightQ = handParkedQ#stubbornTry(lambda : pybullet.getQuaternionFromEuler((roll, 0, yaw)))
         conpo = ['equalq', 'handQ', 'handUprightQ']
         ##conpo = ['equalq', 'handQ', 'handParkedQ']
         tolpo = [0.99, 0.9]
@@ -1168,10 +1153,6 @@ def _getCuttingItemConditions(customDynamicsAPI, name, description, node):
     hand = description.get('hand', None)
     tool = description.get('tool', None)
     storage = description.get('storage', None)
-    location = customDynamicsAPI['getObjectProperty']((item,), 'at')
-    if location is not None:
-        node['location'] = location
-    location = node.get('location', None)
     down = customDynamicsAPI['getDown']()
     handLink = getHandLink(customDynamicsAPI, name, hand)
     handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
@@ -1277,7 +1258,9 @@ def _getNearingConditionsA(customDynamicsAPI, name, description, node):
     waypoints = [wppf, wpf, wpz]
     tolerances = [[tolp, tolf], [tolf2], [tolz]]
     entities = {'zeroP': [0,0,0], 'baseP': baseP, 'baseFwdP': baseFwdP, 'baseQ': baseQ, 'targetP': targetPosition, 'targetQ': facingQ}
-    return [_makeGoal({}, 'stoppedHands'),
+    return [_makeGoal({'hand': 'hand_left'}, 'parkedArm'),
+            _makeGoal({'hand': 'hand_right'}, 'parkedArm'),
+            _makeGoal({}, 'stoppedHands'),
             _makeGoal({'hand': 'base', 'constraintConjunctions': constraintConjunctions, 'isTop': True}, 'constraintFollowed',
                       numerics={'waypoints': waypoints, 'tolerances': tolerances, 'entities': entities})]
                       
@@ -1326,63 +1309,13 @@ def _suggestTransferredAndStored(customDynamicsAPI, name, description, node):
 def _suggestTransferredAndUprighted(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
-    itemPosition = customDynamicsAPI['getObjectProperty']((item,), 'position')
-    itemOrientation = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
-    pouringPoint = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'point'))
-    positionInHand, orientationInHand = getObjectInHand(customDynamicsAPI, name, hand, item, itemPoint=pouringPoint)
-    targetPosition, _ = customDynamicsAPI['objectPoseRelativeToWorld'](itemPosition, itemOrientation, pouringPoint, [0,0,0,1])
-    targetOrientation = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'outof', 'upright'), [0,0,0,1])
-    return [_makeProcess({'amount': description['amount'], 'container': description['container'], 'hand': hand, 'item': item, 'pouredType': description['pouredType']}, 'transferringAndUprighting',
-                         numerics={'positionInHand': positionInHand, 'orientationInHand': orientationInHand},
-                         target={hand: {'target': [targetPosition, targetOrientation], 'positionInLink': positionInHand, 'orientationInLink': orientationInHand, 'clopeningAction': None}})]
+    return [_makeProcess({'amount': description['amount'], 'container': description['container'], 'hand': hand, 'item': item, 'pouredType': description['pouredType']}, 'transferringAndUprighting')]
                          
 def _suggestTransferredContents(customDynamicsAPI, name, description, node):
     item = description['item']
     hand = description['hand']
     container = description['container']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    return [_makeProcess({'container': container, 'hand': hand, 'item': item}, 'transferringContents',
-                         numerics={'positionInHand': positionInHand, 'orientationInHand': orientationInHand})]
-
-def _suggestTippedItemAboveLocation(customDynamicsAPI, name, description, node):
-    item = description['item']
-    hand = description['hand']
-    relatum = description['relatum']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    position = node['numerics'].get('position', None)
-    orientation = node['numerics'].get('tippedOrientation', None)
-    return [_makeProcess({'hand': hand, 'item': item, 'relatum': relatum}, 'tippingItemAboveLocation',
-                         numerics={'position': position, 'entryOrientation': node['numerics'].get('entryOrientation'), 'entryHeight': entryHeight, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand},
-                         target={hand: {'target': [position, orientation], 'positionInLink': positionInHand, 'orientationInLink': orientationInHand, 'clopeningAction': None}})]
-
-def _suggestPreparedItemForTipping(customDynamicsAPI, name, description, node): # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
-    item = description['item']
-    hand = description['hand']
-    relatum = description['relatum']
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    positionHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    orientationHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    position, _ = customDynamicsAPI['objectPoseRelativeToWorld'](positionHand, orientationHand, positionInHand, orientationInHand)
-    position = [position[0], position[1], getItemEntryHeight(entryHeight, positionInHand, orientationHand)]
-    orientation = node['numerics'].get('entryOrientation', None)
-    return [_makeProcess({'hand': hand, 'item': item, 'relatum': relatum}, 'preparingItemForTipping',
-                         numerics={'position': position, 'entryOrientation': node['numerics'].get('entryOrientation'), 'entryHeight': entryHeight, 'positionInHand': positionInHand, 'orientationInHand': orientationInHand},
-                         target={hand: {'target': [position, orientation], 'positionInLink': None, 'orientationInLink': None, 'clopeningAction': None}})]
-
-def _suggestLiftedItemToPouringEntry(customDynamicsAPI, name, description, node): # hand, item, relatum | entryOrientation, positionInHand, orientationInHand, entryHeight
-    item = description['item']
-    hand = description['hand']
-    positionInHand, orientationInHand = node['numerics'].get('positionInHand', None), node['numerics'].get('orientationInHand', None)
-    entryHeight = node['numerics'].get('entryHeight', None)
-    orientation = node['numerics'].get('entryOrientation', None)
-    parkedP, _, _ = getParkedPose(customDynamicsAPI, name, hand)
-    position = [parkedP[0], parkedP[1], entryHeight]
-    return [_makeProcess({'hand': hand, 'item': item}, 'liftingItemToPouringEntry',
-                         numerics={},
-                         target={hand: {'target': [position, orientation], 'positionInLink': None, 'orientationInLink': orientationInHand, 'clopeningAction': None}})]
+    return [_makeProcess({'container': container, 'hand': hand, 'item': item}, 'transferringContents')]
 
 def _suggestConstraintFollowed(customDynamicsAPI, name, description, node): # constraintConjunctions, hand, isTop | waypoints, tolerances
     waypoints = node['numerics']['waypoints']
@@ -1441,7 +1374,8 @@ def _suggestShapedAndParked(customDynamicsAPI, name, description, node):
     handLink = getHandLink(customDynamicsAPI, name, hand)
     aabb = customDynamicsAPI['getObjectProperty']((name, handLink), 'aabb')
     aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, customDynamicsAPI['getObjectProperty']((name,), ('fn', 'grasping', 'graspingActivationRadius', hand), 0.5))
-    closeShapes = [x for x in customDynamicsAPI['checkOverlap'](aabbAdj) if (shapedType == customDynamicsAPI['getObjectProperty']((x,), 'type') and (destination != customDynamicsAPI['getObjectProperty']((x,), 'at')))]
+    closeShapes = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
+    closeShapes = [x for x in closeShapes if (shapedType == customDynamicsAPI['getObjectProperty']((x,), 'type') and (destination != customDynamicsAPI['getObjectProperty']((x,), 'at')))]
     closeShape = None
     containedShape = None
     itemHasShape, shapes = containsShapes(customDynamicsAPI, item, shapedType)
@@ -1481,13 +1415,17 @@ def _suggestOpened(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
     hand = description.get('hand', None)
-    return [{'type': 'P', 'description': {'process': 'opening', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    if not checkOpened(customDynamicsAPI, container, component):
+        return [{'type': 'P', 'description': {'process': 'opening', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    return [_makeProcess({'hand': hand}, 'parkingArm')]
 
 def _suggestClosed(customDynamicsAPI, name, description, node):
     container = description.get('container', None)
     component = description.get('component', None)
     hand = description.get('hand', None)
-    return [{'type': 'P', 'description': {'process': 'closing', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    if not checkClosed(customDynamicsAPI, container, component):
+        return [{'type': 'P', 'description': {'process': 'closing', 'container': container, 'component': component, 'hand': hand}, 'children': []}]
+    return [_makeProcess({'hand': hand}, 'parkingArm')]
 
 def _suggestStoppedOpening(customDynamicsAPI, name, description, node):
     hand = description.get('hand', None)
@@ -1507,7 +1445,7 @@ def _suggestStoppedClosing(customDynamicsAPI, name, description, node):
             target[hand] = {'clopeningAction': None}
     else:
         target[hand] = {'clopeningAction': None}
-    return [{'type': 'P', 'description': {'process': 'stopOpening'}, 'target': target}] # bpt: (clopening, closing, _Hand): (False)
+    return [{'type': 'P', 'description': {'process': 'stopClosing'}, 'target': target}] # bpt: (clopening, closing, _Hand): (False)
 
 def _suggestBakedItem(customDynamicsAPI, name, description, node):
     item = description.get('item', None)
@@ -1561,9 +1499,6 @@ goalCheckers = {
     'transferredAndStored': _checkTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _checkTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _checkTransferredContents, # amount, container, hand, item, pouredType |
-    'tippedItemAboveLocation': _checkTippedItemAboveLocation, # hand, item, relatum | position, tippedOrientation, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'preparedItemForTipping': _checkPreparedItemForTipping, # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'liftedItemToPouringEntry': _checkLiftedItemToPouringEntry, # hand, item, relatum | entryOrientation, positionInHand, orientationInHand, entryHeight
     'constraintFollowed': _checkConstraintFollowed, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixedAndStored': _checkMixedAndStored, # container, hand, mixedType, storage, tool, toolLink |
     'mixedAndUprighted': _checkMixedAndUprighted, # container, hand, mixedType, storage, tool, toolLink |
@@ -1576,6 +1511,7 @@ goalCheckers = {
     'cutItem': _checkCutItem, # hand, item, storage, tool |
     'armTriggeredPortalHandle': _checkArmTriggeredPortalHandle,
     'stoppedOpening': _checkStoppedOpening,
+    'stoppedClosing': _checkStoppedClosing,
     'opened': _checkOpened,
     'closed': _checkClosed,
     'broughtNear': _checkBroughtNear,
@@ -1596,9 +1532,6 @@ processSuggesters = {
     'transferredAndStored': _suggestTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _suggestTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _suggestTransferredContents, # amount, container, hand, item, pouredType |
-    'tippedItemAboveLocation': _suggestTippedItemAboveLocation, # hand, item, relatum | position, tippedOrientation, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'preparedItemForTipping': _suggestPreparedItemForTipping, # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'liftedItemToPouringEntry': _suggestLiftedItemToPouringEntry, # hand, item, relatum | entryOrientation, positionInHand, orientationInHand, entryHeight
     'constraintFollowed': _suggestConstraintFollowed, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixedAndStored': _suggestMixedAndStored, # container, hand, mixedType, storage, tool, toolLink |
     'mixedAndUprighted': _suggestMixedAndUprighted, # container, hand, mixedType, tool, toolLink |
@@ -1631,8 +1564,6 @@ conditionListers = {
     'transferringAndStoring': _getTransferringAndStoringConditions, # amount, container, hand, item, pouredType, storage |
     'transferringAndUprighting': _getTransferringAndUprightingConditions, # amount, container, hand, item, pouredType, storage | positionInHand, orientationInHand
     'transferringContents': _getTransferringContentsConditions, # container, hand, item | positionInHand, orientationInHand
-    'tippingItemAboveLocation': _getTippingItemAboveLocationConditions, # hand, item, relatum | position, tippedOrientation, entryOrientation, positionInHand, orientationInHand, entryHeight
-    'preparingItemForTipping': _getPreparingItemForTippingConditions, # hand, item, relatum | position, entryOrientation, positionInHand, orientationInHand, entryHeight
     'constraintFollowing': _getConstraintFollowingConditions, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixingAndStoring': _getMixingAndStoringConditions, # container, hand, mixedType, storage, tool, toolLink |
     'mixingAndUprighting': _getMixingAndUprightingConditions, # container, hand, mixedType, tool, toolLink |
@@ -1759,7 +1690,7 @@ def getParkedPose(customDynamicsAPI, name, hand):
     armBasePosition = customDynamicsAPI['getObjectProperty']((name, armBaseLink), 'position')
     armBaseOrientation = customDynamicsAPI['getObjectProperty']((name, armBaseLink), 'orientation')
     armParkedPosition = list(customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'parkedPosition', hand)))
-    height = None
+    armParkedOrientation = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'parkedOrientation', hand))
     handLink = getHandLink(customDynamicsAPI, name, hand)
     handPosition = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
     aabbHand = customDynamicsAPI['getObjectProperty']((name, handLink), 'aabb')
@@ -1771,61 +1702,30 @@ def getParkedPose(customDynamicsAPI, name, hand):
     aabbMax = [max([x[0] for x in aabbsMax]), max([x[1] for x in aabbsMax]), max([x[2] for x in aabbsMax])]
     aabbMinAdj = list(aabbMin)
     aabbMinAdj[2] = -0.01
-    overlaps = [x for x in customDynamicsAPI['checkOverlap']([aabbMinAdj, aabbMax]) if (x != name) and (x not in held) and customDynamicsAPI['getObjectProperty']((x,), ('fn', 'canContain'), False)]
-    maxO = None
-    for overlap in overlaps:
-        aabbsOverlap = [(x, customDynamicsAPI['getObjectProperty']((overlap, x), 'aabb')) for x in customDynamicsAPI['getObjectProperty']((overlap,), ('fn', 'containment', 'links'), [])]
-        valid = [(x[1][1][2], overlap, x[0]) for x in aabbsOverlap if bool(x[1][1][2] < handPosition[2])]
-        if 0 < len(valid):
-            maxC = max(valid)
-            if (maxO is None) or bool(maxO[0] < maxC[0]):
-                maxO = maxC
-    if maxO is not None:
-        height = getComponentHeight(customDynamicsAPI, maxO[1], maxO[2]) + maxO[0]
-    armParkedOrientation = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'parkedOrientation', hand))
-    #previousZ = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'processGardening', 'parkZ', hand), None)
+    #height = None
+    #overlaps = [x for x in customDynamicsAPI['checkOverlap']([aabbMinAdj, aabbMax]) if (x[0] != name) and (x[0] not in held) and customDynamicsAPI['getObjectProperty']((x[0],), ('fn', 'canContain'), False)]
+    #maxO = None
+    #for overlap in overlaps:
+    #    obj, lnk = overlap
+    #    if lnk not in customDynamicsAPI['getObjectProperty']((obj,), ('fn', 'containment', 'links'), []):
+    #        continue
+    #    aabbOverlap = customDynamicsAPI['getObjectProperty']((obj, lnk), 'aabb')
+    #    if aabbOverlap[1][2] < handPosition[2]:
+    #        if (maxO is None) or bool(maxO[0] < aabbOverlap[1][2]):
+    #            maxO = [aabbOverlap[1][2], obj, lnk]
+    #if maxO is not None:
+    #    height = getComponentHeight(customDynamicsAPI, maxO[1], maxO[2]) + maxO[0]
+    height = getComponentUnderHandHeight(customDynamicsAPI, name, hand, handPosition, defaultHeight=None)
     if height is not None:
         armParkedPosition[2] = height
-    #customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'processGardening', 'parkZ', hand), previousZ)
-    armParkedOrientation = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'parkedOrientation', hand))
     parkedPosition, parkedOrientation = customDynamicsAPI['objectPoseRelativeToWorld'](armBasePosition, armBaseOrientation, armParkedPosition, armParkedOrientation)
     return parkedPosition, parkedOrientation, height
 
-def getParkingTarget(customDynamicsAPI, name, hand):
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    handPosition = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    parkedPosition, parkedOrientation, height = getParkedPose(customDynamicsAPI, name, hand)
-    parkedPosition = list(parkedPosition)
-    previousXY = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'processGardening', 'auxiliary', 'parkXY', hand), None)
-    if height is None:
-        previousXY = None
-    else:
-        if bool(0.02 < abs(handPosition[2] - height)):
-            if previousXY is None:
-                previousXY = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')[:2]
-            parkedPosition = [previousXY[0], previousXY[1], height]
-        else:
-            previousXY = None
-    customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'processGardening', 'auxiliary', 'parkXY', hand), previousXY)
-    #movedObjs = [x[0][0] for x in customDynamicsAPI['getObjectProperty']((name,), ('fn', 'grasping', 'actuallyGrasping', hand), [])]
-    #ats = [customDynamicsAPI['getObjectProperty']((x,), 'at') for x in movedObjs]
-    #if any([x is not None for x in ats]):
-    #    handLinkPosition = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    #    parkedPosition[2] = handLinkPosition[2] + 0.01
-    return {hand: {'target': [parkedPosition, parkedOrientation], 'positionInLink': None, 'orientationInLink': None, 'clopeningAction': None}}
-
 def getContainerComponent(customDynamicsAPI, item):
-    component = None
-    container = customDynamicsAPI['getObjectProperty']((item,), 'at')
-    if container is not None:
-        for candidate in customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'links'), []):
-            if 0 < len(customDynamicsAPI['checkClosestPoints']((container, candidate), (item,), maxDistance=0.1)):
-                component = candidate
-                break
-    return container, component
-
-def getItemHandlePosition(customDynamicsAPI, name, handleLink, item):
-    return customDynamicsAPI['getObjectProperty']((item, handleLink), 'position')
+    retq = customDynamicsAPI['getObjectProperty']((item,), 'atComponent')
+    if retq is None:
+        return None, None
+    return retq
 
 def getComponentHeight(customDynamicsAPI, container, component):
     retq = None
@@ -1840,19 +1740,6 @@ def getComponentHeight(customDynamicsAPI, container, component):
             if container is None:
                 break
     return retq
-
-#def getTippedOrientation(itemOrientation, pouringAxis):
-#    v = stubbornTry(lambda : pybullet.rotateVector(itemOrientation, pouringAxis))
-#    dv = numpy.dot(v, [0,0,-1])
-#    if dv > 0.95:
-#        return itemOrientation
-#    if dv < -0.95:
-#        return stubbornTry(lambda: pybullet.multiplyTransforms([0,0,0], [1,0,0,0], [0,0,0], itemOrientation))[1]
-#    av = numpy.cross(v, [0,0,-1])
-#    sa = numpy.linalg.norm(av)
-#    av = av/sa
-#    print("XXX", list(av), sa)
-#    return stubbornTry(lambda: pybullet.multiplyTransforms([0,0,0], pybullet.getQuaternionFromAxisAngle(list(av), math.asin(sa)), [0,0,0], itemOrientation))[1]
 
 def toOriginAABB(aabb, pos):
     return [[x-y for x,y in zip(aabb[0],pos)], [x-y for x,y in zip(aabb[1],pos)]]
@@ -1887,8 +1774,8 @@ def getItemPlacement(customDynamicsAPI, name, item, container, component, target
     def feasible(customDynamicsAPI, aabb, component, targetPosition, handRadius, handGraspTolerance, itemHeight):
         aabbAdj = [[x+y for x,y in zip(aabb[0], targetPosition)], [x+y for x,y in zip(aabb[1], targetPosition)]]
         aabbAdjWide = [[aabbAdj[0][0]-handRadius, aabbAdj[0][1]-handRadius, aabbAdj[0][2]], [aabbAdj[1][0]+handRadius, aabbAdj[1][1]+handRadius, aabbAdj[1][2]]]
-        overlaps = customDynamicsAPI['checkOverlap'](aabbAdj)
-        wideOverlaps = customDynamicsAPI['checkOverlap'](aabbAdjWide)
+        overlaps = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
+        wideOverlaps = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdjWide)])
         badOverlaps = []
         for e in overlaps:
             if _acceptable(e):
@@ -1917,8 +1804,18 @@ def getItemPlacement(customDynamicsAPI, name, item, container, component, target
         components = list(set(components).intersection(allowedComponents))
     if 'heap' == arrangement:
         component = components[0]
+        aabbComponent = customDynamicsAPI['getObjectProperty']((container, component), 'aabb')
+        aabbOverComponent = [list(aabbComponent[0]), list(aabbComponent[1])]
+        aabbOverComponent[0][2] = aabbComponent[1][2]
+        aabbOverComponent[1][2] = aabbComponent[1][2] + 0.02
+        overlaps = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbOverComponent)])
+        for e in overlaps:
+            if (e not in [name, item, container]):
+                atContainer, atComponent = customDynamicsAPI['getObjectProperty']((e,), 'at')
+                if (container == atContainer) and (component == atComponent):
+                    return None, None
         targetPosition = list(customDynamicsAPI['getObjectProperty']((container, component), 'position'))
-        targetPosition[2] = customDynamicsAPI['getObjectProperty']((container, component), 'aabb')[1][2] - aabb[0][2]
+        targetPosition[2] = aabbComponent[1][2] - aabb[0][2]
         return component, targetPosition
     ### Assuming side by side arrangement
     if component is not None:
@@ -1934,16 +1831,8 @@ def getContents(customDynamicsAPI, item, heightBonus=None):
     aabb = customDynamicsAPI['getObjectProperty']((item,), 'aabb')
     if heightBonus is not None:
         aabb = [aabb[0], [aabb[1][0], aabb[1][1], aabb[1][2] + heightBonus]]
-    overlaps = customDynamicsAPI['checkOverlap'](aabb)
+    overlaps = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabb)])
     return [x for x in overlaps if (item == customDynamicsAPI['getObjectProperty']((x,), 'at')) or (heightBonus is not None)]
-
-def getSprinklee(customDynamicsAPI, name, item, sprinkledType, previous):
-    if (previous is not None) and (item == customDynamicsAPI['getObjectProperty']((previous,), 'at')):
-        return previous
-    for x in getContents(customDynamicsAPI, item):
-        if (name != x) and (sprinkledType != customDynamicsAPI['getObjectProperty']((x,), 'type')) and (not customDynamicsAPI['getObjectProperty']((x,), ('fn', 'canLine'), False)):
-            return x
-    return None
 
 def checkUpright(itemOrientation, pouringAxis, th=None):
     if th is None:
@@ -1986,19 +1875,6 @@ def checkParked(customDynamicsAPI, name, hand, previous):
     else:
         return pose6DDistance(parkedPosition, parkedOrientation, handPosition, handOrientation, 0.1, 0.95)
 
-def checkParkedXY(customDynamicsAPI, name, hand, previous):
-    handLink = getHandLink(customDynamicsAPI, name, hand)
-    handPosition = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-    handOrientation = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
-    parkedPosition, parkedOrientation, _ = getParkedPose(customDynamicsAPI, name, hand)
-    handPosition = [handPosition[0], handPosition[1], 0]
-    parkedPosition = [parkedPosition[0], parkedPosition[1], 0]
-    if previous:
-        return pose6DDistance(parkedPosition, parkedOrientation, handPosition, handOrientation, 0.5, 0.7)
-    else:
-        return pose6DDistance(parkedPosition, parkedOrientation, handPosition, handOrientation, 0.1, 0.95)
-
-
 def checkTransferred(customDynamicsAPI, name, item, pouredType, amount, container):
     if amount is not None:
         return amount <= len([x for x in getContents(customDynamicsAPI, container) if (pouredType == customDynamicsAPI['getObjectProperty']((x,), 'type'))])
@@ -2006,11 +1882,18 @@ def checkTransferred(customDynamicsAPI, name, item, pouredType, amount, containe
 
 def checkItemInContainer(customDynamicsAPI, name, item, container, allowedComponents=None):
     ## TODO: test whether transitive closure of at includes container
-    inLargeContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'largeConcavity'), False) and (item in customDynamicsAPI['checkOverlap'](customDynamicsAPI['getObjectProperty']((container,), 'aabb')))
-    retq = (customDynamicsAPI['getObjectProperty']((item,), 'position') is None) or (container == customDynamicsAPI['getObjectProperty']((item,), 'at')) or inLargeContainer
-    if allowedComponents is not None:
-        container, component = getContainerComponent(customDynamicsAPI, item)
-        retq = retq and (component in allowedComponents)
+    if (customDynamicsAPI['getObjectProperty']((item,), 'position') is None):
+        return True
+    overlaps = [x[0] for x in customDynamicsAPI['checkOverlap'](customDynamicsAPI['getObjectProperty']((container,), 'aabb'))]
+    inLargeContainer = customDynamicsAPI['getObjectProperty']((container,), ('fn', 'containment', 'largeConcavity'), False) and (item in overlaps)
+    at = customDynamicsAPI['getObjectProperty']((item,), 'atComponent')
+    atContainer = None
+    atComponent = None
+    if at is not None:
+        atContainer, atComponent = at
+    retq = (container == atContainer) or inLargeContainer
+    if retq and (allowedComponents is not None):
+        retq = retq and (atComponent in allowedComponents)
     return retq
 
 def checkBakedContents(customDynamicsAPI, item, bakedType):
@@ -2100,6 +1983,7 @@ def updateGarden(name, customDynamicsAPI):
         nodeType, status = checkStatus(customDynamicsAPI, name, garden[cr])
         sibling = siblings.get(cr, None)
         goalStatuses[cr] = status
+        #print('POP', cr, garden[cr]['description'], garden[cr].get('children'), status)
         if 'G' == nodeType:
             garden[cr]['previousStatus'] = status
             if status:
@@ -2137,8 +2021,10 @@ def updateGarden(name, customDynamicsAPI):
         if 0 < len(garden[cr]['children']):
             fc = garden[cr]['children'][0]
             toVisit.append(fc)
+            #print('    PUSH first ', fc, garden[fc]['description'])
         if status and (sibling is not None):
             toVisit.append(sibling)
+            #print('    PUSH sibling ', sibling, garden[sibling]['description'])
     toKeep = set([])
     toVisit = [0]
     while toVisit:
@@ -2149,8 +2035,8 @@ def updateGarden(name, customDynamicsAPI):
         if nodeIdx not in toKeep:
             garden.pop(nodeIdx)
 
-    for k in sorted(garden.keys()):
-        print(k, garden[k]['description'], garden[k].get('children'), garden[k].get('previousStatus'))
+    #for k in sorted(garden.keys()):
+    #    print(k, garden[k]['description'], garden[k].get('children'), garden[k].get('previousStatus'))
 
     # customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'processGardening', 'garden'), garden)
     for actuator, processes in bodyProcesses.items():
@@ -2188,196 +2074,5 @@ OBSERVATION VERY IMPORTANT:
     CONSEQUENCES:
         ALWAYS COMPUTE WAYPOINTS "ABSOLUTELY": the positions etc. of the trajectors cannot themselves be used as waypoints
         use Schmitt-Trigger pattern: precise thresholds when going False->True, tolerant thresholds once True.
-
-
-Suggest pattern: suppose we want constraint conjunctions (a,b), (b,c), (c,d) achieved in this order
-
-Then need garden
-G:constrainedWaypoint([c,d b,c a,b])
-  P:constrainingWaypoint([c,d b,c a,b]) # current waypoint obeys both c and d
-    G:constrainedWaypoint([b,c a,b])
-      P:constrainingWaypoint([b,c a,b]) # current waypoint obeys both b and c
-        G:constrainedWaypoint([a,b])
-          P:constrainingWaypoint([a,b]) # current waypoint obeys both a and b
-            []
-For slicing:
-  we want ~paad: slicepoint oscillates along blade axis over item and bladeaxis points down
-  we can achieve ~paad by an oscillating process that maintains adSR: bladeaxis down and blade in XYZ segregion just over item
-  we can achieve adSR by a lowering process that maintains adSRXY: bladeaxis down and blade in XY segregion over item
-  we can achieve adSRXY by a tipping process that maintains SRXYez: blade in XY segregion over item and handZ at entryHeight
-  we can achieve SRXYez by a bringing process that maintains ezpo: handZ at entryHeight and handOrientation at parkedOrientation
-  we can achieve ezpo by a lifting process that maintains po: handOrientation at parkedOrientation
-
-Just one issue: the process must actually maintain the constraints it says; i.e., a final waypoint is in general not sufficient. A quick and dirty alt. is to have the constraints be tolerant once met.
-
-'''
-
-'''
-G:notifiedCompletion() // goal status never set to True -- wait for sim update loop to detect it and respond accordingly
-  P:notifyCompletion() // bpt: (processGardening, completed): (True)
-
-G:noped() // goal never completes, used to stop a goal loop
-  P:notifyCompletion() // bpt: None
-
-
-G:near
-  P:nearing
-    G:alignedBaseYaw
-      P:aligningBaseYaw
-        G:baseCentered
-          P:baseCentering
-
-G:parkedArm
-  P:parkingArm
-    G:parkedXY
-      P:parkingXY
-        G:liftedToEntry
-          P:liftingToEntry
-
-G:armNearItemHandle
-  P:lowering (arm, handle)
-    G:aboveLocation (arm, handle)
-      P:hoveringLocation (arm, handle)
-        G:liftedToEntry
-
-G:pickedItem
-  P:pickingItem
-    G:grasped
-    G:parkedArm
-
-G:placedItem
-  P:placingItem
-    G:loweredItemAt,ungrasped,parked
-      P:lowering (item)
-        G:aboveLocation (item)
-          P:hoveringLocation (item)
-            G:liftedToEntry
-
-G:transferred
-  P:transferring
-    G:transferredContents,itemUpright,placedItem
-      P:transferringContents
-        G:aboveLocation (pourPoint)
-      P:itemUprighting
-
-G:mixed
-  P:mixing
-    G:mixedContents,itemUpright,placedItem
-      P:mixingContents
-        G:mixerTippedAbove, lowered(mixer point)
-         P:mixerTippingAbove
-           G:aboveLocation (item)
-
-G:shaped
-  P:shaping
-   G:depositedShape
-     P:depositingShape
-       G:createdShape,placedNearShape
-         P:creatingShape
-           G:lowering (hand)
-         P:placingNearShape
-           G:placedItem
-
-G:baked
-  P:baking
-    G:placedItem
-
-
-G:opened(Item, _Hand)
-  P:opening(Item,_Hand) // bpt: (clopening, opening, _Hand): (True); (kinematicControl, target, _Hand): (next pos in handle traj, at-orn)
-    G:near(Item)...
-    G:armTriggeredPortalHandle(Item,_Hand)
-      P:movingArm...
-    G:parkedArm(_Hand)
-      P:movingArm...
-G:stoppedOpening(_Hand)
-  P:stopOpening(_Hand) // bpt: (clopening, opening, _Hand): (False)
-
-G:closed(Item, _Hand)
-  P:closing(Item,_Hand) // bpt: (clopening, closing, _Hand): (True); (kinematicControl, target, _Hand): (next pos in handle traj, at-orn)
-    G:near(Item)...
-    G:armTriggeredPortalHandle(Item,_Hand)
-      P:movingArm...
-    G:parkedArm(_Hand)
-      P:movingArm...
-G:stoppedClosing(_Hand)
-  P:stopClosing(_Hand) // bpt: (clopening, closing, _Hand): (False)
-
-G:grasped(Item, _Hand)
-  P:grasping(Item, _Hand) // bpt: (grasping, intendToGrasp, _Hand): (+Item)
-    G:opened(at(Item))...
-    G:stoppedOpening(_OHand)...
-    G:near(Item)
-      P:movingBaseTo(Item) // bpt: (kinematicControl, target, base): (Item pos, at-orn)
-    G:armNearItemHandle(Item, _Hand) 
-      P:movingArm(_Hand) // bpt: (kinematicControl, target, _Hand): (above Item handle pos, at-orn)
-
-G:ungrasped(Item, _Hand)
-  P: ungrasping(Item, _Hand) // bpt: (grasping, intendToGrasp, _Hand): (-Item)
-
-G:pickedItem(Item, _Hand)
-  P:pickingItem(Item, at(Item), _Hand)
-    G:grasped(Item, _Hand)...
-    G:parkedArm(_Hand)
-
-G:placedItem(Item, Container, _Hand, _SourceContainer, _SourceComponent)
-  P:placingItem(Item, Container, _Hand, _SourceContainer, _SourceComponent) OR ungrasping(Item, _Hand) OR parkingArm(hand) depending on item/arm pos
-    G:pickedItem(Item,_Hand);closed(_SourceContainer, _SourceComponent, _OHand);parked(_OHand);near(Container);opened(Container,_Component,_OHand)
-
-G:broughtNear(Trajector, Hand, Relatum)
-  P:bringingNear(Trajector, Hand, Relatum, SourceContainer, SourceComponent)
-    G:pickedItem(Item, Hand, SourceContainer, SourceComponent)
-    G:closed(SourceContainer, SourceComponent, _OHand)
-    G:near(Relatum)
-
-G:bakedItem(Item, BakedType, Oven, Destination)
-  P:bakingItem(Item, BakedType, Oven, Destination)
-    G:placedItem(Item, Oven) OR G:placedItem(Item,Destination,Oven,_OvenComponent) depending on baked status
-
-G:transferred(Item, Hand, Container, Storage, Amount, PouredType)
-  P:transferring(Item, Hand, Container, Storage)
-    G:broughtNear(Item, Hand, Container)
-      OR
-    G:parkedArm(Hand)
-      OR
-    G:placedItem(Item, Hand, Storage)
-
-G:sprinkled(Item, SprinkledType, Hand, Shaker, Storage)
-  P:sprinkling(Item, SprinkledType, Hand, Shaker, Storage)
-    G:broughtNear(Shaker, Hand, Item)
-      OR
-    G:parkedArm(Hand)
-      OR
-    G:placedItem(Shaker, Hand, Storage)
-
-G:mixed(Item, MixedType, Hand, Mixer, Storage)
-  P:mixing(Item, MixedType, Hand, Mixer, Storage)
-    G:broughtNear(Mixer, Hand, Item)
-      OR
-    G:placedItem(Mixer, Hand, Storage)
-
-G:shaped(Item, ShapedType, Hand, Storage)
-  P:shaping(Item, ShapedType, Hand, Storage)
-    G:near(Item)
-      OR
-    G:placedItem(_NewShape,Hand,Storage)
-
-// seeding, peeling, sprinkling; 
-G:completedGestureTriggeredProcess(Item, Instrument, Process, _THand)
-  P:completingGestureTriggeredProcess(Item, Instrument, Process) // bpt: (kinematicControl, target, _THand): (pose)
-    G:pickedItem(Instrument)
-    G:broughtItem(Item, working location, _PHand)
-
-//mashing, grinding, mixing;
-G:completedGestureTriggeredProcess(Item, Instrument, Process, _THand)
-  P:completingGestureTriggeredProcess(Item, Instrument, Process) // bpt: (kinematicControl, target, _THand): (pose)
-    G:pickedItem(Instrument)
-    G:near(Item)
-
-//baking, boiling, freezing
-G:completedPlacementTriggeredProcess(Item, ...)
-  P:completingPlacementTriggeredProcess(Item, ...)
-    G:placedItem(Item, ...)
-
 '''
 

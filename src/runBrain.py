@@ -26,6 +26,7 @@ from abe_sim.shaping import updateShaping, updateShaped
 from abe_sim.stickiness import updateStickiness
 from abe_sim.mixing import updateMixing
 from abe_sim.clopening import updateClopening
+from abe_sim.temperature import updateTemperatureGetter
 
 from abe_sim.customDynamics import buildSpecs
 from abe_sim.commands import commandFns
@@ -101,6 +102,8 @@ def handleINT(signum, frame):
 
 def runBrain():
     parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='Text at the bottom of help')
+    parser.add_argument('-fdf', '--frameDurationFactor', default="1.0", help='Attempts to adjust the ratio of real time of frame to simulated time of frame. A frame will always last, in real time, at least as long as it is computed. WARNING: runBrain will become unresponsive to HTTP API calls if this is set too low. Recommended values are above 0.2.')
+    parser.add_argument('-sfr', '--simFrameRate', default="240", help='Number of frames in one second of simulated time. Should be above 60.')
     parser.add_argument('-a', '--agent', help='Name of the agent to control in the loaded scene')
     parser.add_argument('-g', '--useGUI', action='store_true', help='Flag to enable the GUI')
     parser.add_argument('-o', '--useOpenGL', action='store_true', help='Flag to enable hardware acceleration. Warning: often unstable on Linux; ignored on MacOS')
@@ -108,7 +111,7 @@ def runBrain():
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation]')
     arguments = parser.parse_args()
-    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening]]
+    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening]]
 
     objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
     objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}
@@ -121,6 +124,8 @@ def runBrain():
     gravity = (0,0,-10) # TODO argparse
     loadWorldDump = arguments.loadWorldDump
     loadObjectList = arguments.loadObjectList
+    frameDurationFactor = float(arguments.frameDurationFactor)
+    sfr = int(arguments.simFrameRate)
     agentName = arguments.agent
 
     if useOpenGL:
@@ -132,9 +137,9 @@ def runBrain():
     ## WORLD CREATION line: adjust this as needed on your system.
     # TODO if you want to run headless: useGUI=False in World()
     if not isAMac:
-        w = world.World(pybulletOptions = pybulletOptions, useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge)
+        w = world.World(pybulletOptions = pybulletOptions, useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge, simFrameRate=sfr)
     else:
-        w = world.World(pybulletOptions = "", useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge) # Hardware-accelerated rendering. Seems necessary on newer Macs.
+        w = world.World(pybulletOptions = "", useGUI=useGUI, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge, simFrameRate=sfr) # Hardware-accelerated rendering. Seems necessary on newer Macs.
         
     w.setGravity(gravity)
 
@@ -206,8 +211,9 @@ def runBrain():
                         w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), todos["goals"][0])
                         todos["goals"] = todos["goals"][1:]
         stepEnd = time.time()
+        #print(w.getObjectProperty(('abe', 'hand_right_roll'), 'position'), w.getObjectProperty(('abe', 'hand_right_roll'), 'linearVelocity'), pybullet.getContactPoints(bodyA=w._kinematicTrees['abe']['idx']))
         if not isAMac:
-            time.sleep(max((1.0/240.0)-(stepEnd-stepStart), 0))
+            time.sleep(max((frameDurationFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))
 
 if "__main__" == __name__:
     runBrain()
