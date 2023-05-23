@@ -4430,5 +4430,1125 @@
                             }
                      }
               }
+       },
+       {
+              "type": "SaltParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Salt/salt_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "SaltBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Salt/salt_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "CoarseSaltParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/CoarseSalt/coarse_salt_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CoarseSaltBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/CoarseSalt/coarse_salt_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "DevilsFoodCakeMixParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/DevilsFoodCakeMix/devils_food_cake_mix_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "DevilsFoodCakeMixBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/DevilsFoodCakeMix/devils_food_cake_mix_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "CornFlake",
+              "simtype": "ktree",
+              "filename": "3DObjects/CornFlakes/corn_flake.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CornFlakeBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/CornFlakes/corn_flake_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "Oat",
+              "simtype": "ktree",
+              "filename": "3DObjects/Oats/oat.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "OatsBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Oats/oat_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "JarLid",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jar/jarLid.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Jar",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jar/jar.urdf",
+              "fn": {
+                     "canContain": true,
+                     "graspable": true,
+                     "containment": {
+                            "height": {
+                                   "jar": 0.5
+                            },
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 -0.059606,
+                                                 0,
+                                                 0.138908
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   },
+                                   "into": {
+                                          "link": "jar",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0.1
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "heap",
+                                   "axis": null
+                            },
+                            "links": [
+                                   "jar"
+                            ]
+                     }
+              }
+       },
+       {
+              "type": "CoconutOilParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/CoconutOil/CoconutOilParticle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CoconutOilJar",
+              "simtype": "ktree",
+              "filename": "3DObjects/CoconutOil/CoconutOilJar.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "jar"
+                            ],
+                            "hp": {
+                                   "jar": 240
+                            },
+                            "axis": {
+                                   "jar": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "jar": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "MolassesParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Molasses/MolassesParticle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "MolassesJar",
+              "simtype": "ktree",
+              "filename": "3DObjects/Molasses/MolassesJar.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "jar"
+                            ],
+                            "hp": {
+                                   "jar": 240
+                            },
+                            "axis": {
+                                   "jar": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "jar": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "Marshmallow",
+              "simtype": "ktree",
+              "filename": "3DObjects/Marshmallow/Marshmallow.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "MarshmallowBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Marshmallow/MarshmallowBag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "BrownSugarParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/BrownSugar/brown_sugar_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BrownSugarBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/BrownSugar/brown_sugar_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "Almond",
+              "simtype": "ktree",
+              "filename": "3DObjects/Almond/Almond.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "AlmondBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Almond/AlmondBag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "Walnut",
+              "simtype": "ktree",
+              "filename": "3DObjects/Walnut/Walnut.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "HalfWalnut",
+              "simtype": "ktree",
+              "filename": "3DObjects/Walnut/HalfWalnut.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "WalnutBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Walnut/WalnutBag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "GreenOnion",
+              "simtype": "ktree",
+              "filename": "3DObjects/GreenOnion/GreenOnion.urdf",
+              "fn": {
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GreenOnionSlice",
+              "simtype": "ktree",
+              "filename": "3DObjects/GreenOnion/GreenOnionSlice.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GreenOnionLeaf",
+              "simtype": "ktree",
+              "filename": "3DObjects/GreenOnion/GreenOnionLeaf.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GarlicClove",
+              "simtype": "ktree",
+              "filename": "3DObjects/Garlic/GarlicClove.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "GarlicPeel",
+              "simtype": "ktree",
+              "filename": "3DObjects/Garlic/GarlicPeel.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Garlic",
+              "simtype": "ktree",
+              "filename": "3DObjects/Garlic/Garlic.urdf",
+              "fn": {
+                     "peelable": true,
+                     "graspable": true,
+                     "peeling": {
+                            "radius": 0.1
+                     }
+              },
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
+       },
+       {
+              "type": "SweetPotato",
+              "simtype": "ktree",
+              "filename": "3DObjects/SweetPotato/sweet_potato.urdf",
+              "fn": {
+                     "peelable": true,
+                     "graspable": true,
+                     "peeling": {
+                            "radius": 0.1
+                     }
+              },
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
+       },
+       {
+              "type": "SweetPotatoPeel",
+              "simtype": "ktree",
+              "filename": "3DObjects/SweetPotato/sweet_potato_peel.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "PeeledSweetPotato",
+              "simtype": "ktree",
+              "filename": "3DObjects/SweetPotato/peeled_sweet_potato.urdf",
+              "fn": {
+                     "graspable": true,
+                     "mashable": true,
+                     "mashing": {
+                            "masherVelocity": 0.1,
+                            "radius": 0.1
+                     }
+              },
+              "customStateVariables": {
+                     "mashing": {
+                            "hp": 4
+                     }
+              }
+       },
+       {
+              "type": "SweetPotatoParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/SweetPotato/sweet_potato_particle.urdf",
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "VanillaBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Vanilla/vanilla_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "VanillaParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Vanilla/vanilla_particle.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "TabascoParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Tabasco/tabascoParticle.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "TabascoBottle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Tabasco/tabasco_bottle.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "cap"
+                            ],
+                            "hp": {
+                                   "cap": 240
+                            },
+                            "axis": {
+                                   "cap": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0.014015
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "black": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "BreadKnife",
+              "simtype": "ktree",
+              "filename": "3DObjects/BreadKnife/bread_knife.urdf",
+              "fn": {
+                     "canCut": true,
+                     "graspable": true,
+                     "cutting": {
+                            "links": [
+                                   "blade"
+                            ],
+                            "length": {
+                                   "blade": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            },
+                            "axis": {
+                                   "blade": [
+                                          0,
+                                          0,
+                                          -1
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CookieSheet",
+              "simtype": "ktree",
+              "filename": "3DObjects/CookieSheet/cookie_sheet.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canContain": true,
+                     "lineable": true,
+                     "lining": {
+                            "axis": [
+                                   1,
+                                   0,
+                                   0
+                            ],
+                            "point": [
+                                   0,
+                                   0,
+                                   0
+                            ]
+                     },
+                     "containment": {
+                            "height": {
+                                   "bottom": 0.25
+                            },
+                            "links": [
+                                   "bottom"
+                            ],
+                            "pouring": {
+                                   "into": {
+                                          "link": "bottom",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "LemonJuiceParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/LemonJuice/lemonJuiceParticle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "LemonJuice",
+              "simtype": "ktree",
+              "filename": "3DObjects/LemonJuice/lemonJuiceBottle.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "body"
+                            ],
+                            "hp": {
+                                   "body": 240
+                            },
+                            "axis": {
+                                   "body": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0.12425
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "body": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "FreshBasil",
+              "simtype": "ktree",
+              "filename": "3DObjects/FreshBasil/fresh_basil.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
        }
 ]
