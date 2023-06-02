@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="cucumber_slice">
+  <link name="cu">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="CucumberSliceOutside.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="CucumberSliceOutside.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="cumber">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="CucumberSliceInside.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="CucumberSliceInside.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="cu_to_cumber" type="fixed">
+    <parent link="cu"/>
+    <child link="cumber"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+</robot>
+

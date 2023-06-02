@@ -918,10 +918,10 @@
                             }
                      },
                      "temperature": {
-                         "fridge_shelf_top": 4,
-                         "fridge_shelf_bottom": 4,
-                         "freezer_shelf_top": -8,
-                         "freezer_shelf_bottom": -8
+                            "fridge_shelf_top": 4,
+                            "fridge_shelf_bottom": 4,
+                            "freezer_shelf_top": -8,
+                            "freezer_shelf_bottom": -8
                      }
               }
        },
@@ -1145,7 +1145,7 @@
               },
               "customStateVariables": {
                      "temperature": {
-                         "shelf": 180
+                            "shelf": 180
                      }
               }
        },
@@ -1844,6 +1844,18 @@
               "type": "Butter",
               "simtype": "ktree",
               "filename": "3DObjects/Butter/butter.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "transportable": true,
+                     "graspable": true,
+                     "skimmable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "SaltedButter",
+              "simtype": "ktree",
+              "filename": "3DObjects/SaltedButter/salted_butter.urdf",
               "fn": {
                      "temperatureUpdateable": true,
                      "transportable": true,
@@ -5820,5 +5832,786 @@
                      "graspable": true
               },
               "customStateVariables": {}
+       },
+       {
+              "type": "FreshOregano",
+              "simtype": "ktree",
+              "filename": "3DObjects/FreshOregano/fresh_oregano.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "FreshCilantro",
+              "simtype": "ktree",
+              "filename": "3DObjects/FreshCilantro/fresh_cilantro.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Cucumber",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/cucumber.urdf",
+              "fn": {
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CucumberSlice",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/cucumber_slice.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "SaltedButterParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/SaltedButterBag/salted_butter_particle.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.3,
+                            "substanceRadius": 0.3
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },
+       {
+              "type": "SaltedButterBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/SaltedButterBag/salted_butter_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "EggWhitesBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/EggWhiteBag/egg_whites_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ],
+                                          "upright": [
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 1
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "HeavyCreamParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/HeavyCream/heavy_cream_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "HeavyCreamBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/HeavyCream/heavy_cream_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ],
+                                          "upright": [
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 1
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "HardBoiledEgg",
+              "simtype": "ktree",
+              "filename": "3DObjects/HardboiledEgg/hardboiled_egg.urdf",
+              "fn": {
+                     "crackable": true,
+                     "graspable": true,
+                     "temperatureUpdateable": true,
+                     "cracking": {
+                            "force": 3
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "PeeledHardBoiledEgg",
+              "simtype": "ktree",
+              "filename": "3DObjects/HardboiledEgg/peeled_hardboiled_egg.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "MixedGreens",
+              "simtype": "ktree",
+              "filename": "3DObjects/MixedGreens/mixed_greens.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "MixedGreensBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/MixedGreens/mixed_greens_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ],
+                                          "upright": [
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 1
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "Celery",
+              "simtype": "ktree",
+              "filename": "3DObjects/Celery/celery.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CeleryStick",
+              "simtype": "ktree",
+              "filename": "3DObjects/Celery/celeryStick.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CeleryLeaves",
+              "simtype": "ktree",
+              "filename": "3DObjects/Celery/celeryLeaves.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CreamCheese",
+              "simtype": "ktree",
+              "filename": "3DObjects/CreamCheese/cream_cheese.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "transportable": true,
+                     "graspable": true,
+                     "skimmable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CreamCheeseParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/CreamCheeseBag/cream_cheese_particle.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.3,
+                            "substanceRadius": 0.3
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },
+       {
+              "type": "CreamCheeseBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/CreamCheeseBag/cream_cheese_bag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "bag",
+                            "axis": {
+                                   "bag": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.066,
+                                                 0.08
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "GreenCabbage",
+              "simtype": "ktree",
+              "filename": "3DObjects/GreenCabbage/green_cabbage.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CookedChicken",
+              "simtype": "ktree",
+              "filename": "3DObjects/CookedChicken/cooked_chicken.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Colander",
+              "simtype": "ktree",
+              "filename": "3DObjects/Colander/colander.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "canContain": true,
+                     "graspable": true,
+                     "containment": {
+                            "height": {
+                                   "colander": 0.5
+                            },
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 1,
+                                                 0,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 -0.163574,
+                                                 0.000107,
+                                                 0.1801145
+                                          ],
+                                          "tipped": [
+                                                 0,
+                                                 -0.707,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   },
+                                   "into": {
+                                          "link": "colander",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "heap",
+                                   "axis": null
+                            },
+                            "links": [
+                                   "colander"
+                            ]
+                     }
+              }
+       },
+       {
+              "type": "Sift",
+              "simtype": "ktree",
+              "filename": "3DObjects/Sift/sift.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BakingPaper",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingPaper/baking_paper.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "PlasticWrap",
+              "simtype": "ktree",
+              "filename": "3DObjects/PlasticWrap/plastic_wrap.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "MuffinTin",
+              "simtype": "ktree",
+              "filename": "3DObjects/MuffinTin/muffin_tin.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "PaperBakingCup",
+              "simtype": "ktree",
+              "filename": "3DObjects/PaperBakingCup/paper_baking_cup.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canContain": true,
+                     "temperatureUpdateable": true,
+                     "containment": {
+                            "height": {
+                                   "paper_baking_cup": 0.5
+                            },
+                            "links": [
+                                   "paper_baking_cup"
+                            ],
+                            "pouring": {
+                                   "into": {
+                                          "link": "paper_baking_cup",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "WireRack",
+              "simtype": "ktree",
+              "filename": "3DObjects/WireRack/wire_rack.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "FoodProcessor",
+              "simtype": "ktree",
+              "filename": "3DObjects/FoodProcessor/food_processor.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canContain": true,
+                     "containment": {
+                            "height": {
+                                   "lid": 0.5
+                            },
+                            "links": [
+                                   "lid"
+                            ],
+                            "pouring": {
+                                   "into": {
+                                          "link": "lid",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Mixer",
+              "simtype": "ktree",
+              "filename": "3DObjects/Mixer/mixer.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "EggSeparator",
+              "simtype": "ktree",
+              "filename": "3DObjects/EggSeparator/EggSeparator.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Microwave",
+              "simtype": "ktree",
+              "filename": "3DObjects/Microwave/Microwave.urdf",
+              "fn": {
+                     "clopenable": true,
+                     "clopening": {
+                            "clopenableLinks": [
+                                   "microwave_door"
+                            ],
+                            "radius": {
+                                   "microwave_door": 0.7
+                            },
+                            "openingAngle": {
+                                   "microwave_door": -2.57
+                            },
+                            "closingAngle": {
+                                   "microwave_door": 0
+                            },
+                            "openMin": {
+                                   "microwave_door": -3.14
+                            },
+                            "openMax": {
+                                   "microwave_door": -1.5
+                            },
+                            "closedMin": {
+                                   "microwave_door": -0.1
+                            },
+                            "closedMax": {
+                                   "microwave_door": 0.1
+                            },
+                            "handle": {
+                                   "microwave_door": "microwave_door_handle"
+                            }
+                     },
+                     "containment": {
+                            "facing": [
+                                   0,
+                                   -1,
+                                   0
+                            ],
+                            "height": {
+                                   "base": 0.5
+                            },
+                            "arrangement": {
+                                   "mode": "side-by-side",
+                                   "axis": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            },
+                            "links": [
+                                   "base"
+                            ],
+                            "door": {
+                                   "base": "microwave_door"
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "clopening": {
+                            "action": {
+                                   "microwave_door": null
+                            }
+                     }
+              }
        }
 ]

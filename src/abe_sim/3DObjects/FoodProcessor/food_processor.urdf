@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<robot name="food_processor">
+  <link name="base">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="FoodProcessorBase.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="FoodProcessorBase.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="button1">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="FoodProcessorButton1.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="FoodProcessorButton1.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="button2">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="FoodProcessorButton2.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="FoodProcessorButton2.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="container">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="FoodProcessorContainer.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="FoodProcessorContainerCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="handle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="FoodProcessorHandle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="FoodProcessorHandleCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="lid">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="FoodProcessorLid.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="FoodProcessorLidCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="base_to_button1" type="fixed">
+    <parent link="base"/>
+    <child link="button1"/>
+    <origin rpy="0 0 0" xyz="0.107478 -0.019266 0.036119"/>
+  </joint>
+  <joint name="base_to_button2" type="fixed">
+    <parent link="base"/>
+    <child link="button2"/>
+    <origin rpy="0 0 0" xyz="0.107478 0.01746 0.036119"/>
+  </joint>
+  <joint name="base_to_container" type="fixed">
+    <parent link="base"/>
+    <child link="container"/>
+    <origin rpy="0 0 0" xyz="-0.000202 -0.006589 0.17242"/>
+  </joint>
+  <joint name="base_to_handle" type="fixed">
+    <parent link="base"/>
+    <child link="handle"/>
+    <origin rpy="0 0 0" xyz="0 0.11815 0.168385"/>
+  </joint>
+  <joint name="base_to_lid" type="fixed">
+    <parent link="base"/>
+    <child link="lid"/>
+    <origin rpy="0 0 0" xyz="0 0 0.247811"/>
+  </joint>
+</robot>
+

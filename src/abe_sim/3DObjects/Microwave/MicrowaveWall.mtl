@@ -1,0 +1,12 @@
+# Blender 3.4.1 MTL File: 'FoodProcessorWIP.blend'
+# www.blender.org
+
+newmtl metalLight.010
+Ns 92.156860
+Ka 1.000000 1.000000 1.000000
+Kd 0.120456 0.126000 0.122976
+Ks 0.250000 0.250000 0.250000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
