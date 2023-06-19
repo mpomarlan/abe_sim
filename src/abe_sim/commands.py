@@ -150,7 +150,15 @@ def toSetObjectPose(requestData, w, agentName, todos):
     w.setObjectProperty((oname,), 'position', position)
     w.setObjectProperty((oname,), 'orientation', orientation)
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
-    
+
+def toGetObjectConstants(requestData, w, agentName, todos):
+    oname = requestData.get("object")
+    if oname not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
+    mass = w.getObjectProperty((oname,), "mass")
+    dispositions = {k:v for k,v in w._kinematicTrees[oname]["fn"].items() if isinstance(v, bool)}
+    return requests.status_codes.codes.ALL_OK, {'response': {"mass": mass, "dispositions": dispositions}}
+
 def toGetStateUpdates(requestData, w, agentName, todos):
     def _active(p, garden):
         for e in p['children']:
@@ -200,6 +208,14 @@ def toGetStateUpdates(requestData, w, agentName, todos):
             halfYaw = 0.5*updates[name]['joints']['base_y_to_base_yaw']
             updates[name]['orientation'] = {'base': [0,0, math.sin(halfYaw), math.cos(halfYaw)], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
     return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "currentCommand": str(todos["command"]), "abeActions": acts}}
+
+def toPreloadObject(requestData, w, agentName, todos):
+    otype = requestData.get('type', None)
+    if otype not in w._objectKnowledge:
+        return requests.status_codes.codes.NOT_FOUND, {"response": ('World does not have object type %s in its knowledge base' % otype)}
+    ## TODO: add a return value to check that this is ok ...
+    w.preload(otype, None, [0,0,-10])
+    return requests.status_codes.codes.ALL_OK, {'response': 'ok'}
 
 def toGetLocation(requestData, w, agentName, todos):
     def _freeOfContent(o):
@@ -576,6 +592,8 @@ commandFns = {
     "to-set-custom-variable": [processInstantRequest, toSetCustomVariable, None],
     "to-set-object-pose": [processInstantRequest, toSetObjectPose, None],
     "to-get-state-updates": [processInstantRequest, toGetStateUpdates, None],
+    "to-get-object-constants": [processInstantRequest, toGetObjectConstants, None],
+    "to-preload-object": [processInstantRequest, toPreloadObject, None],
     "to-get-location": [processInstantRequest, toGetLocation, None],
     "to-fetch": [processActionRequest, toFetchStart, toFetchEnd],
     "to-portion": [processActionRequest, toPortionStart, toPortionEnd],
