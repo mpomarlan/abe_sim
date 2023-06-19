@@ -416,6 +416,7 @@
                      "graspable": true,
                      "canContain": true,
                      "lineable": true,
+                     "canAbsorb": true,
                      "temperatureUpdateable": true,
                      "lining": {
                             "axis": [
@@ -469,7 +470,16 @@
                             }
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "absorbing": {
+                            "ButterParticle": {
+                                   "hp": 3
+                            }
+                     },
+                     "consuming": {
+                            "accumulator": {}
+                     }
+              }
        },
        {
               "type": "Bread",
@@ -1419,6 +1429,26 @@
               "customStateVariables": {}
        },
        {
+              "type": "BeatenEggParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Egg/beaten_egg_particle.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "transportable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "BeatenEggwhitesParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Egg/beaten_eggwhites_particle.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "transportable": true
+              },
+              "customStateVariables": {}
+       },
+       {
               "type": "EggYolkParticle",
               "simtype": "ktree",
               "filename": "3DObjects/Egg/eggyolk_particle.urdf",
@@ -2352,6 +2382,16 @@
               "type": "CrushedPineapple",
               "simtype": "ktree",
               "filename": "3DObjects/CrushedPineapple/crushedPineapple.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "DrainedCrushedPineapple",
+              "simtype": "ktree",
+              "filename": "3DObjects/CrushedPineapple/drainedCrushedPineapple.urdf",
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true
@@ -3601,6 +3641,16 @@
               "customStateVariables": {}
        },
        {
+              "type": "ThawedCorn",
+              "simtype": "ktree",
+              "filename": "3DObjects/FrozenCornBag/thawed_corn.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
               "type": "FrozenCornBag",
               "simtype": "ktree",
               "filename": "3DObjects/FrozenCornBag/frozen_corn_bag.urdf",
@@ -3813,22 +3863,21 @@
               "customStateVariables": {}
        },
        {
-              "type": "Mayonnaise",
+              "type": "MayonnaiseJar",
               "simtype": "ktree",
-              "filename": "3DObjects/Mayonnaise/mayonnaise.urdf",
+              "filename": "3DObjects/Mayonnaise/mayonnaise_jar.urdf",
               "fn": {
-                     "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
                      "pouring": {
                             "links": [
-                                   "body"
+                                   "jar"
                             ],
                             "hp": {
-                                   "body": 240
+                                   "jar": 240
                             },
                             "axis": {
-                                   "body": [
+                                   "jar": [
                                           0,
                                           1,
                                           0
@@ -3845,8 +3894,8 @@
                                           ],
                                           "point": [
                                                  0,
-                                                 0.03,
-                                                 0.093
+                                                 0.071454,
+                                                 0.163439
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -3861,7 +3910,7 @@
               "customStateVariables": {
                      "pouring": {
                             "hp": {
-                                   "body": 240
+                                   "jar": 240
                             }
                      }
               }
@@ -3870,6 +3919,15 @@
               "type": "BlackBean",
               "simtype": "ktree",
               "filename": "3DObjects/BlackBean/blackBean.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "WashedBlackBean",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackBean/washedBlackBean.urdf",
               "fn": {
                      "graspable": true
               },
@@ -4026,8 +4084,21 @@
               "simtype": "ktree",
               "filename": "3DObjects/Cranberry/cranberry.urdf",
               "fn": {
-                     "absorbable": true,
                      "consumable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedCranberry",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cranberry/chopped_cranberry.urdf",
+              "fn": {
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
               "customStateVariables": {}
        },
@@ -5334,7 +5405,12 @@
               "simtype": "ktree",
               "filename": "3DObjects/Almond/Almond.urdf",
               "fn": {
-                     "graspable": true
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
               "customStateVariables": {}
        },
@@ -5720,6 +5796,7 @@
               "fn": {
                      "graspable": true,
                      "canContain": true,
+                     "canAbsorb": true,
                      "lineable": true,
                      "lining": {
                             "axis": [
@@ -5760,7 +5837,16 @@
                             }
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "absorbing": {
+                            "ButterParticle": {
+                                   "hp": 3
+                            }
+                     },
+                     "consuming": {
+                            "accumulator": {}
+                     }
+              }
        },
        {
               "type": "LemonJuiceParticle",
@@ -6613,5 +6699,289 @@
                             }
                      }
               }
+       },
+       {
+              "type": "FryingPan",
+              "simtype": "ktree",
+              "filename": "3DObjects/FryingPan/frying_pan.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "canContain": true,
+                     "graspable": true,
+                     "containment": {
+                            "height": {
+                                   "fryingPan": 0.5
+                            },
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 1,
+                                                 0,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.163325,
+                                                 0.075924
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   },
+                                   "into": {
+                                          "link": "pan",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "heap",
+                                   "axis": null
+                            },
+                            "links": [
+                                   "pan"
+                            ]
+                     }
+              }
+       },
+       {
+              "type": "GreasedBakingTray",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingTray/greased_baking_tray.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canContain": true,
+                     "canAbsorb": true,
+                     "temperatureUpdateable": true,
+                     "containment": {
+                            "height": {
+                                   "bottom": 0.5
+                            },
+                            "links": [
+                                   "bottom"
+                            ],
+                            "pouring": {
+                                   "into": {
+                                          "link": "bottom",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "multirow",
+                                   "rows": [
+                                          "row_left",
+                                          "row_middle",
+                                          "row_right"
+                                   ],
+                                   "axis": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "absorbing": {
+                            "FlourParticle": {
+                                   "hp": 3
+                            }
+                     },
+                     "consuming": {
+                            "accumulator": {}
+                     }
+              }
+       },
+       {
+              "type": "FlouredBakingTray",
+              "simtype": "ktree",
+              "filename": "3DObjects/BakingTray/floured_baking_tray.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canContain": true,
+                     "temperatureUpdateable": true,
+                     "containment": {
+                            "height": {
+                                   "bottom": 0.5
+                            },
+                            "links": [
+                                   "bottom"
+                            ],
+                            "pouring": {
+                                   "into": {
+                                          "link": "bottom",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "multirow",
+                                   "rows": [
+                                          "row_left",
+                                          "row_middle",
+                                          "row_right"
+                                   ],
+                                   "axis": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "absorbing": {
+                            "FlourParticle": {
+                                   "hp": 3
+                            }
+                     },
+                     "consuming": {
+                            "accumulator": {}
+                     }
+              }
+       },
+       {
+              "type": "GreasedCookieSheet",
+              "simtype": "ktree",
+              "filename": "3DObjects/CookieSheet/greased_cookie_sheet.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canContain": true,
+                     "canAbsorb": true,
+                     "temperatureUpdateable": true,
+                     "containment": {
+                            "height": {
+                                   "bottom": 0.5
+                            },
+                            "links": [
+                                   "bottom"
+                            ],
+                            "pouring": {
+                                   "into": {
+                                          "link": "bottom",
+                                          "point": [
+                                                 0,
+                                                 0,
+                                                 0
+                                          ]
+                                   },
+                                   "outof": {
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            },
+                            "arrangement": {
+                                   "mode": "multirow",
+                                   "rows": [
+                                          "row_left",
+                                          "row_middle",
+                                          "row_right"
+                                   ],
+                                   "axis": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "KitchenSink",
+              "simtype": "ktree",
+              "filename": "3DObjects/KitchenSink/kitchen_sink.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "TrashCan",
+              "simtype": "ktree",
+              "filename": "3DObjects/TrashCan/trash_can.urdf",
+              "immobile": true,
+              "fn": {
+                     "canContain": true,
+                     "containment": {
+                            "facing": [
+                                   0,
+                                   -1,
+                                   0
+                            ],
+                            "height": {
+                                   "trash_can": 0.6
+                            },
+                            "arrangement": {
+                                   "mode": "heap",
+                                   "axis": null
+                            },
+                            "links": [
+                                   "trash_can"
+                            ]
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedApple",
+              "simtype": "ktree",
+              "filename": "3DObjects/Apple/chopped_apple.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true,
+                     "transportable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ToastedAlmond",
+              "simtype": "ktree",
+              "filename": "3DObjects/Almond/toasted_almond.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedAlmond",
+              "simtype": "ktree",
+              "filename": "3DObjects/Almond/chopped_almond.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
        }
 ]
