@@ -33,7 +33,7 @@ def addObjectInstance(w, otype, objKnowledge, position, orientation, linearVeloc
 
 def timestepWorld(w, timestep):
     simFrameRate = w.getSFR()
-    frames = int(timestep*simFrame)
+    frames = int(timestep*simFrameRate)
     for k in range(frames):
         s = time.time()
         w.update()
@@ -244,31 +244,18 @@ objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}
 processKnowledge = json.loads(open('./abe_sim/processknowledge.json').read())
 w = world.World(pybulletOptions="--opengl2", useGUI=True, customDynamics=customDynamics, objectKnowledge=objectTypeKnowledge, processKnowledge=processKnowledge)
 
-toPreload = [
-        ["CrackedEggshellPointyHalf", "CrackedEggshellPointyHalf_0", [0,-1,-10]],
-        ["PeeledPotato", "PeeledPotato_0", [0, -1, -15]]
-    ]
-toPreload += makePreloadList(5, "EggYolkParticle", [-1,-1,-10], 0.05)
-toPreload += makePreloadList(5, "EggWhiteParticle", [-1.1,-1,-10], 0.05)
-toPreload += makePreloadList(20, "PotatoParticle", [-1.2,-1,-10], 0.05)
-toPreload += makePreloadList(6, "PotatoPeel", [-0.7,-1.2,-10], 0.24)
-toPreload += makePreloadList(2, "HalfApple", [-0.7,-1.2,-12], 0.4)
-toPreload += makePreloadList(20, "PepperParticle", [-0.7,-1.2,-11], 0.05)
-
-for oType, name, position in toPreload:
-    preload(w, objectTypeKnowledge[oType], name, position)
 
 w.setGravity((0,0,-10))
 
 floor = addObjectInstance(w, 'Floor', objectTypeKnowledge, (0,0,0), (0,0,0,1))
 kitchenCabinet = addObjectInstance(w, 'KitchenCabinet', objectTypeKnowledge, (0,3,0.15), (0,0,1,0))
 kitchenCounter = addObjectInstance(w, 'KitchenCounter', objectTypeKnowledge, (0,-3,0), (0,0,0,1))
-fridge = addObjectInstance(w, 'Fridge', objectTypeKnowledge, (-3,0,0.1), (0,0,-0.707,0.707))
+fridge = addObjectInstance(w, 'Microwave', objectTypeKnowledge, (-3,0,0.1), (0,0,-0.707,0.707))
 aabbKitchenCounter = w.getObjectProperty((kitchenCounter,), 'aabb')
 
-tomato=addObjectInstance(w, 'Tomato', objectTypeKnowledge, (0,0,3), (0,0,0,1))
-tomato2=addObjectInstance(w, 'Tomato', objectTypeKnowledge, (0,1,0.5), (0,0,0,1))
-tomato3=addObjectInstance(w, 'Tomato', objectTypeKnowledge, (0,1,15.5), (0,0,0,1))
+#tomato=addObjectInstance(w, 'Microwave', objectTypeKnowledge, (0,0,3), (0,0,0,1))
+tomato2=addObjectInstance(w, 'Mixer', objectTypeKnowledge, (0,1,0.5), (0,0,0,1))
+tomato3=addObjectInstance(w, 'CreamCheeseParticle', objectTypeKnowledge, (0,1,15.5), (0,0,0,1))
 timestepWorld(w,7)
 
 abe = addObjectInstance(w, 'Abe', objectTypeKnowledge, (0,0,0), (0,0,0,1))

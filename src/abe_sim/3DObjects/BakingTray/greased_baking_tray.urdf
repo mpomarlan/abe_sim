@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<robot name="greased_bakingtray">
+  <link name="tray">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./tray_visual.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./tray_collision.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="row_middle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.005"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./row.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./row.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="row_left">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.005"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./row.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./row.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="row_right">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.005"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./row.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./row.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="bottom">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.005"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./bottom.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./bottom.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="grease">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.005"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.077" iyz="0" izz="0.087"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="./grease.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="./grease.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="tray_to_row_left" type="fixed">
+    <parent link="tray"/>
+    <child link="row_left"/>
+    <origin rpy="0 0 0" xyz="0 0.069 -0.006"/>
+  </joint>
+  <joint name="tray_to_row_right" type="fixed">
+    <parent link="tray"/>
+    <child link="row_right"/>
+    <origin rpy="0 0 0" xyz="0 -0.069 -0.006"/>
+  </joint>
+  <joint name="tray_to_row_middle" type="fixed">
+    <parent link="tray"/>
+    <child link="row_middle"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.006"/>
+  </joint>
+  <joint name="tray_to_bottom" type="fixed">
+    <parent link="tray"/>
+    <child link="bottom"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <joint name="tray_to_grease" type="fixed">
+    <parent link="tray"/>
+    <child link="grease"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+</robot>
+

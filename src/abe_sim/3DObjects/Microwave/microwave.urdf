@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<robot name="microwave">
+  <link name="base">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveBase.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveBase.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="top">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveTop.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveTop.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="back">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveBack.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveBack.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="wall_left">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveWall.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveWall.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="wall_right">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveWall.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveWall.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="microwave_door">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="MicrowaveDoor.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="MicrowaveDoor.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="microwave_door_handle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveHandle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveHandle.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="wall_front">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveFrontpanel.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveFrontpanel.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="microwave_door_window">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveWindow.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveWindow.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="microwave_display">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="MicrowaveDisplay.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="MicrowaveDisplay.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="base_to_top" type="fixed">
+    <parent link="base"/>
+    <child link="top"/>
+    <origin rpy="0 0 0" xyz="0 -0.07628 0.420125"/>
+  </joint>
+  <joint name="base_to_back" type="fixed">
+    <parent link="base"/>
+    <child link="back"/>
+    <origin rpy="0 0 0" xyz="0 -0.325757 0.208835"/>
+  </joint>
+  <joint name="base_to_wall_left" type="fixed">
+    <parent link="base"/>
+    <child link="wall_left"/>
+    <origin rpy="0 0 0" xyz="0.366999 -0.081001 0.218461"/>
+  </joint>
+  <joint name="base_to_wall_right" type="fixed">
+    <parent link="base"/>
+    <child link="wall_right"/>
+    <origin rpy="0 0 0" xyz="-0.365291 -0.079837 0.222904"/>
+  </joint>
+  <joint name="base_to_wall_front" type="fixed">
+    <parent link="base"/>
+    <child link="wall_front"/>
+    <origin rpy="0 0 0" xyz="-0.260933 0.164735 0.202734"/>
+  </joint>
+  <joint name="wall_front_to_display" type="fixed">
+    <parent link="wall_front"/>
+    <child link="microwave_display"/>
+    <origin rpy="0 0 0" xyz="0.000778 0.02879 0.115587"/>
+  </joint>
+  <joint name="microwave_door_to_handle" type="fixed">
+    <parent link="microwave_door"/>
+    <child link="microwave_door_handle"/>
+    <origin rpy="0 0 0" xyz="-0.277657 0.035952 0.000566"/>
+  </joint>
+  <joint name="microwave_door_to_window" type="fixed">
+    <parent link="microwave_door"/>
+    <child link="microwave_door_window"/>
+    <origin rpy="0 0 0" xyz="-0.013327 0.025425 -0.003215"/>
+  </joint>
+  <joint name="base_to_microwave_door" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="base"/>
+    <child link="microwave_door"/>
+    <origin rpy="0 0 0" xyz="0.141553 0.185465 0.2118"/>
+    <limit effort="1000.0" lower="-2.5" upper="0" velocity="1."/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+</robot>
+

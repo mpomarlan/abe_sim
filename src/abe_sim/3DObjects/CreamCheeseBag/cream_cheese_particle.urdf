@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="cream_cheese_particle">
+  <link name="cream_cheese_particle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="2e-5" ixy="0" ixz="0" iyy="2e-5" iyz="0" izz="2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="CreamCheeseParticle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="CreamCheeseParticle.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+
