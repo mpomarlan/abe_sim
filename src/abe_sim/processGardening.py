@@ -1094,6 +1094,8 @@ def updateSubforest(garden, nodeId, mode, newNodes):
             garden[found]['type'] = n['type']
             if 'target' in n: #P: nodes may need updating targets, because new targets may be computed when suggesting procs based on current world state
                 garden[found]['target'] = n['target']
+            if 'updateable' in n:
+                garden[found]['updateable'] = n['updateable']
             newChildren.append(found)
     garden[nodeId]['children'] = newChildren
 
