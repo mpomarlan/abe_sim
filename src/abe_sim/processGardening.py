@@ -155,6 +155,11 @@ def getAxisInWorld(customDynamicsAPI, item, axis):
 
 def _alwaysFalse(customDynamicsAPI, name, description, node):
     return False
+    
+def _checkWaited(customDynamicsAPI, name, description, node):
+    timeEnd = description.get('timeEnd', 0)
+    timeNow = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'timing', 'timer'))
+    return timeEnd <= timeNow
 
 def _checkNear(customDynamicsAPI, name, description, node):
     relatum = description['relatum']
@@ -297,6 +302,8 @@ def _checkConstraintFollowed(customDynamicsAPI, name, description, node): # cons
     return True
 
 def checkMixed(customDynamicsAPI, name, container, mixedType):
+    if mixedType is None:
+        return all([0 == customDynamicsAPI['getObjectProperty']((x,), ('customStateVariables', 'mingling', 'hp'), 0) for x in getContents(customDynamicsAPI, container)])
     # TODO: needs a smarter check: should be, mixable into mixedType
     notDones = [x for x in getContents(customDynamicsAPI, container) if (mixedType != customDynamicsAPI['getObjectProperty']((x,), 'type')) and (customDynamicsAPI['getObjectProperty']((x,), ('fn', 'mixable')))]
     return 0 == len(notDones)
@@ -386,7 +393,11 @@ def _checkShapedAndParked(customDynamicsAPI, name, description, node):
     parked = node.get('parked', False)
     parked = checkParked(customDynamicsAPI, name, hand, parked)
     node['parked'] = parked
-    return (not containsIngredients(customDynamicsAPI, item, ingredientTypes)[0]) and (not containsShapes(customDynamicsAPI, item, shapedType)[0]) and (not isHoldingObjectOfType(customDynamicsAPI, name, hand, shapedType)[0]) and parked
+    if description.get('itemIsShaped', False):
+        shapingDone = (shapedType == customDynamicsAPI['getObjectProperty']((item,), 'type'))
+    else:
+        shapingDone = (not containsIngredients(customDynamicsAPI, item, ingredientTypes)[0]) and (not containsShapes(customDynamicsAPI, item, shapedType)[0])
+    return shapingDone and (not isHoldingObjectOfType(customDynamicsAPI, name, hand, shapedType)[0]) and parked
 
 def _checkSprinkled(customDynamicsAPI, name, description, node):
     item = description.get('item', None)
@@ -978,10 +989,15 @@ def _getShapingConditions(customDynamicsAPI, name, description, node):
     handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
     itemP = customDynamicsAPI['getObjectProperty']((item,), 'position')
     itemQ = customDynamicsAPI['getObjectProperty']((item,), 'orientation')
+    itemAABB = customDynamicsAPI['getObjectProperty']((item,), 'aabb')
     handParkedP, handParkedQ, _ = getParkedPose(customDynamicsAPI, name, hand)
-    containerEntryInContainer = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'into', 'point'))
-    containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](itemP, itemQ, containerEntryInContainer, [0,0,0,1])
-    containerEntry = [containerEntry[0], containerEntry[1], customDynamicsAPI['getObjectProperty']((item,), 'aabb')[1][2] + 0.05]
+    if description.get('itemIsShaped', False):
+        containerEntryInContainer = [0, 0, (itemAABB[1][2]-itemP[2])]
+        containerEntry = [itemP[0], itemP[1], itemAABB[1][2]]
+    else:
+        containerEntryInContainer = customDynamicsAPI['getObjectProperty']((item,), ('fn', 'containment', 'pouring', 'into', 'point'))
+        containerEntry, _ = customDynamicsAPI['objectPoseRelativeToWorld'](itemP, itemQ, containerEntryInContainer, [0,0,0,1])
+    containerEntry = [containerEntry[0], containerEntry[1], itemAABB[1][2] + 0.05]
     entryHeight = getEntryHeight(customDynamicsAPI, name, {'hand': hand, 'item': item}, {})
     #For shaping:
     #  we want hp/po: hand at container entry+offset and handOrientation at parkedOrientation
@@ -1269,6 +1285,13 @@ def _checkStoppedHands(customDynamicsAPI, name, description, node):
     right = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'kinematicControl', 'target', 'hand_right'))
     return (left is None) and (right is None)
 
+def _suggestWaited(customDynamicsAPI, name, description, node):
+    timeEnd = description.get('timeEnd', 0)
+    timeNow = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'timing', 'timer'))
+    if timeNow < timeEnd:
+        customDynamicsAPI['setFrameStepCount'](1 + math.ceil((timeEnd-timeNow)*customDynamicsAPI['getSFR']()))
+    return [_makeProcess({}, 'waiting')]
+
 def _suggestStoppedHands(customDynamicsAPI, name, description, node):
     return [_makeProcess({}, 'stoppingHands', target={'hand_right': {'target': None}, 'hand_left': {'target': None}})]
 
@@ -1369,7 +1392,16 @@ def _suggestShapedAndParked(customDynamicsAPI, name, description, node):
     destination = description.get('destination', None)
     shapedType = description.get('shapedType', None)
     ingredientTypes = description.get('ingredientTypes', [])
-    ingredientsAvailable, pickedIngredients = containsIngredients(customDynamicsAPI, item, ingredientTypes)
+    if description.get('itemIsShaped', False):
+        ingredientsAvailable, pickedIngredients = False, []
+        itemHasShape, shapes = False, []
+        if (shapedType != customDynamicsAPI['getObjectProperty']((item,), 'type')):
+            ingredientsAvailable, pickedIngredients = True, [item]
+        elif (destination != customDynamicsAPI['getObjectProperty']((item,), 'at')):
+            itemHasShape, shapes = True, [item]
+    else:
+        ingredientsAvailable, pickedIngredients = containsIngredients(customDynamicsAPI, item, ingredientTypes)
+        itemHasShape, shapes = containsShapes(customDynamicsAPI, item, shapedType)
     holdingShape, heldShape = isHoldingObjectOfType(customDynamicsAPI, name, hand, shapedType)
     handLink = getHandLink(customDynamicsAPI, name, hand)
     aabb = customDynamicsAPI['getObjectProperty']((name, handLink), 'aabb')
@@ -1378,7 +1410,6 @@ def _suggestShapedAndParked(customDynamicsAPI, name, description, node):
     closeShapes = [x for x in closeShapes if (shapedType == customDynamicsAPI['getObjectProperty']((x,), 'type') and (destination != customDynamicsAPI['getObjectProperty']((x,), 'at')))]
     closeShape = None
     containedShape = None
-    itemHasShape, shapes = containsShapes(customDynamicsAPI, item, shapedType)
     if 0 < len(shapes):
         containedShape = sorted(shapes)[0]
     if 0 < len(closeShapes):
@@ -1486,6 +1517,7 @@ def _suggestSprinkled(customDynamicsAPI, name, description, node):
   
 goalCheckers = {
     'noped': _alwaysFalse,
+    'waited': _checkWaited, # timeEnd
     'notifiedCompletion': _alwaysFalse,
     'stoppedHands': _checkStoppedHands,
     'near': _checkNear, # relatum | position
@@ -1520,6 +1552,7 @@ goalCheckers = {
 processSuggesters = {
     'notifiedCompletion': _suggestNotifiedCompletion,
     'noped': _suggestNoped,
+    'waited': _suggestWaited, # timeEnd
     'stoppedHands': _suggestStoppedHands,
     'near': _suggestNearA, # relatum | position
     'parkedArm': _suggestParkedArm, # hand | 
@@ -1552,6 +1585,7 @@ processSuggesters = {
     }
 conditionListers = {
     'notifyingCompletion': _emptyList,
+    'waiting': _emptyList, # 
     'nearing': _getNearingConditionsA, # relatum | 
     'stoppingHands': _emptyList,
     'parkingArm': _getParkingArmConditions, # hand |

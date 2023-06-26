@@ -4,7 +4,8 @@ import numpy
 from abe_sim.world import getDictionaryEntry, stubbornTry
 
 def updateTemperatureGetter(name, customDynamicsAPI):
-    backgroundTemperature, heatExchangeCoefficient = customDynamicsAPI['getBackgroundTemperature']()
+    thermalTimeConstant = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'thermal', 'timeConstant'), 1.0)
+    backgroundTemperature, defaultHeatExchangeCoefficient = customDynamicsAPI['getBackgroundTemperature']()
     at = customDynamicsAPI['getObjectProperty']((name,), 'atComponent')
     for l in customDynamicsAPI['getObjectProperty']((name,), 'links'):
         ownTemperature = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'temperature', l), backgroundTemperature)
@@ -13,6 +14,7 @@ def updateTemperatureGetter(name, customDynamicsAPI):
             targetTemperature = atTemperature
         else:
             targetTemperature = backgroundTemperature
-        newTemperature = ownTemperature + heatExchangeCoefficient*(targetTemperature - ownTemperature)
+        dt = 1.0/customDynamicsAPI['getSFR']()
+        nfr = 1.0/customDynamicsAPI['getFrameStepCount']()
+        newTemperature = ownTemperature + (targetTemperature - ownTemperature)*(1-math.exp(-nfr*dt/thermalTimeConstant))
         customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'temperature', l), newTemperature)
-
