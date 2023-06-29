@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot name="floor">
-  <link name="floor">
+<robot name="wall_south">
+  <link name="wall_south">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <mass value="0.00"/>
@@ -8,12 +8,12 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="floor2.obj"/>
+        <mesh filename="wall_south.obj"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="floor2.obj"/>
+        <mesh filename="wall_south.obj"/>
       </geometry>
     </collision>
   </link>

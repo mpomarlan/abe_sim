@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<robot name="wall_east">
+  <link name="wall_east">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="wall_east.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="wall_east.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="doorframe">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="doorframe.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="doorframe.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="door">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="door.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="door.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="doorknob">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="1.9e-5" ixy="0" ixz="0" iyy="6.8e-6" iyz="0" izz="1.2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="doorknob.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="doorknob.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="wall_to_doorframe" type="fixed">
+    <parent link="wall_east"/>
+    <child link="doorframe"/>
+    <origin rpy="0 0 0" xyz="7.964 -0.1 0"/>
+  </joint>
+  <joint name="wall_to_door" type="fixed">
+    <parent link="wall_east"/>
+    <child link="door"/>
+    <origin rpy="0 0 0" xyz="7.964 -0.1 0"/>
+  </joint>
+  <joint name="wall_to_doorknob" type="fixed">
+    <parent link="wall_east"/>
+    <child link="doorknob"/>
+    <origin rpy="0 0 0" xyz="8.60948 -0.1 0"/>
+  </joint>
+</robot>
+

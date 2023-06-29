@@ -1,0 +1,12 @@
+# Blender 3.4.1 MTL File: 'roomDecorTest.blend'
+# www.blender.org
+
+newmtl _defaultMat.008
+Ns 96.078453
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.804907 0.570317
+Ks 0.250000 0.250000 0.250000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
