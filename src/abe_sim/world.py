@@ -132,6 +132,7 @@ class World():
         if customDynamics is not None:
             self._customDynamics = list(customDynamics)
         self._sfr = 240
+        self._frameStepCount = 1
         if simFrameRate is not None:
             self._sfr = simFrameRate
         self._customDynamicsUpdaters = {'ktree': {}, 'kcon': {}, 'marker': {}}
@@ -169,6 +170,8 @@ class World():
         if objectKnowledge is not None:
             self._objectKnowledge = copy.deepcopy(objectKnowledge)
         self._customDynamicsAPIBase = {
+          'getFrameStepCount': (lambda : self.getFrameStepCount()),
+          'setFrameStepCount': (lambda x : self.setFrameStepCount()),
           'getSFR' : (lambda : self.getSFR()),
           'addObject': (lambda x : self.addNewObject(x)), 
           'getObjectProperty': (lambda x,y,defaultValue=None: self.getObjectProperty(x,y,defaultValue=defaultValue)),
@@ -206,6 +209,10 @@ class World():
         return self._pybulletConnection
     def getSFR(self):
         return self._sfr
+    def getFrameStepCount(self):
+        return self._frameStepCount
+    def setFrameStepCount(self, x):
+        self._frameStepCount = x
     def adjustAABBRadius(self, aabb, radius):
         center = [(x+y)/2 for x,y in zip(aabb[0], aabb[1])]
         return tuple([tuple([x-radius for x in center]), tuple([x+radius for x in center])])
@@ -1004,6 +1011,7 @@ class World():
                         updateFn(name, self._customDynamicsAPI[objType][name])
         stubbornTry(lambda : pybullet.stepSimulation(self._pybulletConnection))
         self._computedCollisions = True
+        self._frameStepCount = 1
         # TODO: if enabled, update debug objects such as markers. Currently waiting for a newer pybullet where markers are easier to work with.
         return
     def distance(self, vectorEnd, vectorStart):

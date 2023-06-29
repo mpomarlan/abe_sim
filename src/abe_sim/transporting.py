@@ -33,7 +33,8 @@ def updateTransporting(name, customDynamicsAPI):
         dv = numpy.dot(dv, dv)
         if 0.0001 < dv:
             relativeStillness = False
-    if relativeStillness:
+    mingling = customDynamicsAPI['getObjectProperty']((name,), ('customDynamicsAPI', 'mingling', 'mingling'), False)
+    if relativeStillness and (not mingling):
         atOrientation = customDynamicsAPI['getObjectProperty']((at[0],), 'orientation')
         pourAxisInAt = customDynamicsAPI['getObjectProperty']((at[0],), ('fn', 'containment', 'pouring', 'outof', 'axis'), (0,1,0))
         pourAxis = stubbornTry(lambda : pybullet.rotateVector(atOrientation, pourAxisInAt))
