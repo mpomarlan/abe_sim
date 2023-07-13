@@ -84,7 +84,7 @@ commands = [
         ["http://localhost:54321/abe-sim-command/to-mix", {'containerWithInputIngredients': 'mediumBowl3', 'mixingTool': 'whisk', 'kitchenStateIn': None, 'setWorldState': False}, "./WS7.log", "./WS8.log"],
         ["http://localhost:54321/abe-sim-command/to-fetch", {'object': 'bakingTray', 'kitchenStateIn': None, 'setWorldState': False}, "./WS8.log", "./WS9.log"],
         ["http://localhost:54321/abe-sim-command/to-line", {'bakingTray': 'bakingTray', 'bakingPaper': 'bakingSheet', 'kitchenStateIn': None, 'setWorldState': False}, "./WS9.log", "./WS10.log"],
-        ["http://localhost:54321/abe-sim-command/to-shape", {'containerWithDough': 'mediumBowl3', 'destination': 'bakingTray', 'kitchenStateIn': None, 'setWorldState': False}, "./WS10.log", "./WS11.log"],
+        ["http://localhost:54321/abe-sim-command/to-portion-and-arrange", {'containerWithDough': 'mediumBowl3', 'destination': 'bakingTray', 'kitchenStateIn': None, 'setWorldState': False}, "./WS10.log", "./WS11.log"],
         ["http://localhost:54321/abe-sim-command/to-bake", {'thingToBake': 'bakingTray', 'inputDestinationContainer': 'kitchenCounter', 'oven': 'oven', 'kitchenStateIn': None, 'setWorldState': False}, "./WS11.log", "./WS12.log"],
         ["http://localhost:54321/abe-sim-command/to-sprinkle", {'object': 'bakingTray', 'toppingContainer': 'sugarBag', 'kitchenStateIn': None, 'setWorldState': False}, "./WS12.log", "./WS13.log"]
     ]

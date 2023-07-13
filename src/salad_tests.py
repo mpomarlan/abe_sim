@@ -51,6 +51,7 @@ for e in toPlace:
     if (e not in worldState) or ('kitchenCounter' != worldState[e]['at']):
         continue
     r = requests.post("http://localhost:54321/abe-sim-command/to-place", data=bytes(json.dumps({'object': e, 'container': 'largeBowl'}), "utf-8"))
+    print(r.text)
 
 sys.exit()
 

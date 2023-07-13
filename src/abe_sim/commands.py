@@ -258,7 +258,7 @@ def _checkTopGoal(w, agentName):
         return topGoal, requests.status_codes.codes.INTERNAL_SERVER_ERROR, {'response': 'Malformed garden: missing top goal.'}
     error = topGoal.get('error', None)
     if (error is not None):
-        return requests.status_codes.codes.PRECONDITION_FAILED, {'response': ('Top goal error: %s' % error)}
+        return topGoal, requests.status_codes.codes.PRECONDITION_FAILED, {'response': ('Top goal error: %s' % error)}
     return topGoal, requests.status_codes.codes.ALL_OK, {}
     
 def toFetchStart(requestData, w, agentName, todos):
@@ -554,7 +554,7 @@ def toPortionAndArrangeStart(requestData, w, agentName, todos):
     if not w._kinematicTrees[destination].get('fn', {}).get('canContain', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested destination cannot contain.'}
     _checkGreatReset(requestData, w)
-    garden = {0: {'type': 'G', 'description': {'goal': 'shapedAndParked', 'item': container, 'hand': 'hand_right', 'destination': destination, 'shapedType': shapedType, 'ingredientTypes': ingredientTypes}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'shapedAndParked', 'item': container, 'hand': 'hand_right', 'destination': destination, 'shapedType': shapedType, 'ingredientTypes': ingredientTypes, "itemIsShaped": False}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}

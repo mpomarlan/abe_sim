@@ -103,7 +103,7 @@ def handleINT(signum, frame):
 def runBrain():
     parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='Text at the bottom of help')
     parser.add_argument('-fdf', '--frameDurationFactor', default="1.0", help='Attempts to adjust the ratio of real time of frame to simulated time of frame. A frame will always last, in real time, at least as long as it is computed. WARNING: runBrain will become unresponsive to HTTP API calls if this is set too low. Recommended values are above 0.2.')
-    parser.add_argument('-sfr', '--simFrameRate', default="240", help='Number of frames in one second of simulated time. Should be above 60.')
+    parser.add_argument('-sfr', '--simFrameRate', default="160", help='Number of frames in one second of simulated time. Should be above 60.')
     parser.add_argument('-a', '--agent', help='Name of the agent to control in the loaded scene')
     parser.add_argument('-g', '--useGUI', action='store_true', help='Flag to enable the GUI')
     parser.add_argument('-o', '--useOpenGL', action='store_true', help='Flag to enable hardware acceleration. Warning: often unstable on Linux; ignored on MacOS')
@@ -171,7 +171,7 @@ def runBrain():
     todos = {"currentAction": None, "goals": [], "requestData": {}, "command": None, "cancelled": False}
     
     while True:
-        stepStart = time.time()
+        stepStart = time.perf_counter()
         with updating:
             for commandId, commandSpec in list(requestDictionary.items()):
                 if commandId == todos["currentAction"]:
@@ -196,8 +196,8 @@ def runBrain():
             #print(w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {}))
             if todos["currentAction"] is not None:
                 garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
-                if (0 not in garden) or (garden[0].get('previousStatus', False)):
-                    if 0 == len(todos["goals"]):
+                if (0 not in garden) or (garden[0].get('previousStatus', False)) or ("error" in garden[0]):
+                    if (0 == len(todos["goals"])) or ("error" in garden[0]):
                         requestDictionary.pop(todos["currentAction"])
                         if todos["cancelled"]:
                             responseDictionary[todos["currentAction"]] = [False, requests.status_codes.codes.GONE, 'Action cancelled by user.']
@@ -210,7 +210,7 @@ def runBrain():
                     else:
                         w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), todos["goals"][0])
                         todos["goals"] = todos["goals"][1:]
-        stepEnd = time.time()
+        stepEnd = time.perf_counter()
         #print(w.getObjectProperty(('abe', 'hand_right_roll'), 'position'), w.getObjectProperty(('abe', 'hand_right_roll'), 'linearVelocity'), pybullet.getContactPoints(bodyA=w._kinematicTrees['abe']['idx']))
         if not isAMac:
             time.sleep(max((frameDurationFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))

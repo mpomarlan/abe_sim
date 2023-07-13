@@ -1,210 +1,259 @@
 import yaml
 
 import math
-import numpy as np
+import time
 
 import copy
 
 from abe_sim.geom_utils import vector2Axis
+from abe_sim.world import _setDictionaryEntry, getDictionaryEntry
 
-conditionalModes = {'dummy': (lambda varVal, refVal: True),
-                    'notInclude': (lambda varVal, refVal: (refVal not in varVal)),
-                    'includes': (lambda varVal, refVal: (refVal in varVal)),
-                    'wholeSubsumesSomeElement': (lambda varVal, refVal: any([varVal.issuperset(x) for x in refVal])),
-                    'equal': (lambda varVal, refVal: varVal == refVal)}
+conditionalModes = {"dummy": (lambda varVal, refVal: True),
+                    "notInclude": (lambda varVal, refVal: (refVal not in varVal)),
+                    "includes": (lambda varVal, refVal: (refVal in varVal)),
+                    "wholeSubsumesSomeElement": (lambda varVal, refVal: any([varVal.issuperset(x) for x in refVal])),
+                    "equal": (lambda varVal, refVal: varVal == refVal)}
 
-def interpretVariableDescription(name, customDynamicsAPI, description, roleBdgs):
+def interpretVariableDescription(name, w, description, roleBdgs):
     if isinstance(description, int) or isinstance(description, float) or isinstance(description, bool) or (description is None):
         return description
     if isinstance(description, str):
-        if '$' == description[0]:
+        if "$" == description[0]:
             return roleBdgs[description[1:]]
         return description
-    if 'world' == description[0]:
-        if 'upAxis' == description[1]:
-            return customDynamicsAPI['getUp']()
-        elif 'downAxis' == description[1]:
-            return customDynamicsAPI['getDown']()
-        elif 'contact-normal' == description[1]:
-            return roleBdgs['contact-normal']
-    newDescription = [interpretVariableDescription(name, customDynamicsAPI, x, roleBdgs) for x in description[1:]]
-    if 'self' == description[0]:
-        return customDynamicsAPI['getObjectProperty']((name,), newDescription)
-    if 'trajector' == description[0]:
-        return customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'],), newDescription)
-    if 'processKnowledge' == description[0]:
-        return customDynamicsAPI['getProcessKnowledge'](newDescription)
+    if "world" == description[0]:
+        if "upAxis" == description[1]:
+            return w.getUp()
+        elif "downAxis" == description[1]:
+            return w.getDown()
+        elif "contact-normal" == description[1]:
+            return roleBdgs["contact-normal"]
+    newDescription = [interpretVariableDescription(name, w, x, roleBdgs) for x in description[1:]]
+    if "self" == description[0]:
+        return getDictionaryEntry(w._kinematicTrees[name], newDescription, None)
+    if "trajector" == description[0]:
+        return getDictionaryEntry(w._kinematicTrees[roleBdgs["trajector"]], newDescription, None)
+    if "processKnowledge" == description[0]:
+        return w.getProcessKnowledge(newDescription)
 
-def getVariablePath(name, customDynamicsAPI, description, roleBdgs):
-    obName = roleBdgs['trajector']
-    if 'self' == description[0]:
+def getVariablePath(name, w, description, roleBdgs):
+    obName = roleBdgs["trajector"]
+    if "self" == description[0]:
         obName = name
-    return obName, [interpretVariableDescription(name, customDynamicsAPI, x, roleBdgs) for x in description[1:]]
+    return obName, [interpretVariableDescription(name, w, x, roleBdgs) for x in description[1:]]
 
-def getAxisInWorld(name, customDynamicsAPI, axis, roleBdgs):
-    iniValue = interpretVariableDescription(name, customDynamicsAPI, axis, roleBdgs)
-    if (iniValue is None) or ('world' == axis[0]):
+def getAxisInWorld(name, w, axis, roleBdgs):
+    iniValue = interpretVariableDescription(name, w, axis, roleBdgs)
+    if (iniValue is None) or ("world" == axis[0]):
         return iniValue
-    if 'self' == axis[0]:
-        refOrientation = customDynamicsAPI['getObjectProperty']((name,), 'orientation')
-    elif 'trajector' == axis[0]:
-        refOrientation = customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'],), 'orientation')
-    return customDynamicsAPI['objectPoseRelativeToWorld']([0,0,0], refOrientation, iniValue, [0,0,0,1])[0]
+    if "self" == axis[0]:
+        _, refOrientation, _, _ = w.getKinematicData((name,))
+    elif "trajector" == axis[0]:
+        _, refOrientation, _, _ = w.getKinematicData((roleBdgs["trajector"],))
+    return w.objectPoseRelativeToWorld([0,0,0], refOrientation, iniValue, [0,0,0,1])[0]
 
-def getCandidates(name, customDynamicsAPI, description):
+def getCandidates(name, w, description, disposition, partsPath):
     retq = []
-    if 'contact' == description['mode']:
-        collisions = customDynamicsAPI['checkCollision']((name,))
+    tC = 0.0
+    if "contact" == description["mode"]:
+        collisions = w.checkCollision((name,))
+        aux = {}
         for collision in collisions:
             identifierA, identifierB, posA, posB, normal, distance, force, _, _, _, _ = collision
-            retq.append({'relatumId': identifierA, 'trajectorId': identifierB, 'posOnRelatum': posA, 'posOnTrajector': posB, 'normal': normal, 'distance': distance, 'force': force})
-    elif 'transitive-at' == description['mode']:
+            if (disposition is not None) and (not w._kinematicTrees[identifierB[0]].get("fn").get(disposition)):
+                continue
+            if ((identifierA, identifierB) not in aux) or (force > aux[(identifierA, identifierB)]["force"]):
+                aux[(identifierA, identifierB)] = {"relatumId": identifierA, "trajectorId": identifierB, "posOnRelatum": posA, "posOnTrajector": posB, "normal": normal, "distance": distance, "force": force}
+        retq = list(aux.values())
+    elif "transitive-at" == description["mode"]:
         atOb = name
         while True:
-            atOb = customDynamicsAPI['getObjectProperty']((atOb,), 'at')
+            atOb = w.at((atOb,))
             if atOb is None:
                 break
-            retq.append({'relatumId': (name,), 'trajectorId': (atOb,), 'posOnRelatum': None, 'posOnTrajector': None, 'normal': None, 'distance': None, 'force': 0})
-    elif 'close' ==  description['mode']:
-        radius = interpretVariableDescription(name, customDynamicsAPI, description['radius'], {})
-        aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
-        aabbAdj = customDynamicsAPI['addAABBRadius'](aabb, radius)
-        closeObjects = customDynamicsAPI['checkOverlap'](aabbAdj)
+            if not w._kinematicTrees[atOb].get("fn").get(disposition):
+                continue
+            retq.append({"relatumId": (name,), "trajectorId": (atOb,), "posOnRelatum": None, "posOnTrajector": None, "normal": None, "distance": None, "force": 0})
+    elif "close" ==  description["mode"]:
+        radius = interpretVariableDescription(name, w, description["radius"], {})
+        aabb = w.getAABB((name,))
+        aabbAdj = w.addAABBRadius(aabb, radius)
+        closeObjects = w.checkOverlap(aabbAdj)
+        if disposition is not None:
+            closeObjects = [x for x in closeObjects if w._kinematicTrees[x[0]].get("fn", {}).get(disposition)]
+        if partsPath is not None:
+            aux = {}
+            closeNew = []
+            for cob, clnk in closeObjects:
+                if cob not in aux:
+                    aux[cob] = getDictionaryEntry(w._kinematicTrees[cob], partsPath, [])
+                if clnk in aux[cob]:
+                    closeNew.append((cob, clnk))
+            closeObjects = closeNew
         for cob, clnk in closeObjects:
-            closePoints = customDynamicsAPI['checkClosestPoints']((name,), (cob, clnk), maxDistance=radius)
+            closePoints = w.checkClosestPoints((name,), (cob, clnk), maxDistance=radius)
             for closePoint in closePoints:
                 identifierA, identifierB, posA, posB, normal, distance = closePoint
-                retq.append({'relatumId': identifierA, 'trajectorId': identifierB, 'posOnRelatum': posA, 'posOnTrajector': posB, 'normal': normal, 'distance': distance, 'force': 0})
-    elif 'pose' == description['mode']:
-        links = customDynamicsAPI['getObjectProperty']((name,), 'links')
+                retq.append({"relatumId": identifierA, "trajectorId": identifierB, "posOnRelatum": posA, "posOnTrajector": posB, "normal": normal, "distance": distance, "force": 0})
+    elif "pose" == description["mode"]:
+        links = w._kinematicTrees[name]["links"]
         for l in links:
-            retq.append({'relatumId': (name, l), 'trajectorId': (name, l), 'posOnRelatum': None, 'posOnTrajector': None, 'normal': None, 'distance': None, 'force': 0})
+            retq.append({"relatumId": (name, l), "trajectorId": (name, l), "posOnRelatum": None, "posOnTrajector": None, "normal": None, "distance": None, "force": 0})
     return retq
 
-def filterObject(candidate, name, customDynamicsAPI, roleBdgs, role, description):
+def filterObject(candidate, name, w, roleBdgs, role, description):
     if description is None:
         return True, roleBdgs
-    if 'disposition' in description:
-        if not interpretVariableDescription(name, customDynamicsAPI, description['disposition'], roleBdgs):
+    if "disposition" in description:
+        if not interpretVariableDescription(name, w, description["disposition"], roleBdgs):
             return False, roleBdgs
-    if 'part' in description:
-        acceptableParts = interpretVariableDescription(name, customDynamicsAPI, description['part'], roleBdgs)
-        if (acceptableParts is None) or (roleBdgs['%s-part' % role] not in acceptableParts):
+    if "part" in description:
+        acceptableParts = interpretVariableDescription(name, w, description["part"], roleBdgs)
+        if (acceptableParts is None) or (roleBdgs["%s-part" % role] not in acceptableParts):
             return False, roleBdgs
-    if 'substance' in description:
-        substanceSet = interpretVariableDescription(name, customDynamicsAPI, description['substance'], roleBdgs)
+    if "substance" in description:
+        substanceSet = interpretVariableDescription(name, w, description["substance"], roleBdgs)
         if (substanceSet is None) or (0 == len(substanceSet)):
             return False, roleBdgs
-        roleBdgs['%s-substance' % role] = list(substanceSet.keys())[0]
-    if 'resources' in description:
-        for res in description['resources']:
-            variable = interpretVariableDescription(name, customDynamicsAPI, res['variable'], roleBdgs)
-            reference = interpretVariableDescription(name, customDynamicsAPI, res['reference'], roleBdgs)
-            if (variable is None) or (not conditionalModes[res['mode']](variable, reference)):
+        roleBdgs["%s-substance" % role] = list(substanceSet.keys())[0]
+    if "resources" in description:
+        for res in description["resources"]:
+            variable = interpretVariableDescription(name, w, res["variable"], roleBdgs)
+            reference = interpretVariableDescription(name, w, res["reference"], roleBdgs)
+            if (variable is None) or (not conditionalModes[res["mode"]](variable, reference)):
                 return False, roleBdgs
     return True, roleBdgs
 
-def filterSource(candidate, name, customDynamicsAPI, roleBdgs, description):
+def filterSource(candidate, name, w, roleBdgs, description, kinCache):
     if description is None:
         return True, roleBdgs
-    if 'minforce' in description:
-        threshold = interpretVariableDescription(name, customDynamicsAPI, description['minforce'], roleBdgs)
-        if not (threshold < candidate['force']):
+    if "minforce" in description:
+        threshold = interpretVariableDescription(name, w, description['minforce'], roleBdgs)
+        if not (threshold < candidate["force"]):
             return False, roleBdgs
-    if 'constraints' in description:
-        for c in description['constraints']:
-            if 'axis' in c:
-                axisInWorld = getAxisInWorld(name, customDynamicsAPI, c['axis'], roleBdgs)
-                referenceInWorld = getAxisInWorld(name, customDynamicsAPI, c['reference'], roleBdgs)
-                thresholdVal = interpretVariableDescription(name, customDynamicsAPI, c['threshold'], roleBdgs)
-                mode = c['mode']
-                if ('alignment' == mode) and (thresholdVal > np.dot(axisInWorld, referenceInWorld)):
+    if "constraints" in description:
+        for c in description["constraints"]:
+            if "axis" in c:
+                axisInWorld = getAxisInWorld(name, w, c["axis"], roleBdgs)
+                referenceInWorld = getAxisInWorld(name, w, c["reference"], roleBdgs)
+                thresholdVal = interpretVariableDescription(name, w, c["threshold"], roleBdgs)
+                mode = c["mode"]
+                dot = axisInWorld[0]*referenceInWorld[0] + axisInWorld[1]*referenceInWorld[1] + axisInWorld[2]*referenceInWorld[2]
+                if ("alignment" == mode) and (thresholdVal > dot):
                     return False, roleBdgs
-                elif ('counter-alignment' == mode) and (thresholdVal > -np.dot(axisInWorld, referenceInWorld)):
+                elif ("counter-alignment" == mode) and (thresholdVal > -dot):
                     return False, roleBdgs
-                elif ('orthogonal' == mode) and (thresholdVal < abs(np.dot(axisInWorld, referenceInWorld))):
+                elif ("orthogonal" == mode) and (thresholdVal < abs(dot)):
                     return False, roleBdgs
     return True, roleBdgs
 
-def filterPath(candidate, name, customDynamicsAPI, roleBdgs, description):
+def filterPath(candidate, name, w, roleBdgs, description, kinCache):
     if description is None:
         return True, roleBdgs
-    mode = description['mode']
-    reference = description.get('reference')
-    threshold = description.get('threshold')
-    referenceVal = getAxisInWorld(name, customDynamicsAPI, reference, roleBdgs)
-    thresholdVal = interpretVariableDescription(name, customDynamicsAPI, threshold, roleBdgs)
-    velT = np.array(customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'], roleBdgs['trajector-part']), 'linearVelocity'))
-    velR = np.array(customDynamicsAPI['getObjectProperty']((roleBdgs['relatum'], roleBdgs['relatum-part']), 'linearVelocity'))
-    relativeVelocity = velT-velR
-    velocityDirection = vector2Axis(relativeVelocity)
-    speed = np.linalg.norm(relativeVelocity)
+    mode = description["mode"]
+    reference = description.get("reference")
+    threshold = description.get("threshold")
+    referenceVal = getAxisInWorld(name, w, reference, roleBdgs)
+    thresholdVal = interpretVariableDescription(name, w, threshold, roleBdgs)
+    if (roleBdgs["trajector"], roleBdgs["trajector-part"]) not in kinCache:
+        kinCache[(roleBdgs["trajector"], roleBdgs["trajector-part"])] = w.getKinematicData((roleBdgs["trajector"], roleBdgs["trajector-part"]))
+    _, _, velT, _ = kinCache[(roleBdgs["trajector"], roleBdgs["trajector-part"])]
+    if (roleBdgs["relatum"], roleBdgs["relatum-part"]) not in kinCache:
+        kinCache[(roleBdgs["relatum"], roleBdgs["relatum-part"])] = w.getKinematicData((roleBdgs["relatum"], roleBdgs["relatum-part"]))
+    _, _, velR, _ = kinCache[(roleBdgs["relatum"], roleBdgs["relatum-part"])]
+    relativeVelocity = [velT[0]-velR[0], velT[1]-velR[1], velT[2]-velR[2]]
+    speed = math.sqrt(relativeVelocity[0]*relativeVelocity[0]+relativeVelocity[1]*relativeVelocity[1]+relativeVelocity[2]*relativeVelocity[2])
+    if 0.000001 > speed:
+        velocityDirection = relativeVelocity
+    else:
+        velocityDirection = [relativeVelocity[0]/speed, relativeVelocity[1]/speed, relativeVelocity[2]/speed]
+    dot = velocityDirection[0]*referenceVal[0] + velocityDirection[1]*referenceVal[1] + velocityDirection[2]*referenceVal[2]
     retq = False
-    if ('minmagnitude' == mode) and (threshold < speed):
+    if ("minmagnitude" == mode) and (threshold < speed):
         retq = True
-    elif ('alignment' == mode) and (threshold < np.dot(velocityDirection, referenceVal)):
+    elif ("alignment" == mode) and (threshold < dot):
         retq = True
-    elif ('counter-alignment' == mode) and (threshold < -np.dot(velocityDirection, referenceVal)):
+    elif ("counter-alignment" == mode) and (threshold < -dot):
         retq = True
-    elif ('orthogonal' == mode) and (threshold > abs(np.dot(velocityDirection, referenceVal))):
+    elif ("orthogonal" == mode) and (threshold > abs(dot)):
         retq = True
     return retq, roleBdgs
 
-def filterGoal(candidate, name, customDynamicsAPI, roleBdgs, description):
+def filterGoal(candidate, name, w, roleBdgs, description, kinCache):
     if description is None:
         return True, roleBdgs
-    direction = description['direction']
-    threshold = description['threshold']
-    posT = np.array(customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'], roleBdgs['trajector-part']), 'position'))
-    posR = np.array(customDynamicsAPI['getObjectProperty']((roleBdgs['relatum'], roleBdgs['relatum-part']), 'position'))
-    velT = np.array(customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'], roleBdgs['trajector-part']), 'linearVelocity'))
-    velR = np.array(customDynamicsAPI['getObjectProperty']((roleBdgs['relatum'], roleBdgs['relatum-part']), 'linearVelocity'))
-    velDir = vector2Axis(velT - velR)
-    dispDir = vector2Axis(posR - posT)
+    direction = description["direction"]
+    threshold = description["threshold"]
+    if (roleBdgs["trajector"], roleBdgs["trajector-part"]) not in kinCache:
+        kinCache[(roleBdgs["trajector"], roleBdgs["trajector-part"])] = w.getKinematicData((roleBdgs["trajector"], roleBdgs["trajector-part"]))
+    posT, _, velT, _ = kinCache[(roleBdgs["trajector"], roleBdgs["trajector-part"])]
+    if (roleBdgs["relatum"], roleBdgs["relatum-part"]) not in kinCache:
+        kinCache[(roleBdgs["relatum"], roleBdgs["relatum-part"])] = w.getKinematicData((roleBdgs["relatum"], roleBdgs["relatum-part"]))
+    posR, _, velR, _ = kinCache[(roleBdgs["relatum"], roleBdgs["relatum-part"])]
+    pd = [posR[0]-posT[0], posR[1]-posT[1], posR[2]-posT[2]]
+    vd = [velT[0]-velR[0], velT[1]-velR[1], velT[2]-velR[2]]
+    pdn = math.sqrt(pd[0]*pd[0]+pd[1]*pd[1]+pd[2]*pd[2])
+    vdn = math.sqrt(vd[0]*vd[0]+vd[1]*vd[1]+vd[2]*vd[2])
+    if 0.000001 > pdn:
+        dispDir = pd
+    else:
+        dispDir = [pd[0]/pdn, pd[1]/pdn, pd[2]/pdn]
+    if 0.000001 > vdn:
+        velDir = pd
+    else:
+        velDir = [vd[0]/vdn, vd[1]/vdn, vd[2]/vdn]
     retq = False
-    if ('away' == direction) and (threshold < -np.dot(velDir, dispDir)):
+    dot = velDir[0]*dispDir[0] + velDir[1]*dispDir[1] + velDir[2]*dispDir[2]
+    if ("away" == direction) and (threshold < -dot):
         retq = True
-    if ('towards' == direction) and (threshold < np.dot(velDir, dispDir)):
+    if ("towards" == direction) and (threshold < dot):
         retq = True
-    if ('around' == direction) and (threshold > abs(np.dot(velDir, dispDir))):
+    if ("around" == direction) and (threshold > abs(dot)):
         retq = True
     return retq, roleBdgs
 
-def checkProgress(name, customDynamicsAPI, description):
-    def loadCandidate(candidate, name, customDynamicsAPI, roleBdgs):
-        roleBdgs['relatum-part'] = None
-        roleBdgs['trajector-part'] = None
-        if 1 < len(candidate['relatumId']):
-            roleBdgs['relatum-part'] = candidate['relatumId'][1]
-        if 1 < len(candidate['trajectorId']):
-            roleBdgs['trajector-part'] = candidate['trajectorId'][1]
-        roleBdgs['trajector'] = candidate['trajectorId'][0]
-        roleBdgs['trajector-type'] = customDynamicsAPI['getObjectProperty']((roleBdgs['trajector'],), 'type')
-        roleBdgs['contact-normal'] = candidate['normal']
-        roleBdgs['contact-force'] = candidate['force']
+def checkProgress(name, w, description):
+    def loadCandidate(candidate, name, w, roleBdgs):
+        roleBdgs["relatum-part"] = None
+        roleBdgs["trajector-part"] = None
+        if 1 < len(candidate["relatumId"]):
+            roleBdgs["relatum-part"] = candidate["relatumId"][1]
+        if 1 < len(candidate["trajectorId"]):
+            roleBdgs["trajector-part"] = candidate["trajectorId"][1]
+        roleBdgs["trajector"] = candidate["trajectorId"][0]
+        roleBdgs["trajector-type"] = w._kinematicTrees[roleBdgs["trajector"]].get("type")
+        roleBdgs["contact-normal"] = candidate["normal"]
+        roleBdgs["contact-force"] = candidate["force"]
         return True, roleBdgs
     retq = False
-    roleBdgs = {'relatum': name, 'relatum-type': customDynamicsAPI['getObjectProperty']((name,), 'type')}
-    candidates = getCandidates(name, customDynamicsAPI, description['source'])
+    roleBdgs = {"relatum": name, "relatum-type": w._kinematicTrees[name].get("type")}
+    disposition = description.get("trajector", {}).get("disposition")
+    partsPath = description.get("trajector", {}).get("part")
+    if disposition is not None:
+        disposition = disposition[-1]
+    if partsPath is not None:
+        partsPath = partsPath[1:]
+    candidates = getCandidates(name, w, description["source"], disposition, partsPath)
+    kinCache = {}
     filters = [loadCandidate]
-    filters += [(lambda c, name, customDynamicsAPI, roleBdgs: filterObject(c, name, customDynamicsAPI, roleBdgs, 'relatum', description.get('relatum')))]
-    filters += [(lambda c, name, customDynamicsAPI, roleBdgs: filterObject(c, name, customDynamicsAPI, roleBdgs, 'trajector', description.get('trajector')))]
-    filters += [(lambda c, name, customDynamicsAPI, roleBdgs: filterSource(c, name, customDynamicsAPI, roleBdgs, description.get('source')))]
-    filters += [(lambda c, name, customDynamicsAPI, roleBdgs: filterPath(c, name, customDynamicsAPI, roleBdgs, description.get('path')))]
-    filters += [(lambda c, name, customDynamicsAPI, roleBdgs: filterGoal(c, name, customDynamicsAPI, roleBdgs, description.get('goal')))]
+    filters += [(lambda c, name, w, roleBdgs: filterObject(c, name, w, roleBdgs, "relatum", description.get("relatum")))]
+    filters += [(lambda c, name, w, roleBdgs: filterObject(c, name, w, roleBdgs, "trajector", description.get("trajector")))]
+    filters += [(lambda c, name, w, roleBdgs: filterSource(c, name, w, roleBdgs, description.get("source"), kinCache))]
+    filters += [(lambda c, name, w, roleBdgs: filterPath(c, name, w, roleBdgs, description.get("path"), kinCache))]
+    filters += [(lambda c, name, w, roleBdgs: filterGoal(c, name, w, roleBdgs, description.get("goal"), kinCache))]
     for c in candidates:
         retq = True
         for f in filters:
-            retq, roleBdgs = f(c, name, customDynamicsAPI, roleBdgs)
+            retq, roleBdgs = f(c, name, w, roleBdgs)
             if retq is False:
                 break
         if retq is True:
             break
     return retq, roleBdgs
 
-def decrementResource(name, customDynamicsAPI, roleBdgs, previousResult, resourceDescription, resetDescription):
+def decrementResource(name, w, roleBdgs, previousResult, resourceDescription, resetDescription):
     newResult = False
-    value = interpretVariableDescription(name, customDynamicsAPI, resourceDescription, roleBdgs)
+    value = interpretVariableDescription(name, w, resourceDescription, roleBdgs)
     if value is None:
         return None
     value -= 1
@@ -214,30 +263,30 @@ def decrementResource(name, customDynamicsAPI, roleBdgs, previousResult, resourc
         if resetDescription is not None:
             doReset = True
             if 'lives' in resetDescription:
-                lives = interpretVariableDescription(name, customDynamicsAPI, resetDescription['lives'], roleBdgs)
+                lives = interpretVariableDescription(name, w, resetDescription["lives"], roleBdgs)
                 if lives is not None:
                     lives -= 1
                     if 0 >= lives:
                         doReset = False
                         lives = 0
-                    _, livesPath = getVariablePath(name, customDynamicsAPI, resourceDescription['lives'], roleBdgs)
-                    customDynamicsAPI['setObjectProperty']((), livesPath, lives)
+                    _, livesPath = getVariablePath(name, w, resourceDescription["lives"], roleBdgs)
+                    _setDictionaryEntry(w._kinematicTrees[name], livesPath, lives)
             if doReset:
-                value = interpretVariableDescription(name, customDynamicsAPI, resetDescription['value'], roleBdgs)
-    _, varPath = getVariablePath(name, customDynamicsAPI, resourceDescription, roleBdgs)
-    customDynamicsAPI['setObjectProperty']((), varPath, value)
+                value = interpretVariableDescription(name, w, resetDescription["value"], roleBdgs)
+    _, varPath = getVariablePath(name, w, resourceDescription, roleBdgs)
+    _setDictionaryEntry(w._kinematicTrees[name], varPath, value)
     if (previousResult is None) or (newResult is False):
         return newResult
     return previousResult
     
-def accumulateResource(name, customDynamicsAPI, roleBdgs, previousResult, variableDescription, valueDescription, capacity, conditionFn, conditionVariableDescription, conditionReference):
-    conditionVariableValue = interpretVariableDescription(name, customDynamicsAPI, conditionVariableDescription, roleBdgs)
-    conditionReferenceValue = interpretVariableDescription(name, customDynamicsAPI, conditionReference, roleBdgs)
+def accumulateResource(name, w, roleBdgs, previousResult, variableDescription, valueDescription, capacity, conditionFn, conditionVariableDescription, conditionReference):
+    conditionVariableValue = interpretVariableDescription(name, w, conditionVariableDescription, roleBdgs)
+    conditionReferenceValue = interpretVariableDescription(name, w, conditionReference, roleBdgs)
     newResult = previousResult
     if conditionFn(conditionVariableValue, conditionReferenceValue):
-        previousAccumulatorValue = interpretVariableDescription(name, customDynamicsAPI, variableDescription, roleBdgs)
-        _, accumulatorPath = getVariablePath(name, customDynamicsAPI, variableDescription, roleBdgs)
-        increment = interpretVariableDescription(name, customDynamicsAPI, valueDescription, roleBdgs)
+        previousAccumulatorValue = interpretVariableDescription(name, w, variableDescription, roleBdgs)
+        _, accumulatorPath = getVariablePath(name, w, variableDescription, roleBdgs)
+        increment = interpretVariableDescription(name, w, valueDescription, roleBdgs)
         numericAcc = True
         if isinstance(increment, str):
             numericAcc = False
@@ -246,14 +295,14 @@ def accumulateResource(name, customDynamicsAPI, roleBdgs, previousResult, variab
                 previousAccumulatorValue = 0
             else:
                 previousAccumulatorValue = {}
-            customDynamicsAPI['setObjectProperty']((), accumulatorPath, previousAccumulatorValue)
+            _setDictionaryEntry(w._kinematicTrees[name], accumulatorPath, previousAccumulatorValue)
         if numericAcc:
             newAccumulatorValue = previousAccumulatorValue + increment
         else:
             newAccumulatorValue = previousAccumulatorValue
             newAccumulatorValue[increment] = True
-        customDynamicsAPI['setObjectProperty']((), accumulatorPath, newAccumulatorValue)
-        capacity = interpretVariableDescription(name, customDynamicsAPI, capacity, roleBdgs)
+        _setDictionaryEntry(w._kinematicTrees[name], accumulatorPath, newAccumulatorValue)
+        capacity = interpretVariableDescription(name, w, capacity, roleBdgs)
         if capacity is not None:
             if numericAcc:
                 newResult = (capacity <= newAccumulatorValue)
@@ -263,49 +312,53 @@ def accumulateResource(name, customDynamicsAPI, roleBdgs, previousResult, variab
                 newResult = previousResult
     return newResult
 
-def processCompletion(name, customDynamicsAPI, completionDescription, roleBdgs):
-    description = {k: interpretVariableDescription(name, customDynamicsAPI, v, roleBdgs) for k, v in completionDescription.items()}
-    description['patient'] = roleBdgs['relatum-type']
-    description['process'] = completionDescription['process']
-    customDynamicsAPI['concludeProcess'](description)
+def processCompletion(name, w, completionDescription, roleBdgs):
+    description = {k: interpretVariableDescription(name, w, v, roleBdgs) for k, v in completionDescription.items()}
+    description["patient"] = roleBdgs["relatum-type"]
+    description["process"] = completionDescription["process"]
+    w.concludeProcess(description, name)
 
-def clearVariable(name, customDynamicsAPI, description, roleBdgs):
-    value = interpretVariableDescription(name, customDynamicsAPI, description[:-1], roleBdgs)
-    last = interpretVariableDescription(name, customDynamicsAPI, description[-1], roleBdgs)
+def clearVariable(name, w, description, roleBdgs):
+    value = interpretVariableDescription(name, w, description[:-1], roleBdgs)
+    last = interpretVariableDescription(name, w, description[-1], roleBdgs)
     if isinstance(value.get(last), bool):
-        if last in value:
-            value.pop(last)
-            _, varPath = getVariablePath(name, customDynamicsAPI, description[:-1], roleBdgs)
-            customDynamicsAPI['setObjectProperty']((), varPath, value)
+        value.pop(last)
+        _, varPath = getVariablePath(name, w, description[:-1], roleBdgs)
+        _setDictionaryEntry(w._kinematicTrees[name], varPath, value)
 
-def customDynamic(name, customDynamicsAPI, progressDescription, resourceDescription, completionDescription):
-    isProgressing, roleBdgs = checkProgress(name, customDynamicsAPI, progressDescription)
+def customDynamic(name, customDynamicsAPI, progressDescription, resourceDescription, completionDescription, dynname):
+    sT = time.perf_counter()
+    w = customDynamicsAPI["leetHAXXOR"]()
+    isProgressing, roleBdgs = checkProgress(name, w, progressDescription)
+    eP = time.perf_counter()
     if isProgressing:
         resourceTrigger = None
-        if (resourceDescription['resource'] is None) and (resourceDescription['accumulators'] is None):
+        if (resourceDescription["resource"] is None) and (resourceDescription["accumulators"] is None):
             resourceTrigger = True
-        if (resourceDescription['resource'] is not None):
-            resourceTrigger = decrementResource(name, customDynamicsAPI, roleBdgs, resourceTrigger, resourceDescription['resource'], resourceDescription['reset'])
-        if (resourceDescription['accumulators'] is not None) and ((resourceTrigger is not None) or (resourceDescription['resource'] is None)):
-            for acc in resourceDescription['accumulators']:
-                variableDescription = acc['variable']
-                capacity = acc.get('capacity', None)
-                valueDescription = acc.get('value', None)
+        if (resourceDescription["resource"] is not None):
+            ####
+            resourceTrigger = decrementResource(name, w, roleBdgs, resourceTrigger, resourceDescription["resource"], resourceDescription["reset"])
+        if (resourceDescription["accumulators"] is not None) and ((resourceTrigger is not None) or (resourceDescription["resource"] is None)):
+            for acc in resourceDescription["accumulators"]:
+                variableDescription = acc["variable"]
+                capacity = acc.get("capacity", None)
+                valueDescription = acc.get("value", None)
                 conditionFn = lambda x, y: True
                 conditionVariableDescription = None
                 conditionReference = None
-                if 'conditional' in acc:
-                    mode = acc['conditional'].get('mode', 'dummy')
+                if "conditional" in acc:
+                    mode = acc["conditional"].get("mode", "dummy")
                     conditionFn = conditionalModes[mode]
-                    conditionVariableDescription = acc['conditional'].get('variable')
-                    conditionReference = acc['conditional'].get('reference')
-                resourceTrigger = accumulateResource(name, customDynamicsAPI, roleBdgs, resourceTrigger, variableDescription, valueDescription, capacity, conditionFn, conditionVariableDescription, conditionReference)
+                    conditionVariableDescription = acc["conditional"].get("variable")
+                    conditionReference = acc["conditional"].get("reference")
+                ####
+                resourceTrigger = accumulateResource(name, w, roleBdgs, resourceTrigger, variableDescription, valueDescription, capacity, conditionFn, conditionVariableDescription, conditionReference)
         if resourceTrigger:
-            if completionDescription['completion'] is not None:
-                processCompletion(name, customDynamicsAPI, completionDescription['completion'], roleBdgs)
-            if completionDescription['clear'] is not None:
-                for clearDescription in completionDescription['clear']:
-                    clearVariable(name, customDynamicsAPI, clearDescription, roleBdgs)
+            if completionDescription["completion"] is not None:
+                processCompletion(name, w, completionDescription["completion"], roleBdgs)
+            if completionDescription["clear"] is not None:
+                for clearDescription in completionDescription["clear"]:
+                    clearVariable(name, w, clearDescription, roleBdgs)
 
 def buildSpecs(processDescriptionFilename):
     procs = yaml.safe_load(open(processDescriptionFilename).read())
@@ -321,7 +374,7 @@ def buildSpecs(processDescriptionFilename):
             resetDescription = {'lives': lives, 'value': description['reset']['value']}
         resourceDescription = {'resource': copy.deepcopy(description.get('resource')), 'accumulators': copy.deepcopy(description.get('accumulators')), 'reset': resetDescription}
         completionDescription = {'completion': copy.deepcopy(description.get('completion')), 'clear': copy.deepcopy(description.get('clear'))}
-        updateFn = lambda name, customDynamicsAPI, progressDescription=progressDescription, resourceDescription=resourceDescription, completionDescription=completionDescription: customDynamic(name, customDynamicsAPI, progressDescription, resourceDescription, completionDescription)
+        updateFn = lambda name, customDynamicsAPI, progressDescription=progressDescription, resourceDescription=resourceDescription, completionDescription=completionDescription, dynname=dynname: customDynamic(name, customDynamicsAPI, progressDescription, resourceDescription, completionDescription, dynname)
         retq.append([disposition, updateFn])
     return retq
 
