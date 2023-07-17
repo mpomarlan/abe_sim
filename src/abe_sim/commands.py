@@ -57,6 +57,39 @@ def toCancel(requestData, w, agentName, todos):
     _cancelGardenAction(w, agentName, todos)
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
 
+def toUpdateAvatar(requestData, w, agentName, todos):
+    bea = requestData.get("avatarName", "bea")
+    if (bea not in w._kinematicTrees):
+        return requests.status_codes.codes.NOT_FOUND, {"response": "Did not find object %s." % bea}
+    if ("Bea" != w._kinematicTrees[bea]["type"]):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {"response": "Object %s is not a human avatar." % bea}
+    posHead = requestData.get("positionHead")
+    ornHead = requestData.get("orientationHead")
+    posLeft = requestData.get("positionLeft")
+    ornLeft = requestData.get("orientationLeft")
+    posRight = requestData.get("positionRight")
+    ornRight = requestData.get("orientationRight")
+    graspLeft = requestData.get("graspLeft", [])
+    graspRight = requestData.get("graspRight", [])
+    clopenLeft = requestData.get("clopenLeft")
+    clopenRight = requestData.get("clopenRight")
+    csv = w._kinematicTrees[bea]["customStateVariables"]
+    targetBase = None
+    targetLeft = None
+    targetRight = None
+    if (posHead is not None) and (ornHead is not None):
+        targetBase = [[posHead[0], posHead[1], 0], stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,pybullet.getEulerFromQuaternion(ornHead)[2])))]
+    if (posLeft is not None) and (ornLeft is not None):
+        targetLeft = [posLeft, ornLeft]
+    if (posRight is not None) and (ornRight is not None):
+        targetRight = [posRight, ornRight]
+    csv["kinematicControl"]["target"] = {"base": targetBase,
+                                         "hand_left": targetLeft,
+                                         "hand_right": targetRight}
+    csv["grasping"]["intendToGrasp"] = {"hand_left": graspLeft, "hand_right": graspRight}
+    csv["clopening"]["action"] = {"hand_left": clopenLeft, "hand_right": clopenRight}
+    return requests.status_codes.codes.ALL_OK, {"response": "Ok."}    
+
 def toGetKitchen(requestData, w, agentName, todos):
     kitchenStateIn = requestData.get('kitchenStateIn', None)
     lacks = _checkArgs([[kitchenStateIn, "Request lacks kitchen-state-in parameter."]])
@@ -771,6 +804,7 @@ def processInstantRequest(fn, requestData, w, agentName, todos):
 commandFns = {
     "to-get-time": [processInstantRequest, toGetTime, None], 
     "to-cancel": [processInstantRequest, toCancel, None],
+    "to-update-avatar": [processInstantRequest, toUpdateAvatar, None],
     "to-get-kitchen": [processInstantRequest, toGetKitchen, None],
     "to-set-kitchen": [processInstantRequest, toSetKitchen, None],
     "to-go-to-pose": [processInstantRequest, toGoToPose, None],

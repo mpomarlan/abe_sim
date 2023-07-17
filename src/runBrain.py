@@ -101,7 +101,7 @@ def handleINT(signum, frame):
     sys.exit(0)
 
 def runBrain():
-    parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='Text at the bottom of help')
+    parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='kwargs for the loadObjectList is a dictionary. Possible keys are linearVelocity (of base, value is a float), angularVelocity (of base, value is a float) and jointPositions (value is a dictionary where keys are link names and values are floats representing the position of the parent joint for the link).')
     parser.add_argument('-fdf', '--frameDurationFactor', default="1.0", help='Attempts to adjust the ratio of real time of frame to simulated time of frame. A frame will always last, in real time, at least as long as it is computed. WARNING: runBrain will become unresponsive to HTTP API calls if this is set too low. Recommended values are above 0.2.')
     parser.add_argument('-sfr', '--simFrameRate', default="160", help='Number of frames in one second of simulated time. Should be above 60.')
     parser.add_argument('-a', '--agent', help='Name of the agent to control in the loaded scene')
@@ -109,7 +109,7 @@ def runBrain():
     parser.add_argument('-o', '--useOpenGL', action='store_true', help='Flag to enable hardware acceleration. Warning: often unstable on Linux; ignored on MacOS')
     parser.add_argument('-p', '--preloads', default=None, help='Path to a file containing a json list of objects to preload. Each element of this list must be of form [type, name, position]')
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
-    parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation]')
+    parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation, kwargs] (kwargs optional)')
     arguments = parser.parse_args()
     customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening], [('fn', 'mingleable'), updateMingling]]
 
@@ -150,8 +150,24 @@ def runBrain():
     if loadWorldDump is not None:
         w.greatReset(json.loads(open(loadWorldDump).read()))
     elif loadObjectList is not None:
-        _ = [w.addObjectInstance(*x) for x in json.loads(open(loadObjectList).read())]
-            
+        for x in json.loads(open(loadObjectList).read()):
+            spec = None
+            if 4 == len(x):
+                otype, oname, position, orientation = x
+            elif 5 == len(x):
+                otype, oname, position, orientation, spec = x
+            else:
+                continue
+            w.addObjectInstance(otype, oname, position, orientation)
+            if spec is not None:
+                if "linearVelocity" in spec:
+                    w.setObjectProperty((oname), "linearVelocity", spec["linearVelocity"])
+                if "angularVelocity" in spec:
+                    w.setObjectProperty((oname), "angularVelocity", spec["angularVelocity"])
+                if "jointPositions" in spec:
+                    for lnk, pos in spec["jointPositions"].items():
+                        w.setObjectProperty((oname, lnk), "jointPosition", pos)
+    
     waitingFor = 0
     
     if (agentName is None) or (agentName not in w._kinematicTrees.keys()):
