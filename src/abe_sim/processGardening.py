@@ -486,8 +486,8 @@ def checkMixed(w, name, container, mixedType, predCache):
         predCache[((container, mixedType), "mixed")] = retq
     return predCache[((container, mixedType), "mixed")]
 
-def checkMashed(w, name, container, mixedType, predCache):
-    return all([not w._kinematicTrees[x].get("fn", {}).get("mashable", False) for x in getContents(w, container, predCache)])
+def checkMashed(w, name, container, disposition, predCache):
+    return all([not w._kinematicTrees[x].get("fn", {}).get(disposition, False) for x in getContents(w, container, predCache)])
 
 def checkUpright(w, itemOrientation, pouringAxis, predCache, th=None):
     itemOrientation = tuple(itemOrientation)
@@ -781,16 +781,18 @@ def _checkMashedAndStored(w, name, description, node, predCache): # container, h
     storage = description['storage']
     tool = description['tool']
     hand = description['hand']
+    disposition = description["disposition"]
     container = description['container']
     parked = node.get('parked', False)
     parked = checkParked(w, name, hand, parked, predCache)
     node['parked'] = parked
-    return checkMashed(w, name, container, predCache) and (not checkGrasped(w, name, None, tool, predCache)) and checkItemInContainer(w, name, tool, storage, predCache) and parked
+    return checkMashed(w, name, container, disposition, predCache) and (not checkGrasped(w, name, None, tool, predCache)) and checkItemInContainer(w, name, tool, storage, predCache) and parked
 
 def _checkMashedAndUprighted(w, name, description, node, predCache): # container, hand, storage, tool, toolLink |
     tool = description['tool']
     toolLink = description['toolLink']
     hand = description['hand']
+    disposition = description["disposition"]
     container = description['container']
     _, toolOrientation, _, _ = getKinematicData(w, (tool,), predCache)
     mashingAxis = w._kinematicTrees[tool].get("fn", {}).get("mashing", {}).get("axis", {}).get(toolLink) or [1,0,0]
@@ -800,11 +802,12 @@ def _checkMashedAndUprighted(w, name, description, node, predCache): # container
     handLink = getHandLink(w, name, hand, predCache)
     _, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
     upright = checkUpright(w, toolOrientation, mashingAxis, predCache, th=ornTh) and checkUpright(w, handQ, [1,0,0], predCache, th=ornTh)
-    return checkMashed(w, name, container, predCache) and upright
+    return checkMashed(w, name, container, disposition, predCache) and upright
 
 def _checkMashed(w, name, description, node, predCache): # container, hand, storage, tool, toolLink |
+    disposition = description["disposition"]
     container = description['container']
-    return checkMashed(w, name, container, predCache)
+    return checkMashed(w, name, container, disposition, predCache)
     
 def _checkLinedAndParked(w, name, description, node, predCache):
     item = description['item']
@@ -1033,13 +1036,13 @@ def _suggestMixed(w, name, description, node, predCache): # container, hand, mix
     return [{"type": "P", "description": {"process": "mixing", "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"], "mixedType": description["mixedType"]}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestMashedAndStored(w, name, description, node, predCache): # container, hand, storage, tool, toolLink |
-    return [{"type": "P", "description": {"process": "mashingAndStoring", "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"], "storage": description["storage"]}, 'children': [], 'numerics': {}, "target": None}]
+    return [{"type": "P", "description": {"process": "mashingAndStoring", "disposition": description["disposition"], "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"], "storage": description["storage"]}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestMashedAndUprighted(w, name, description, node, predCache): # container, hand, tool, toolLink |
-    return [{"type": "P", "description": {"process": "mashingAndUprighting", "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"]}, 'children': [], 'numerics': {}, "target": None}]
+    return [{"type": "P", "description": {"process": "mashingAndUprighting", "disposition": description["disposition"], "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"]}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestMashed(w, name, description, node, predCache): # container, hand, tool, toolLink |
-    return [{"type": "P", "description": {"process": "mashing", "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"]}, 'children': [], 'numerics': {}, "target": None}]
+    return [{"type": "P", "description": {"process": "mashing", "disposition": description["disposition"], "container": description["container"], "hand": description["hand"], "tool": description["tool"], "toolLink": description["toolLink"]}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestLinedAndParked(w, name, description, node, predCache):
     return [{"type": "P", "description": {"process": "liningAndParking", "lining": description["lining"], "hand": description["hand"], "item": description["item"]}, 'children': [], 'numerics': {}, "target": None}]
@@ -1576,10 +1579,17 @@ def _getMixingConditions(w, name, description, node, predCache): # container, ha
 def _getMashingAndStoringConditions(w, name, description, node, predCache): # container, hand, storage, tool, toolLink |
     tool = description['tool']
     hand = description['hand']
-    return [{"type": "G", "description": {"goal": "mashedAndUprighted", "container": description["container"], "hand": hand, "tool": tool, "toolLink": description["toolLink"]}, "children": [], "previousStatus": None, "numerics": None},
+    return [{"type": "G", "description": {"goal": "mashedAndUprighted", "disposition": description["disposition"], "container": description["container"], "hand": hand, "tool": tool, "toolLink": description["toolLink"]}, "children": [], "previousStatus": None, "numerics": None},
             {"type": "G", "description": {"goal": "placedItem", "hand": hand, "item": tool, "container": description["storage"]}, "children": [], "previousStatus": None, "numerics": {}}]
 
 def _getMashingAndUprightingConditions(w, name, description, node, predCache): # container, hand, tool, toolLink |
+    disposition = description["disposition"]
+    if "mashable" == disposition:
+        fnGroup = "mashing"
+        fnPoint = "mashPoint"
+    elif "grindable" == disposition:
+        fnGroup = "grinding"
+        fnPoint = "grindPoint"
     toolLink = description['toolLink']
     tool = description['tool']
     hand = description['hand']
@@ -1591,7 +1601,7 @@ def _getMashingAndUprightingConditions(w, name, description, node, predCache): #
     toolPositionInHand, toolOrientationInHand = w.objectPoseRelativeToObject(handP, handQ, toolP, toolQ)
     handParkedP, handParkedQ, _ = getParkedPose(w, name, hand, predCache)
     entryHeight = getEntryHeight(w, name, {'hand': hand, 'item': container}, {}, predCache)
-    mashPointInTool = w._kinematicTrees[tool].get("fn", {}).get("mashing", {}).get("mashPoint", {}).get(toolLink) or [0,0,0]
+    mashPointInTool = w._kinematicTrees[tool].get("fn", {}).get(fnGroup, {}).get(fnPoint, {}).get(toolLink) or [0,0,0]
     mashPointInHand = w.objectPoseRelativeToWorld(toolPositionInHand, toolOrientationInHand, mashPointInTool, [0,0,0,1])[0]
     mashPoint = w.objectPoseRelativeToWorld(handP, handQ, mashPointInHand, [0,0,0,1])[0]
     containerEntryInContainer = w._kinematicTrees[container].get("fn", {}).get("containment", {}).get("pouring", {}).get("into", {}).get("point") or [0,0,0]
@@ -1624,10 +1634,17 @@ def _getMashingAndUprightingConditions(w, name, description, node, predCache): #
     waypoints = [wpPU, wpxyU, wpUZ, wpUZXY, wpZXY]
     tolerances = [[tolP, tolU], [tolxy, tolU], [tolU, tolZ], [tolU, tolZ, tolXY], [tolZ, tolXY]]
     entities = {'handP': handP, 'handQ': handQ, 'handParkedP': handParkedP, 'handParkedQ': handParkedQ, 'entryHeight': [0,0,entryHeight], 'mashPoint': mashPoint, 'containerEntry': containerEntry}
-    return [{"type": "G", "description": {"goal": "mashed", "container": container, "hand": hand, "tool": tool, "toolLink": toolLink}, "children": [], "previousStatus": None, "numerics": None},
+    return [{"type": "G", "description": {"goal": "mashed", "disposition": description["disposition"], "container": container, "hand": hand, "tool": tool, "toolLink": toolLink}, "children": [], "previousStatus": None, "numerics": None},
             {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
 
 def _getMashingConditions(w, name, description, node, predCache): # container, hand, tool, toolLink |
+    disposition = description["disposition"]
+    if "mashable" == disposition:
+        fnGroup = "mashing"
+        fnPoint = "mashPoint"
+    elif "grindable" == disposition:
+        fnGroup = "grinding"
+        fnPoint = "grindPoint"
     toolLink = description['toolLink']
     tool = description['tool']
     hand = description['hand']
@@ -1640,10 +1657,10 @@ def _getMashingConditions(w, name, description, node, predCache): # container, h
     toolPositionInHand, toolOrientationInHand = w.objectPoseRelativeToObject(handP, handQ, toolP, toolQ)
     handParkedP, handParkedQ, _ = getParkedPose(w, name, hand, predCache)
     entryHeight = getEntryHeight(w, name, {'hand': hand, 'item': container}, {}, predCache)
-    mashAxisInTool = w._kinematicTrees[tool].get("fn", {}).get("mashing", {}).get("axis", {}).get(toolLink) or [1,0,0]
+    mashAxisInTool = w._kinematicTrees[tool].get("fn", {}).get(fnGroup, {}).get("axis", {}).get(toolLink) or [1,0,0]
     mashAxis = stubbornTry(lambda : pybullet.rotateVector(toolQ, mashAxisInTool))
     mashAxisInHand = stubbornTry(lambda : pybullet.rotateVector(toolOrientationInHand, mashAxisInTool))
-    mashPointInTool = w._kinematicTrees[tool].get("fn", {}).get("mashing", {}).get("mashPoint", {}).get(toolLink) or [0,0,0]
+    mashPointInTool = w._kinematicTrees[tool].get("fn", {}).get(fnGroup, {}).get(fnPoint, {}).get(toolLink) or [0,0,0]
     mashPointInHand = w.objectPoseRelativeToWorld(toolPositionInHand, toolOrientationInHand, mashPointInTool, [0,0,0,1])[0]
     mashPoint = w.objectPoseRelativeToWorld(handP, handQ, mashPointInHand, [0,0,0,1])[0]
     containerEntryInContainer = w._kinematicTrees[container].get("fn", {}).get("containment", {}).get("pouring", {}).get("into", {}).get("point") or [0,0,0]

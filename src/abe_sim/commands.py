@@ -558,7 +558,7 @@ def toMashStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested mashingTool cannot mash.'}
     toolLink = w._kinematicTrees[tool]['fn']['mashing']['links'][0]
     storage = _getStorage(w)
-    garden = {0: {'type': 'G', 'description': {'goal': 'mashedAndStored', 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': inputIngredient, 'storage': storage}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'mashedAndStored', "disposition": "mashable", 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': inputIngredient, 'storage': storage}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
@@ -568,6 +568,33 @@ def toMashEnd(requestData, w, agentName):
     if requests.status_codes.codes.ALL_OK != status:
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'mashedIngredient': requestData.get('inputIngredient', None), 'kitchenStateOut': w.worldDump()}}
+
+def toGrindStart(requestData, w, agentName, todos):
+    inputIngredient = requestData.get("containerWithIngredientsToBeGround", None)
+    tool = requestData.get("grindingTool", None)
+    lacks = _checkArgs([[inputIngredient, "Request lacks containerWithIngredientsToBeGround parameter."],
+                        [tool, "Request lacks grindingTool parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if inputIngredient not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithIngredientsToBeGround does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested grindingTool does not exist in world.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canGrind', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested grindingTool cannot grind.'}
+    toolLink = w._kinematicTrees[tool]['fn']['grinding']['links'][0]
+    storage = _getStorage(w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'mashedAndStored', "disposition": "grindable", 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': inputIngredient, 'storage': storage}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+    
+def toGrindEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'containerWithGroundIngredients': requestData.get('containerWithIngredientsToBeGround', None), 'kitchenStateOut': w.worldDump()}}
 
 def toLineStart(requestData, w, agentName, todos):
     item = requestData.get("bakingTray", None)
@@ -851,6 +878,7 @@ commandFns = {
     "to-mix": [processActionRequest, toMixStart, toMixEnd],
     "to-mingle": [processActionRequest, toMingleStart, toMingleEnd],
     "to-mash": [processActionRequest, toMashStart, toMashEnd],
+    "to-grind": [processActionRequest, toGrindStart, toGrindEnd],
     "to-line": [processActionRequest, toLineStart, toLineEnd],
     "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
     "to-portion-and-arrange": [processActionRequest, toPortionAndArrangeStart, toPortionAndArrangeEnd],
