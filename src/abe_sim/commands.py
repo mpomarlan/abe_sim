@@ -465,13 +465,13 @@ def toBeatStart(requestData, w, agentName, todos):
                         [tool, "Request lacks tool parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if container not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithIngredients does not exist in world.'}
     if tool not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested tool does not exist in world.'}
     if not w._kinematicTrees[tool].get('fn', {}).get('canMix', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested tool cannot mix.'}
-    _checkGreatReset(requestData, w)
     mixedType = 'default' # TODO: get mixed type
     toolLink = w._kinematicTrees[tool]['fn']['mixing']['links'][0]
     storage = _getStorage(w)
@@ -493,13 +493,13 @@ def toMixStart(requestData, w, agentName, todos):
                         [tool, "Request lacks mixingTool parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if container not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithInputIngredients does not exist in world.'}
     if tool not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested mixingTool does not exist in world.'}
     if not w._kinematicTrees[tool].get('fn', {}).get('canMix', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested mixingTool cannot mix.'}
-    _checkGreatReset(requestData, w)
     mixedType = 'default' # TODO: get mixed type
     toolLink = w._kinematicTrees[tool]['fn']['mixing']['links'][0]
     storage = _getStorage(w)
@@ -521,13 +521,13 @@ def toMingleStart(requestData, w, agentName, todos):
                         [tool, "Request lacks minglingTool parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if container not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithInputIngredients does not exist in world.'}
     if tool not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested minglingTool does not exist in world.'}
     if not w._kinematicTrees[tool].get('fn', {}).get('canMix', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested minglingTool cannot mix.'}
-    _checkGreatReset(requestData, w)
     mixedType = None
     toolLink = w._kinematicTrees[tool]['fn']['mixing']['links'][0]
     storage = _getStorage(w)
@@ -542,6 +542,33 @@ def toMingleEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'containerWithMixture': requestData.get('containerWithInputIngredients', None), 'kitchenStateOut': w.worldDump()}}
 
+def toMashStart(requestData, w, agentName, todos):
+    inputIngredient = requestData.get("inputIngredient", None)
+    tool = requestData.get("mashingTool", None)
+    lacks = _checkArgs([[inputIngredient, "Request lacks inputIngredient parameter."],
+                        [tool, "Request lacks mashingTool parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if inputIngredient not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested inputIngredient does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested mashingTool does not exist in world.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canMash', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested mashingTool cannot mash.'}
+    toolLink = w._kinematicTrees[tool]['fn']['mashing']['links'][0]
+    storage = _getStorage(w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'mashedAndStored', 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': inputIngredient, 'storage': storage}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+    
+def toMashEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'mashedIngredient': requestData.get('inputIngredient', None), 'kitchenStateOut': w.worldDump()}}
+
 def toLineStart(requestData, w, agentName, todos):
     item = requestData.get("bakingTray", None)
     lining = requestData.get("bakingPaper", None)
@@ -549,6 +576,7 @@ def toLineStart(requestData, w, agentName, todos):
                         [lining, "Request lacks bakingPaper parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if item not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested bakingTray does not exist in world.'}
     if lining not in w._kinematicTrees:
@@ -557,7 +585,6 @@ def toLineStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested bakingPaper cannot line.'}
     if not w._kinematicTrees[item].get('fn', {}).get('lineable', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested bakingTray cannot be lined.'}
-    _checkGreatReset(requestData, w)
     garden = {0: {'type': 'G', 'description': {'goal': 'linedAndParked', 'lining': lining, 'hand': 'hand_right', 'item': item}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
@@ -823,6 +850,7 @@ commandFns = {
     "to-beat": [processActionRequest, toBeatStart, toBeatEnd],
     "to-mix": [processActionRequest, toMixStart, toMixEnd],
     "to-mingle": [processActionRequest, toMingleStart, toMingleEnd],
+    "to-mash": [processActionRequest, toMashStart, toMashEnd],
     "to-line": [processActionRequest, toLineStart, toLineEnd],
     "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
     "to-portion-and-arrange": [processActionRequest, toPortionAndArrangeStart, toPortionAndArrangeEnd],
