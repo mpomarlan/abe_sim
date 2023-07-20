@@ -735,6 +735,8 @@ class World():
         objData = self._kinematicTrees[identifier[0]]
         jointNames = list(objData["joints"].keys())
         aux = stubbornTry(lambda : pybullet.getJointStates(objData['idx'], [objData['joints'][j]['idx'] for j in jointNames]))
+        if aux is None:
+            aux = []
         return {k: v[0] for k, v in zip(jointNames, aux)},  {k: v[1] for k, v in zip(jointNames, aux)}, {k: v[2] for k, v in zip(jointNames, aux)}, {k: v[3] for k, v in zip(jointNames, aux)}
     def getObjectProperty(self, identifier, propertyIdentifier, defaultValue=None):
         if not self._isIdentifier(identifier):
@@ -859,7 +861,7 @@ class World():
                     self._getObjectPropertyCache[(identifier, 'jointVelocities')] = jointVels
                     self._getObjectPropertyCache[(identifier, 'jointReactionForces')] = jointForces
                     self._getObjectPropertyCache[(identifier, 'jointAppliedTorques')] = jointTorques
-                    return {'jointPositions': jointPs, 'jointVelocities': jointVelocities, 'jointReactionForces': jointForces, 'jointAppliedTorques': jointTorques}[propertyIdentifier]
+                    return {'jointPositions': jointPs, 'jointVelocities': jointVels, 'jointReactionForces': jointForces, 'jointAppliedTorques': jointTorques}[propertyIdentifier]
 
                 return None
             elif 'links' == propertyIdentifier:
