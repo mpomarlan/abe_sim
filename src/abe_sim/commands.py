@@ -737,6 +737,57 @@ def toSprinkleEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'sprinkledObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
 
+def toFlourStart(requestData, w, agentName, todos):
+    item = requestData.get("containerToFlour", None)
+    shaker = requestData.get("ingredientToFlourWith", None)
+    storage = _getStorage(w)
+    sprinkledType = 'FlouredTray' ### TODO
+    lacks = _checkArgs([[item, "Request lacks containerToFlour parameter."],
+                        [shaker, "Request lacks ingredientToFlourWith parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerToFlour does not exist in world.'}
+    if shaker not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested ingredientToFlourWith does not exist in world.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'sprinkled', 'shaker': shaker, 'hand': 'hand_right', 'item': item, 'storage': storage, 'sprinkledType': sprinkledType}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toFlourEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'flouredContainer': requestData['containerToFlour'], 'kitchenStateOut': w.worldDump()}}
+
+def toGreaseStart(requestData, w, agentName, todos):
+    item = requestData.get("containerToGrease", None)
+    shaker = requestData.get("ingredientToGreaseWith", None)
+    storage = _getStorage(w)
+    sprinkledType = 'GreasedTray' ### TODO
+    lacks = _checkArgs([[item, "Request lacks containerToGrease parameter."],
+                        [shaker, "Request lacks ingredientToGreaseWith parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerToGrease does not exist in world.'}
+    if shaker not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested ingredientToGreaseWith does not exist in world.'}
+    _checkGreatReset(requestData, w)
+    garden = {0: {'type': 'G', 'description': {'goal': 'sprinkled', 'shaker': shaker, 'hand': 'hand_right', 'item': item, 'storage': storage, 'sprinkledType': sprinkledType}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toGreaseEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'greasedContainer': requestData['containerToGrease'], 'kitchenStateOut': w.worldDump()}}
+
+
 def toCutStart(requestData, w, agentName, todos):
     item = requestData.get("object", None)
     tool = requestData.get("cuttingTool", None)
@@ -884,6 +935,8 @@ commandFns = {
     "to-portion-and-arrange": [processActionRequest, toPortionAndArrangeStart, toPortionAndArrangeEnd],
     "to-bake": [processActionRequest, toBakeStart, toBakeEnd],
     "to-sprinkle": [processActionRequest, toSprinkleStart, toSprinkleEnd],
+    "to-flour": [processActionRequest, toFlourStart, toFlourEnd],
+    "to-grease": [processActionRequest, toGreaseStart, toGreaseEnd],
     "to-cut": [processActionRequest, toCutStart, toCutEnd],
     "to-place": [processActionRequest, toPlaceStart, toPlaceEnd],
     "to-transfer-items": [processActionRequest, toTransferItemsStart, toTransferItemsEnd],
