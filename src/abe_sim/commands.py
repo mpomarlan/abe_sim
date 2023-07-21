@@ -704,6 +704,7 @@ def toBakeStart(requestData, w, agentName, todos):
                         [destination, "Request lacks inputDestinationContainer parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if item not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested thingToBake does not exist in world.'}
     if oven not in w._kinematicTrees:
@@ -714,7 +715,6 @@ def toBakeStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven cannot bake.'}
     if not w._kinematicTrees[destination].get('fn', {}).get('canContain', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested inputDestinationContainer cannot contain.'}
-    _checkGreatReset(requestData, w)
     garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': bakedType}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
@@ -725,6 +725,99 @@ def toBakeEnd(requestData, w, agentName):
     if requests.status_codes.codes.ALL_OK != status:
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'thingBaked': requestData['thingToBake'], 'outputDestinationContainer': requestData['inputDestinationContainer'], 'kitchenStateOut': w.worldDump()}}
+
+def toBoilStart(requestData, w, agentName, todos):
+    item = requestData.get("thingToBoil", None)
+    oven = requestData.get("stoveToBoilOn", None)
+    heatingMode = requestData.get("heatingMode", None)
+    timeToBoilAmount = requestData.get("timeToBoilQuantity", None)
+    timeToBoilUnit = requestData.get("timeToBoilUnit", None)
+    destination = getStorage(w)
+    boiledType = 'BoiledPotatoes' ### TODO
+    lacks = _checkArgs([[item, "Request lacks thingToBoil parameter."],
+                        [oven, "Request lacks stoveToBoilOn parameter."],
+                        [heatingMode, "Request lacks heatingMode parameter."],
+                        [timeToBoilAmount, "Request lacks timeToBoilQuantity parameter."],
+                        [timeToBoilUnit, "Request lacks timeToBoilUnit parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested thingToBoil does not exist in world.'}
+    if oven not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested stoveToBoilOn does not exist in world.'}
+    if not w._kinematicTrees[oven].get('fn', {}).get('canBoil', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested stoveToBoilOn cannot boil.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': boiledType, "process": "boiling", "timeAmount": timeToBoilAmount, "timeUnit": timeToBoilUnit}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toBoilEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'thingBoiled': requestData['thingToBoil'], 'kitchenStateOut': w.worldDump()}}
+
+def toFryStart(requestData, w, agentName, todos):
+    item = requestData.get("thingToFry", None)
+    oven = requestData.get("stoveToFryOn", None)
+    heatingMode = requestData.get("heatingMode", None)
+    timeToFryAmount = requestData.get("timeToFryQuantity", None)
+    timeToFryUnit = requestData.get("timeToFryUnit", None)
+    destination = getStorage(w)
+    friedType = 'FriedChicken' ### TODO
+    lacks = _checkArgs([[item, "Request lacks thingToFry parameter."],
+                        [oven, "Request lacks stoveToFryOn parameter."],
+                        [heatingMode, "Request lacks heatingMode parameter."],
+                        [timeToFryAmount, "Request lacks timeToFryQuantity parameter."],
+                        [timeToFryUnit, "Request lacks timeToFryUnit parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested thingToFry does not exist in world.'}
+    if oven not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested stoveToFryOn does not exist in world.'}
+    if not w._kinematicTrees[oven].get('fn', {}).get('canFry', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested stoveToFryOn cannot fry.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': friedType, "process": "frying", "timeAmount": timeToFryAmount, "timeUnit": timeToFryUnit}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toFryEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'thingFried': requestData['thingToFry'], 'kitchenStateOut': w.worldDump()}}
+
+def toMeltStart(requestData, w, agentName, todos):
+    item = requestData.get("containerWithInputIngredients", None)
+    oven = requestData.get("meltingTool", None)
+    destination = getStorage(w)
+    meltedType = 'MeltedButter' ### TODO
+    lacks = _checkArgs([[item, "Request lacks containerWithInputIngredients parameter."],
+                        [oven, "Request lacks meltingTool parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerWithInputIngredients does not exist in world.'}
+    if oven not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested meltingTool does not exist in world.'}
+    if not w._kinematicTrees[oven].get('fn', {}).get('canMelt', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested meltingTool cannot melt.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': meltedType, "process": "melting"}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toMeltEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'containerWithMeltedIngredients': requestData['containerWithInputIngredients'], 'kitchenStateOut': w.worldDump()}}
 
 def toSprinkleStart(requestData, w, agentName, todos):
     item = requestData.get("object", None)
@@ -948,6 +1041,9 @@ commandFns = {
     "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
     "to-portion-and-arrange": [processActionRequest, toPortionAndArrangeStart, toPortionAndArrangeEnd],
     "to-bake": [processActionRequest, toBakeStart, toBakeEnd],
+    "to-boil": [processActionRequest, toBoilStart, toBoilEnd],
+    "to-fry": [processActionRequest, toFryStart, toFryEnd],
+    "to-melt": [processActionRequest, toMeltStart, toMeltEnd],
     "to-sprinkle": [processActionRequest, toSprinkleStart, toSprinkleEnd],
     "to-flour": [processActionRequest, toFlourStart, toFlourEnd],
     "to-grease": [processActionRequest, toGreaseStart, toGreaseEnd],
