@@ -131,6 +131,7 @@ if "__main__" == __name__:
                 o = _toO(o,ss)
                 outfile.write("  <%s> %s ;\n" % (p, o))
                 lastS = s
+            outfile.write("  .\n")
         elif "ntriples" == formatT:
             for e in res:
                 o = _toO(e[2],ss)
