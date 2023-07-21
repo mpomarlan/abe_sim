@@ -58,6 +58,17 @@ def toCancel(requestData, w, agentName, todos):
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
 
 def toUpdateAvatar(requestData, w, agentName, todos):
+    def _adjustTarget(p,q,ef,csv):
+        if isinstance(p, str):
+            p = json.loads(p)
+        if isinstance(q, str):
+            q = json.loads(q)
+        #previousTarget = csv.get("kinematicControl", {}).get("target", {}).get(ef)
+        #if p is None:
+        #    p = previousTarget[0]
+        #if q is None:
+        #    q = previousTarget[1]
+        return p, q
     bea = requestData.get("avatarName", "bea")
     if (bea not in w._kinematicTrees):
         return requests.status_codes.codes.NOT_FOUND, {"response": "Did not find object %s." % bea}
@@ -74,6 +85,9 @@ def toUpdateAvatar(requestData, w, agentName, todos):
     clopenLeft = requestData.get("clopenLeft")
     clopenRight = requestData.get("clopenRight")
     csv = w._kinematicTrees[bea]["customStateVariables"]
+    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
+    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
+    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
     targetBase = None
     targetLeft = None
     targetRight = None
