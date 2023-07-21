@@ -542,17 +542,17 @@ def checkSprinkled(w, name, item, sprinkledType, predCache):
         predCache[((item, sprinkledType), "sprinkled")] = (0 == len(retq), retq)
     return predCache[((item, sprinkledType), "sprinkled")]
 
-def checkBakedContents(w, item, bakedType, predCache):
-    if ((item, bakedType), "baked") not in predCache:
+def checkBakedContents(w, item, bakedType, process, predCache):
+    if ((item, bakedType, process), "baked") not in predCache:
         contents = getContents(w, item, predCache)
         baked = False
-        # TODO: need a smarter check here: all that is bakeable into bakedType must be baked.
+        # TODO: need a smarter check here: all that is bakeable/processable into bakedType must be baked.
         for x in contents:
             if bakedType == w._kinematicTrees[x].get("type"):
                 baked = True
                 break
-        predCache[((item, bakedType), "baked")] = baked
-    return predCache[((item, bakedType), "baked")]
+        predCache[((item, bakedType, process), "baked")] = baked
+    return predCache[((item, bakedType, process), "baked")]
 
 def checkOpened(w, container, component, predCache):
     if ((container, component), "open") not in predCache:
@@ -857,7 +857,8 @@ def _checkBaked(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    baked = checkBakedContents(w, item, bakedType, predCache)
+    process = description.get('process', 'baking')
+    baked = checkBakedContents(w, item, bakedType, process, predCache)
     container, component = getContainerComponent(w, item)
     atOven = (container == oven)
     atDestination = (container == destination)
@@ -1149,7 +1150,10 @@ def _suggestBakedItem(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    return [{'type': 'P', 'description': {'process': 'bakingItem', 'item': item, 'hand': hand, 'oven': oven, 'destination': destination, 'bakedType': bakedType}, 'sourceContainer': node.get('sourceContainer'), 'sourceComponent': node.get('sourceComponent')}]
+    process = description.get('process', 'baking')
+    timeAmount = description.get('timeAmount')
+    timeUnit = description.get('timeUnit')
+    return [{'type': 'P', 'description': {'process': 'bakingItem', 'item': item, 'hand': hand, 'oven': oven, 'destination': destination, 'bakedType': bakedType, 'process': process, 'timeAmount': timeAmount, 'timeUnit': timeUnit}, 'sourceContainer': node.get('sourceContainer'), 'sourceComponent': node.get('sourceComponent')}]
 
 def _suggestBroughtNear(w, name, description, node, predCache):
     return [{'type': 'P', 'description': {"process": "bringingNear", "trajector": description["trajector"], "hand": description["hand"], "relatum": description["relatum"]}, "children": [], "numerics": {}, "target": None}]
@@ -1829,11 +1833,23 @@ def _getBakingConditions(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
+    timeAmount = description.get("timeAmount")
+    timeUnit = description.get("timeUnit")
     source = node.get('sourceContainer')
     sourcePart = node.get('sourceComponent')
-    if checkBakedContents(w, item, bakedType, predCache):
+    if checkBakedContents(w, item, bakedType, process, predCache):
         return [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': destination}}]
-    return [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': oven}}]
+    retq = [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': oven}}]
+    if (timeAmount is not None) and (checkItemInContainer(w, name, item, oven, predCache)) and (not checkGrasped(w, name, None, item, predCache)):
+        if timeUnit is None:
+            timeUnit = 1.0
+        timeAmount = timeAmount*timeUnit
+        previousStartTime = node.get("previousStartTime")
+        if (previousStartTime is None):
+            previousStartTime = w._kinematicTrees[agentName].get("customStateVariables", {}).get("timing", {}).get("timer",0)
+        retq.append({'type': 'G', 'description': {'goal': 'waited', 'timeEnd': timeAmount + previousStartTime}})
+        node["previousStartTime"] = previousStartTime
+    return retq
 
 def _getSprinklingConditions(w, name, description, node, predCache):
     item = description.get('item', None)
