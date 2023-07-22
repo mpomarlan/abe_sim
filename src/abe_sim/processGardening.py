@@ -1594,6 +1594,9 @@ def _getMashingAndUprightingConditions(w, name, description, node, predCache): #
     elif "grindable" == disposition:
         fnGroup = "grinding"
         fnPoint = "grindPoint"
+    elif "flattenable" == disposition:
+        fnGroup = "flattening"
+        fnPoint = "flattenPoint"
     toolLink = description['toolLink']
     tool = description['tool']
     hand = description['hand']
@@ -1649,6 +1652,9 @@ def _getMashingConditions(w, name, description, node, predCache): # container, h
     elif "grindable" == disposition:
         fnGroup = "grinding"
         fnPoint = "grindPoint"
+    elif "flattenable" == disposition:
+        fnGroup = "flattening"
+        fnPoint = "flattenPoint"
     toolLink = description['toolLink']
     tool = description['tool']
     hand = description['hand']

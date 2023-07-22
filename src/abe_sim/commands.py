@@ -610,6 +610,36 @@ def toGrindEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'containerWithGroundIngredients': requestData.get('containerWithIngredientsToBeGround', None), 'kitchenStateOut': w.worldDump()}}
 
+def toFlattenStart(requestData, w, agentName, todos):
+    portions = requestData.get("portions", None)
+    tool = requestData.get("canFlattenTool", None)
+    lacks = _checkArgs([[portions, "Request lacks portions parameter."],
+                        [tool, "Request lacks canFlattenTool parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    if 0 == len(portions):
+        return requests.status_codes.codes.BAD_REQUEST, {"response": "Must request flattening something."}
+    _checkGreatReset(requestData, w)
+    if any([x not in w._kinematicTrees for x in portions]):
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested portion does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested canFlattenTool does not exist in world.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canFlatten', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested canFlattenTool cannot flatten.'}
+    toolLink = w._kinematicTrees[tool]['fn']['flattening']['links'][0]
+    storage = _getStorage(w)
+    requestData["at"] = w.at((portions[0],))
+    garden = {0: {'type': 'G', 'description': {'goal': 'mashedAndStored', "disposition": "flattenable", 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': portions[0], 'storage': storage}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = [{0: {'type': 'G', 'description': {'goal': 'mashedAndStored', "disposition": "flattenable", 'tool': tool, 'toolLink': toolLink, 'hand': 'hand_right', 'container': portion, 'storage': storage}}} for portion in portions[1:]]
+    return requests.status_codes.codes.ALL_OK, {}
+    
+def toFlattenEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'containerWithFlattenedItems': requestData.get('at', None), 'kitchenStateOut': w.worldDump()}}
+
 def toLineStart(requestData, w, agentName, todos):
     item = requestData.get("bakingTray", None)
     lining = requestData.get("bakingPaper", None)
@@ -1037,6 +1067,7 @@ commandFns = {
     "to-mingle": [processActionRequest, toMingleStart, toMingleEnd],
     "to-mash": [processActionRequest, toMashStart, toMashEnd],
     "to-grind": [processActionRequest, toGrindStart, toGrindEnd],
+    "to-flatten": [processActionRequest, toFlattenStart, toFlattenEnd],
     "to-line": [processActionRequest, toLineStart, toLineEnd],
     "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
     "to-portion-and-arrange": [processActionRequest, toPortionAndArrangeStart, toPortionAndArrangeEnd],
