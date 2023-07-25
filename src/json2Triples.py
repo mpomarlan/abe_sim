@@ -87,9 +87,16 @@ def json2Triples(data, eliminateRootS=False, nameProperty=None):
 if "__main__" == __name__:
     def _toO(o, ss):
         if o in ss:
-            o = "<%s>" % o
+            o = "<urn:%s>" % o
         else:
-            o = json.dumps(o)
+            if isinstance(o,bool):
+                o = "\""+str(o).lower()+"\"^^<http://www.w3.org/2001/XMLSchema#boolean>"
+            elif isinstance(o,float):
+                o = "\""+str(o)+"\"^^<http://www.w3.org/2001/XMLSchema#float>"
+            elif isinstance(o,int):
+                o = "\""+str(o)+"\"^^<http://www.w3.org/2001/XMLSchema#integer>"
+            elif isinstance(o,str):
+                o = "\""+str(o)+"\"^^<http://www.w3.org/2001/XMLSchema#string>"
         return o
     parser = argparse.ArgumentParser(prog='json2Triples', description='Convert json files (e.g. abesim world dumps) into lists of triples', epilog='Text after help string goes here.')
     parser.add_argument('-i', '--inputFile', default="", help='Input json file to convert.')
@@ -125,17 +132,17 @@ if "__main__" == __name__:
                 s, p, o = e
                 if (s != lastS):
                     if (lastS is not None):
-                        outfile.write("  .\n<%s>\n" % s)
+                        outfile.write("  .\n<urn:%s>\n" % s)
                     else:
-                        outfile.write("<%s>" % s)
+                        outfile.write("<urn:%s>" % s)
                 o = _toO(o,ss)
-                outfile.write("  <%s> %s ;\n" % (p, o))
+                outfile.write("  <urn:%s> %s ;\n" % (p, o))
                 lastS = s
             outfile.write("  .\n")
         elif "ntriples" == formatT:
             for e in res:
                 o = _toO(e[2],ss)
-                outfile.write("<%s> <%s> %s .\n" % (e[0], e[1], o))
+                outfile.write("<urn:%s> <urn:%s> %s .\n" % (e[0], e[1], o))
         elif "xml":
             outfile.write("<?xml version=\"1.0\"?>\n<rdf:RDF xmlns=\"\"\n         xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n         xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n         xmlns:p=\"https://github.com/mpomarlan/abe_sim#\">\n")
             lastS = None
@@ -149,15 +156,13 @@ if "__main__" == __name__:
                 if (lastS!=s):
                     if lastS is not None:
                         outfile.write("  </rdf:Description>\n")
-                    outfile.write("  <rdf:Description rdf:about=\"%s\">\n" % s)
+                    outfile.write("  <rdf:Description rdf:about=\"urn:%s\">\n" % s)
                 if o in ss:
-                    if isinstance(p,int):
-                        print("Ohoh")
-                    outfile.write("    <p:%s rdf:resource=\"%s\" />\n" % (p, o))
+                    outfile.write("    <p:%s rdf:resource=\"urn:%s\" />\n" % (p, o))
                 else:
-                    outfile.write("    <p:%s>%s</p:%s>\n" % (p, _toO(o,ss), p))
+                    outfile.write("    <p:%s>%s</p:%s>\n" % (p, str(o), p))
                 lastS = s
-            outfile.write("</rdf:RDF>\n")
+            outfile.write("  </rdf:Description>\n</rdf:RDF>\n")
         else:
             for e in res:
                 outfile.write("%s\n" % json.dumps(e))
