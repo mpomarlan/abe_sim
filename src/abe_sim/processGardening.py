@@ -466,6 +466,35 @@ def checkItemInContainer(w, name, item, container, predCache, allowedComponents=
         predCache[((container, item, allowedComponents), "contains")] = retq
     return predCache[((container, item, allowedComponents), "contains")]
 
+def checkItemCoversContainer(w, name, cover, item, predCache, covered, allowedComponents=None):
+    if (item not in w._kinematicTrees) or (cover not in w._kinematicTrees):
+        return True
+    if ((cover, item, allowedComponents), "covers") not in predCache:
+        if not covered:
+            posTh = 0.0004
+            ornTh = 0.99
+        else:
+            posTh = 0.004
+            ornTh = 0.9
+        itemP, itemQ, _, _ = getKinematicData(w, (item,), predCache)
+        coverP, coverQ, _, _ = getKinematicData(w, (cover,), predCache)
+        itemFnCovering = w._kinematicTrees[item].get("fn", {}).get("covering", {})
+        coverFnCovering = w._kinematicTrees[cover].get("fn", {}).get("covering", {})
+        itemCoverPoint = itemFnCovering.get("point")
+        itemCoverAxis = itemFnCovering.get("axis")
+        coverCoverPoint = coverFnCovering.get("point")
+        coverCoverAxis = coverFnCovering.get("axis")
+        itemCoverAxisInWorld = stubbornTry(lambda : pybullet.rotateVector(itemQ, itemCoverAxis))
+        coverCoverAxisInWorld = stubbornTry(lambda : pybullet.rotateVector(coverQ, coverCoverAxis))
+        itemCoverPointInWorld, _ = w.objectPoseRelativeToWorld(itemP, itemQ, itemCoverPoint, [0,0,0,1])
+        coverCoverPointInWorld, _ = w.objectPoseRelativeToWorld(coverP, coverQ, coverCoverPoint, [0,0,0,1])
+        zGap = w.getAABB((cover,))[0][2] - w.getAABB((item,))[1][2]
+        d = [coverCoverPointInWorld[0] - itemCoverPointInWorld[0], coverCoverPointInWorld[1] - itemCoverPointInWorld[1]]
+        dot = coverCoverAxisInWorld[0]*itemCoverAxisInWorld[0] + coverCoverAxisInWorld[1]*itemCoverAxisInWorld[1] + coverCoverAxisInWorld[2]*itemCoverAxisInWorld[2]
+        retq = (posTh > (d[0]*d[0] + d[1]*d[1])) and (ornTh < dot) and (-0.05 < zGap) and (0.05 > zGap)
+        predCache[((cover, item, allowedComponents), "covers")] = retq
+    return predCache[((cover, item, allowedComponents), "covers")]
+
 def checkTransferred(w, name, item, pouredType, amount, container, predCache):
     if ((name, item, pouredType, amount, container), "transferred") not in predCache:
         if amount is not None:
@@ -579,6 +608,9 @@ def checkClosed(w, container, component, predCache):
 
 def _alwaysFalse(w, name, description, node, predCache):
     return False
+    
+def _alwaysTrue(w, name, description, node, predCache):
+    return True
     
 def _checkWaited(w, name, description, node, predCache):
     timeEnd = description.get('timeEnd', 0)
@@ -824,6 +856,26 @@ def _checkLined(w, name, description, node, predCache):
     lining = description['lining']
     return checkItemInContainer(w, name, lining, item, predCache)
 
+def _checkCoveredAndParked(w, name, description, node, predCache):
+    item = description['item']
+    hand = description['hand']
+    cover = description['cover']
+    parked = node.get('parked', False)
+    covered = node.get("covered", False)
+    parked = checkParked(w, name, hand, parked, predCache)
+    covered = checkItemCoversContainer(w, name, cover, item, predCache, covered)
+    node['parked'] = parked
+    node["covered"] = covered
+    return (not checkGrasped(w, name, None, cover, predCache)) and covered and parked
+
+def _checkCovered(w, name, description, node, predCache):
+    item = description['item']
+    hand = description['hand']
+    cover = description['cover']
+    covered = node.get("covered", False):
+    node["covered"] = checkItemCoversContainer(w, name, cover, item, predCache, covered)
+    return node["covered"]
+
 def _checkShapedAndParked(w, name, description, node, predCache):
     item = description.get('item', None)
     hand = description.get('hand', None)
@@ -1050,6 +1102,12 @@ def _suggestLinedAndParked(w, name, description, node, predCache):
 
 def _suggestLined(w, name, description, node, predCache):
     return [{"type": "P", "description": {"process": "lining", "lining": description["lining"], "hand": description["hand"], "item": description["item"]}, 'children': [], 'numerics': {}, "target": None}]
+
+def _suggestCoveredAndParked(w, name, description, node, predCache): # hand, item, cover |
+    return [{"type": "P", "description": {"process": "coveringAndParking", "cover": description["cover"], "hand": description["hand"], "item": description["item"]}, 'children': [], 'numerics': {}, "target": None}]
+
+def _suggestCovered(w, name, description, node, predCache): # hand, item, cover |
+    return [{"type": "P", "description": {"process": "covering", "cover": description["cover"], "hand": description["hand"], "item": description["item"]}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestShapedAndParked(w, name, description, node, predCache):
     item = description.get('item', None)
@@ -1779,6 +1837,69 @@ def _getLiningConditions(w, name, description, node, predCache):
             {"type": "G", "description": {"goal": "near", "relatum": item}, "children": [], "previousStatus": None, "numerics": {}},
             {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
 
+def _getCoveringAndParkingConditions(w, name, description, node, predCache): # hand, item, cover |
+    cover = description['cover']
+    hand = description['hand']
+    #source = description.get('sourceContainer', None)
+    #sourcePart = description.get('sourceComponent', None)
+    return [{"type": "G", "description": {"goal": "covered", "hand": hand, "item": description["item"], "cover": cover}, "children": [], "previousStatus": None, "numerics": None},
+            {"type": "G", "description": {"goal": "ungrasped", "hand": hand, "item": cover}, "children": [], "previousStatus": None, "numerics": None},
+            {"type": "G", "description": {"goal": "parkedArm", "hand": hand}, "children": [], "previousStatus": None, "numerics": {}}]
+
+def _getCoveringConditions(w, name, description, node, predCache): # hand, item, cover |
+    cover = description['cover']
+    hand = description['hand']
+    item = description['item']
+    handLink = getHandLink(w, name, hand, predCache)
+    handP, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
+    covP, covQ, _, _ = getKinematicData(w, (cover,), predCache)
+    itemP, itemQ, _, _ = getKinematicData(w, (item,), predCache)
+    covPositionInHand, covOrientationInHand = w.objectPoseRelativeToObject(handP, handQ, covP, covQ)
+    handParkedP, handParkedQ, _ = getParkedPose(w, name, hand, predCache)
+    entryHeight = getEntryHeight(w, name, {'hand': hand, 'item': item}, {}, predCache)
+    coveringFn = w._kinematicTrees[cover].get("fn", {}).get("covering", {})
+    itemCoveringFn = w._kinematicTrees[item].get("fn", {}).get("covering", {})
+    covAxisInCov = liningFn.get("axis") or [1,0,0]
+    covPointInCov = liningFn.get("point") or [0,0,0]
+    covAxis = stubbornTry(lambda : pybullet.rotateVector(covQ, covAxisInCov))
+    itemAxisInItem = itemCoveringFn.get("axis") or [1,0,0]
+    itemCovPointInItem = itemCoveringFn.get("point") or [0,0,0]
+    itemAxis = stubbornTry(lambda : pybullet.rotateVector(itemQ, itemAxisInItem))
+    covPointInHand = w.objectPoseRelativeToWorld(covPositionInHand, covOrientationInHand, covPointInCov, [0,0,0,1])[0]
+    covPoint = w.objectPoseRelativeToWorld(covP, covQ, covPointInCov, [0,0,0,1])[0]
+    itemCovPoint, _ = w.objectPoseRelativeToWorld(itemP, itemQ, itemCovPointInItem, [0,0,0,1])
+    entryHeightCovPoint = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, covPointInHand))[2]
+    itemYaw = math.atan2(itemAxis[1], itemAxis[0])
+    coveringQ = stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,itemYaw)))
+    #For lining:
+    #  we want lp/la: linpoint at itemlinpoint and linaxis aligned with itemaxis
+    #  we can achieve lp/la by a lowering process that maintains la/xy: linaxis aligned with itemaxis and linpointXY at itemlinpointXY
+    #  we can achieve la/xy by an aligning process that maintains xy/ez: linpointXY at itemlinpointXY and handZ at entryHeight
+    #  we can achieve xy/ez by a bringing process that maintains ez/po: handZ at entryHeight and handOrientation at parkedOrientation
+    #  we can achieve ez/po by a lifting process that maintains po: handOrientation at parkedOrientation
+    conlp = ['equalp', 'covPoint', 'itemCovPoint']
+    tollp = [0.0001, 0.0004]
+    conla = ['aligned', 'covAxis', 'itemAxis']
+    tolla = [0.99, 0.9]
+    conxy = ['equalxy', 'covPoint', 'itemCovPoint']
+    tolxy = [0.0001, 0.0004]
+    conez = ['equalz', 'handP', 'entryHeight']
+    tolez = [0.01, 0.05]
+    conpo = ['equalq', 'handQ', 'handParkedQ']
+    tolpo = [0.99, 0.9]
+    constraintConjunctions = [[conlp, conla], [conla, conxy], [conxy, conez], [conez, conpo]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wplpla = [itemCovPoint, coveringQ, None, covPointInHand, covOrientationInHand, None, None]
+    wplaxy = [[itemCovPoint[0], itemCovPoint[1], entryHeightCovPoint], coveringQ, None, covPointInHand, covOrientationInHand, None, None]
+    wpxyez = [[itemCovPoint[0], itemCovPoint[1], entryHeightCovPoint], handParkedQ, None, covPointInHand, None, None, None]
+    wpezpo = [[handParkedP[0], handParkedP[1], entryHeight], handParkedQ, None, None, None, None, None]
+    waypoints = [wplpla, wplaxy, wpxyez, wpezpo]
+    tolerances = [[tollp, tolla], [tolla, tolxy], [tolxy, tolez], [tolez, tolpo]]
+    entities = {'handP': handP, 'handQ': handQ, 'handParkedP': handParkedP, 'handParkedQ': handParkedQ, 'entryHeight': [0,0,entryHeight], 'covPoint': covPoint, 'itemCovPoint': itemCovPoint, 'covAxis': covAxis, 'itemAxis': itemAxis}
+    return [{"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": cover}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "near", "relatum": item}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
+
 def _getShapingConditions(w, name, description, node, predCache):
     hand = description['hand']
     item = description['item']
@@ -2031,6 +2152,7 @@ def _getBringingNearConditions(w, name, description, node, predCache):
     return [picked, closed, near]
 
 goalCheckers = {
+    'done': _alwaysTrue,
     'noped': _alwaysFalse,
     'waited': _checkWaited, # timeEnd
     'notifiedCompletion': _alwaysFalse,
@@ -2055,6 +2177,8 @@ goalCheckers = {
     'mashed': _checkMashed, # container, hand, storage, tool, toolLink |
     'linedAndParked': _checkLinedAndParked, # hand, item, lining |
     'lined': _checkLined, # hand, item, lining |
+    'coveredAndParked': _checkCoveredAndParked, # cover, hand, item |
+    'covered': _checkCovered, # cover, hand, item |
     'shapedAndParked': _checkShapedAndParked, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkled': _checkSprinkled, # hand, item, shaker, sprinkledType, storage |
     'bakedItem': _checkBaked,
@@ -2091,6 +2215,8 @@ processSuggesters = {
     'mashed': _suggestMashed, # container, hand, tool, toolLink |
     'linedAndParked': _suggestLinedAndParked, # hand, item, lining |
     'lined': _suggestLined, # hand, item, lining |
+    'coveredAndParked': _suggestCoveredAndParked, # hand, item, cover |
+    'covered': _suggestCovered, # hand, item, cover |
     'shapedAndParked': _suggestShapedAndParked, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkled': _suggestSprinkled, # hand, item, shaker, sprinkledType, storage |
     'cutItem': _suggestCutItem, # hand, item, storage, tool |
@@ -2128,6 +2254,8 @@ conditionListers = {
     'mashing': _getMashingConditions, # container, hand, tool, toolLink |
     'liningAndParking': _getLiningAndParkingConditions, # hand, item, lining |
     'lining': _getLiningConditions, # hand, item, lining |
+    'coveringAndParking': _getCoveringAndParkingConditions, # hand, item, cover |
+    'covering': _getCoveringConditions, # hand, item, cover |
     'shaping': _getShapingConditions, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkling': _getSprinklingConditions, # hand, item, shaker, sprinkledType, storage |
     'cuttingItem': _getCuttingItemConditions, # hand, item, storage, tool |

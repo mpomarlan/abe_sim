@@ -667,6 +667,62 @@ def toLineEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'linedBakingTray': requestData.get('bakingTray', None), 'kitchenStateOut': w.worldDump()}}
 
+def toCoverStart(requestData, w, agentName, todos):
+    item = requestData.get("object", None)
+    cover = requestData.get("cover", None)
+    lacks = _checkArgs([[item, "Request lacks object parameter."],
+                        [cover, "Request lacks cover parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
+    if cover not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested cover does not exist in world.'}
+    if not w._kinematicTrees[cover].get('fn', {}).get('canCover', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested cover cannot cover.'}
+    if not w._kinematicTrees[item].get('fn', {}).get('coverable', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested object cannot be covered.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'coveredAndParked', 'cover': cover, 'hand': 'hand_right', 'item': item}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toCoverEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'coveredObject': requestData.get('object', None), 'kitchenStateOut': w.worldDump()}}
+
+def toUncoverStart(requestData, w, agentName, todos):
+    item = requestData.get("object", None)
+    lacks = _checkArgs([[item, "Request lacks object parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    storage = _getStorage(w)
+    contacts = [x for x in w.checkCollision((item,)) if w._kinematicTrees[x].get("fn",{}).get("canCover", False)]
+    if 0 == len(contacts):
+        garden = {0: {'type': "G", "description": {"goal": "done"}}}
+        cover = None
+    else:
+        cover = contacts[0]
+        if item not in w._kinematicTrees:
+            return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
+        if not w._kinematicTrees[item].get('fn', {}).get('coverable', False):
+            return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested object cannot be covered.'}
+        garden = {0: {'type': 'G', 'description': {'goal': 'placedItem', "container": storage, "hand": "hand_right", "item": cover}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    requestData["cover"] = cover
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toUncoverEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'uncoveredObject': requestData.get('object', None), "cover": requestData.get("cover", None), 'kitchenStateOut': w.worldDump()}}
+
 def toPortionAndArrangeStart(requestData, w, agentName, todos):
     container = requestData.get("containerWithDough", None)
     destination = requestData.get("destination", None)
@@ -1069,6 +1125,8 @@ commandFns = {
     "to-grind": [processActionRequest, toGrindStart, toGrindEnd],
     "to-flatten": [processActionRequest, toFlattenStart, toFlattenEnd],
     "to-line": [processActionRequest, toLineStart, toLineEnd],
+    "to-cover": [processActionRequest, toCoverStart, toCoverEnd],
+    "to-uncover": [processActionRequest, toUncoverStart, toUncoverEnd],
     "to-shape": [processActionRequest, toShapeStart, toShapeEnd],
     "to-portion-and-arrange": [processActionRequest, toPortionAndArrangeStart, toPortionAndArrangeEnd],
     "to-bake": [processActionRequest, toBakeStart, toBakeEnd],
