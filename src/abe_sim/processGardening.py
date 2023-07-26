@@ -872,7 +872,7 @@ def _checkCovered(w, name, description, node, predCache):
     item = description['item']
     hand = description['hand']
     cover = description['cover']
-    covered = node.get("covered", False):
+    covered = node.get("covered", False)
     node["covered"] = checkItemCoversContainer(w, name, cover, item, predCache, covered)
     return node["covered"]
 

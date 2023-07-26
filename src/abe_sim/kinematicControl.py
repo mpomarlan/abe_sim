@@ -30,7 +30,7 @@ def computeError(w, fnKinematicControl, robotName, efLink, efPositionInLink, efO
     positionE = 10*adj*positionE
     axis, angle = w.orientationDifferenceAA(targetOrientation, efOrientation)
     angle = min(angularD, angle)
-    orientationE = numpy.array([angle*x for x in axis])
+    orientationE = 10*numpy.array([angle*x for x in axis])
     efPositionInBase, efOrientationInBase = w.objectPoseRelativeToObject(efBasePosition, efBaseOrientation, efPosition, efOrientation)
     tangentialVelocity = [efBaseAngularVelocity[1]*efPositionInBase[2]-efBaseAngularVelocity[2]*efPositionInBase[1],
                           efBaseAngularVelocity[2]*efPositionInBase[0]-efBaseAngularVelocity[0]*efPositionInBase[2],
