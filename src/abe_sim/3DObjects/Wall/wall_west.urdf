@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot name="wall_west">
+  <link name="wall_west">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="wall_west.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="wall_west.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="window_frame1">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="windowFrame.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="windowFrameCollider.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="window_frame2">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="windowFrame.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="windowFrameCollider.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="wall_to_window1" type="fixed">
+    <parent link="wall_west"/>
+    <child link="window_frame1"/>
+    <origin rpy="0 0 0" xyz="5.9507 0 0.574668"/>
+  </joint>
+  <joint name="wall_to_window2" type="fixed">
+    <parent link="wall_west"/>
+    <child link="window_frame2"/>
+    <origin rpy="0 0 0" xyz="0 0 0.574668"/>
+  </joint>
+</robot>
+

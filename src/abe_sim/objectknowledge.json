@@ -7144,5 +7144,69 @@
                      "graspable": true
               },
               "customStateVariables": {}
+       },
+       {
+              "type": "NorthWall",
+              "simtype": "ktree",
+              "filename": "3DObjects/Wall/wall_north.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "EastWall",
+              "simtype": "ktree",
+              "filename": "3DObjects/Wall/wall_east.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "SouthWall",
+              "simtype": "ktree",
+              "filename": "3DObjects/Wall/wall_south.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "WestWall",
+              "simtype": "ktree",
+              "filename": "3DObjects/Wall/wall_west.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "Ceiling",
+              "simtype": "ktree",
+              "filename": "3DObjects/Ceiling/ceiling.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "PottedPlant",
+              "simtype": "ktree",
+              "filename": "3DObjects/PottedPlant/pottedPlant.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "Table",
+              "simtype": "ktree",
+              "filename": "3DObjects/Table/table.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "Chair",
+              "simtype": "ktree",
+              "filename": "3DObjects/Chair/chair.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
        }
 ]
