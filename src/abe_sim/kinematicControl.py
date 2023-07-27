@@ -1,34 +1,47 @@
 import math
 import numpy
+import time
 
 from abe_sim.world import getDictionaryEntry
 from abe_sim.geom_utils import vector2Axis
 
-def computeError(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, efBaseLinearVelocity, efBaseAngularVelocity, linearD=0.1, angularD=0.1):
+###############################
+### WARNING WARNING WARNING ###
+###############################
+#
+# Just because numpy is usually fast does not mean it is always fast.
+# In particular, for 3D vectors numpy.dot and numpy.cross are SLOWER 
+# than manually implementing the dot and cross product in python code!
+# numpy.cross is MUCH slower. AVOID it.
+# Convert a list of numbers to numpy array only later, when doing matmul,
+# mat inversion, or the like.
+
+def computeError(w, fnKinematicControl, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, linearD=0.1, angularD=0.1):
     # e = clampmag(target-actual, d)
-    positionEFLink = customDynamicsAPI['getObjectProperty']((robotName, efLink), 'position')
-    orientationEFLink = customDynamicsAPI['getObjectProperty']((robotName, efLink), 'orientation')
-    linearVelocityEFLink = customDynamicsAPI['getObjectProperty']((robotName, efLink), 'linearVelocity')
-    angularVelocityEFLink = customDynamicsAPI['getObjectProperty']((robotName, efLink), 'angularVelocity')
-    positionBase = customDynamicsAPI['getObjectProperty']((robotName,), 'position')
-    orientationBase = customDynamicsAPI['getObjectProperty']((robotName,), 'orientation')
-    efPosition, efOrientation = customDynamicsAPI['objectPoseRelativeToWorld'](positionEFLink, orientationEFLink, efPositionInLink, efOrientationInLink)
-    positionE = numpy.array([a-b for a,b in zip(targetPosition, efPosition)])
-    lenPE = numpy.dot(positionE, positionE)
+    positionEFLink, orientationEFLink, linearVelocityEFLink, angularVelocityEFLink = w.getKinematicData((robotName, efLink))
+    efPosition, efOrientation = w.objectPoseRelativeToWorld(positionEFLink, orientationEFLink, efPositionInLink, efOrientationInLink)
+    positionE = [a-b for a,b in zip(targetPosition, efPosition)]
+    lenPE = positionE[0]*positionE[0]+positionE[1]*positionE[1]+positionE[2]*positionE[2]
     linearDSq = linearD*linearD
     adj = 1.0
     if linearDSq < lenPE:
         adj = math.sqrt(linearDSq/lenPE)
+    positionE = numpy.array(positionE)
     positionE = 10*adj*positionE
-    axis, angle = customDynamicsAPI['orientationDifferenceAA'](targetOrientation, efOrientation)
+    axis, angle = w.orientationDifferenceAA(targetOrientation, efOrientation)
     angle = min(angularD, angle)
-    orientationE = numpy.array([angle*x for x in axis])
-    efPositionInBase, efOrientationInBase = customDynamicsAPI['objectPoseRelativeToObject'](positionBase, orientationBase, efPosition, efOrientation)
-    tangentialVelocity = numpy.cross(efBaseAngularVelocity, efPositionInBase)
+    orientationE = 10*numpy.array([angle*x for x in axis])
+    efPositionInBase, efOrientationInBase = w.objectPoseRelativeToObject(efBasePosition, efBaseOrientation, efPosition, efOrientation)
+    tangentialVelocity = [efBaseAngularVelocity[1]*efPositionInBase[2]-efBaseAngularVelocity[2]*efPositionInBase[1],
+                          efBaseAngularVelocity[2]*efPositionInBase[0]-efBaseAngularVelocity[0]*efPositionInBase[2],
+                          efBaseAngularVelocity[0]*efPositionInBase[1]-efBaseAngularVelocity[1]*efPositionInBase[0]]
     eLV = positionE - efBaseLinearVelocity - tangentialVelocity
     eAV = orientationE - efBaseAngularVelocity
-    currentVelocity = numpy.array(linearVelocityEFLink) - efBaseLinearVelocity - tangentialVelocity + numpy.cross(angularVelocityEFLink, efPositionInLink)
-    accelerationLimitSquared = customDynamicsAPI['getObjectProperty']((robotName,), ('fn', 'kinematicControl', 'accelerationLimitSquared', efLink), 1.0)
+    vpCross = [angularVelocityEFLink[1]*efPositionInLink[2] - angularVelocityEFLink[2]*efPositionInLink[1],
+               angularVelocityEFLink[2]*efPositionInLink[0] - angularVelocityEFLink[0]*efPositionInLink[2],
+               angularVelocityEFLink[0]*efPositionInLink[1] - angularVelocityEFLink[1]*efPositionInLink[0]]
+    currentVelocity = numpy.array(linearVelocityEFLink) - efBaseLinearVelocity - tangentialVelocity + vpCross
+    accelerationLimitSquared = fnKinematicControl.get("accelerationLimitSquared", {}).get(efLink) or 1.0
     #acceleration = eLV - currentVelocity
     #accelerationDirection = vector2Axis(acceleration)
     #accelerationMagnitude = numpy.linalg.norm(acceleration)
@@ -38,11 +51,12 @@ def computeError(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrien
     #    return numpy.concatenate((eLV, eAV))
     #return numpy.concatenate((currentVelocity + accelerationLimit*accelerationDirection, eAV))
 
-def computeAvailableJacobian(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, usableDoFs, mobileBase=False):
-    linearJacobian, angularJacobian = customDynamicsAPI['computeJacobian'](efLink, efPositionInLink)
+def computeAvailableJacobian(w, robotName, efLink, efPositionInLink, efOrientationInLink, usableDoFs, mobileBase=False):
+    jointPositions, jointVelocities, _, _ = w.getJointStates((robotName,))
+    linearJacobian, angularJacobian = w.computeJacobian(robotName, efLink, efPositionInLink, positions=jointPositions, velocities=jointVelocities)
     linearJacobian = numpy.array(linearJacobian)
     angularJacobian = numpy.array(angularJacobian)
-    dofList = customDynamicsAPI['getObjectProperty']((robotName,), 'dofList')
+    dofList = w._kinematicTrees[robotName].get('dofList', [])
     selectedDoF = []
     baseK = 0
     if mobileBase:
@@ -70,9 +84,9 @@ def getFactorForTranspose(newVelocity, oldVelocity, accelerationLimitSquared):
     else:
         return 5
     
-def jacobianTranspose(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, usableDoFs, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=1.0, linearD=0.1, angularD=0.1, mobileBase=False):
-    e, currentVelocity, accelerationLimitSquared = computeError(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, efBaseLinearVelocity, efBaseAngularVelocity, linearD, angularD)
-    J, Jt = computeAvailableJacobian(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, usableDoFs, mobileBase=mobileBase)
+def jacobianTranspose(w, fnKinematicControl, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, usableDoFs, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=1.0, linearD=0.1, angularD=0.1, mobileBase=False):
+    e, currentVelocity, accelerationLimitSquared = computeError(w, fnKinematicControl, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, linearD, angularD)
+    J, Jt = computeAvailableJacobian(w, robotName, efLink, efPositionInLink, efOrientationInLink, usableDoFs, mobileBase=mobileBase)
     Jte = numpy.matmul(Jt,e)
     JJte = numpy.matmul(J, Jte)
     dotJJte = numpy.dot(JJte, JJte)
@@ -85,47 +99,45 @@ def jacobianTranspose(customDynamicsAPI, robotName, efLink, efPositionInLink, ef
     factor = getFactorForTranspose(alpha*e[:3], currentVelocity, accelerationLimitSquared)
     return factor*alpha*Jte
 
-def jacobianPseudoinverseDLS(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, usableDoFs, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=0.1, linearD=0.1, angularD=0.1, mobileBase=False):
-    e, _, _ = computeError(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, efBaseLinearVelocity, efBaseAngularVelocity, linearD, angularD)
+def jacobianPseudoinverseDLS(w, fnKinematicControl, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, usableDoFs, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=0.1, linearD=0.1, angularD=0.1, mobileBase=False):
+    e, _, _ = computeError(w, fnKinematicControl, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, linearD, angularD)
     # dq = Jt*inv(J*Jt + dampingSq*I)*e
-    J, Jt = computeAvailableJacobian(customDynamicsAPI, robotName, efLink, efPositionInLink, efOrientationInLink, usableDoFs, mobileBase=mobileBase)
+    J, Jt = computeAvailableJacobian(w, robotName, efLink, efPositionInLink, efOrientationInLink, usableDoFs, mobileBase=mobileBase)
     JJt = numpy.matmul(J, Jt)
     invMat = numpy.linalg.inv(JJt + dampingSq*numpy.eye(len(JJt)))
     return numpy.matmul(Jt, numpy.matmul(invMat, e))
 
 def updateKinematicControl(name, customDynamicsAPI):
-    fnKinematicControl = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl'), {})
-    csvKinematicControl = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'kinematicControl'), {})
-    controlType = fnKinematicControl.get('method', 'transpose')
+    startD = time.perf_counter()
+    w = customDynamicsAPI["leetHAXXOR"]()
+    objData = w._kinematicTrees[name]
+    fnKinematicControl = objData.get("fn", {}).get("kinematicControl", {})
+    csvKinematicControl = objData.get("customStateVariables", {}).get("kinematicControl", {})
+    controlType = fnKinematicControl.get("method", "transpose")
     controlFn = {'transpose': jacobianTranspose, 'pseudoinverse': jacobianPseudoinverseDLS}.get(controlType, jacobianTranspose)
-    dofs = [x[0] for x in customDynamicsAPI['getObjectProperty']((name,), 'dofList', [])]
+    dofs = [x[0] for x in objData.get('dofList', [])]
     dofSet = set(dofs)
-    mobileBase = not customDynamicsAPI['getObjectProperty']((name,), 'immobile', False)
-    for ef in fnKinematicControl.get('endEffectors', []):
-        efTarget = getDictionaryEntry(csvKinematicControl, ('target', ef), None)
-        usableDoFs = set(getDictionaryEntry(fnKinematicControl, ('availableDoFs', ef), dofSet))
+    mobileBase = not objData.get("immobile", False)
+    for ef in fnKinematicControl.get("endEffectors", []):
+        efTarget = csvKinematicControl.get("target", {}).get(ef, None)
+        usableDoFs = set(fnKinematicControl.get("availableDoFs", {}).get(ef, dofSet))
         if efTarget is not None:
-            efPositionInLink = getDictionaryEntry(csvKinematicControl, ('positionInLink', ef), (0,0,0))
-            efOrientationInLink = getDictionaryEntry(csvKinematicControl, ('orientationInLink', ef), (0,0,0,1)) 
-            efLink = getDictionaryEntry(fnKinematicControl, ('efLink', ef), '')
-            #efBaseLink = ###
-            efBaseLinearVelocity = customDynamicsAPI['getObjectProperty']((name,), 'linearVelocity')
-            efBaseAngularVelocity = customDynamicsAPI['getObjectProperty']((name,), 'angularVelocity')
-            dampingSq = getDictionaryEntry(fnKinematicControl, ('dampingSq', ef), 1.0)
-            linearD = getDictionaryEntry(fnKinematicControl, ('linearD', ef), 0.1)
-            angularD = getDictionaryEntry(fnKinematicControl, ('angularD', ef), 0.1) 
-            jointVels = controlFn(customDynamicsAPI, name, efLink, efPositionInLink, efOrientationInLink, efTarget[0], efTarget[1], usableDoFs, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=dampingSq, linearD=linearD, angularD=angularD, mobileBase=mobileBase)
+            efPositionInLink = csvKinematicControl.get("positionInLink", {}).get(ef) or (0,0,0)
+            efOrientationInLink = csvKinematicControl.get("orientationInLink", {}).get(ef) or (0,0,0,1)
+            efLink = fnKinematicControl.get("efLink", {}).get(ef, '')
+            efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity = w.getKinematicData((name,))
+            dampingSq = fnKinematicControl.get("dampingSq", {}).get(ef) or 1.0
+            linearD = fnKinematicControl.get("linearD", {}).get(ef) or 0.1
+            angularD = fnKinematicControl.get("angularD", {}).get(ef) or 0.1
+            jointVels = controlFn(w, fnKinematicControl, name, efLink, efPositionInLink, efOrientationInLink, efTarget[0], efTarget[1], usableDoFs, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=dampingSq, linearD=linearD, angularD=angularD, mobileBase=mobileBase)
         else:
             jointVels = [0]*len(usableDoFs)
         k = 0
         for d in dofs:
             if d in usableDoFs:
-                force = getDictionaryEntry(fnKinematicControl, ('maxForce', d), 1000)
-                #if 'hand_right_yaw_to_hand_right_pitch' == d:
-                #    print(jointVels[k], force)
-                #    print('P', customDynamicsAPI['getObjectProperty']((name,), 'jointPositions')['hand_right_yaw_to_hand_right_pitch'])
-                #    print('V', customDynamicsAPI['getObjectProperty']((name,), 'jointVelocities')['hand_right_yaw_to_hand_right_pitch'])
-                #    print('F', customDynamicsAPI['getObjectProperty']((name,), 'jointReactionForces')['hand_right_yaw_to_hand_right_pitch'])
-                customDynamicsAPI['applyJointControl'](d, targetVelocity=jointVels[k], force=force)
+                force = fnKinematicControl.get("maxForce", {}).get(d) or 1000
+                w.applyJointControl((name, d), targetVelocity=jointVels[k], force=force)
                 k = k + 1
+    endD = time.perf_counter()
+    print("    kinematicC %f" % (endD-startD))
     return

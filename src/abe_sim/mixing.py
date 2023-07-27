@@ -1,89 +1,90 @@
 import math
-import numpy
 
 from abe_sim.world import getDictionaryEntry
 
 def updateMingling(name, customDynamicsAPI):
-    at = customDynamicsAPI['getObjectProperty']((name,), 'atComponent')
-    fnMingling = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'mingling'), {})
-    csvMingling = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'mingling'), {})
-    nameType = customDynamicsAPI['getObjectProperty']((name,), 'type')
-    aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
-    aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, getDictionaryEntry(fnMingling, ('minglableRadius',), 1.0))
-    closeObjects = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
+    w = customDynamicsAPI["leetHAXXOR"]()
+    fnMingling = w._kinematicTrees[name].get("fn") or {}
+    if "customStateVariables" not in w._kinematicTrees[name]:
+        w._kinematicTrees[name]["customStateVariables"] = {}
+    if "mingling" not in w._kinematicTrees[name]["customStateVariables"]:
+        w._kinematicTrees[name]["customStateVariables"]["mingling"] = {}
+    csvMingling = w._kinematicTrees[name]["customStateVariables"]["mingling"]
+    nameType = w._kinematicTrees[name]("type")
+    aabb = w.getAABB((name,))
+    aabbAdj = w.adjustAABBRadius(aabb, (fnMingling.get("minglableRadius") or 0.5))
+    overlaps = [x for x in customDynamicsAPI['checkOverlap'](aabbAdj) if name != x[0]]
+    minglers = set([x[0] for x in overlaps if w._kinematicTrees[x[0]].get("fn", {}).get("canMingle")])
     isMingling = False
-    for closeObject in closeObjects:
-        if not customDynamicsAPI['getObjectProperty']((closeObject,), ('fn', 'canMingle'), False):
-            continue
-        fnMingler = customDynamicsAPI['getObjectProperty']((closeObject,), ('fn', 'mingling'), {})
-        minglerLinks = getDictionaryEntry(fnMingler, ('links',), [])
+    for mingler in minglers:
+        fnMingler = w._kinematicTrees[closeObject].get("fn", {}).get("mingling") or {}
+        minglerLinks = fnMingler.get("links") or []
         for minglerLink in minglerLinks:
-            minglerRadius = getDictionaryEntry(fnMingler, ('radius', minglerLink), 0.0)
-            if minglerRadius > customDynamicsAPI['getDistance']((name,), (closeObject, minglerLink), minglerRadius):
+            if (mingler, minglerLink) in overlaps:
                 isMingling = True
                 break
         if isMingling:
             break
     if isMingling:
-        hp = getDictionaryEntry(csvMingling, ('hp',), 0) - 1
+        hp = (csvMingling.get("hp") or 0) - 1
         if 0 < hp:
-            nameP = customDynamicsAPI['getObjectProperty']((name,), 'position')
-            minglerP = customDynamicsAPI['getObjectProperty']((closeObject, minglerLink), 'position')
+            nameP, _, _, _ = w.getKinematicData((name,))
+            minglerP, _, _, _ = w.getKinematicData((closeObject, minglerLink))
             dx = nameP[0] - minglerP[0]
             dy = nameP[1] - minglerP[1]
             norm = math.sqrt(dx*dx+dy*dy)
             if 0.1 < norm:
-                dx = 0.1*dx/norm
-                dy = 0.07*dy/norm
-            vel = [-dy, dx, 0]
-            customDynamicsAPI['setObjectProperty']((), 'linearVelocity', vel)
-            customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'mingling', 'mingling'), True)
-            customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'mingling', 'hp'), hp)
+                dx = 0.05*dx/norm
+                dy = 0.05*dy/norm
+            force = [-dy, dx, 0]
+            w.applyExternalForce((name,), force, nameP, inWorldFrame=True)
+            csvMingling["mingling"] = True
+            csvMingling["hp"] = hp
     else:
-        customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'mingling', 'mingling'), False)
+        csvMingling["mingling"] = False
 
 def updateMixing(name, customDynamicsAPI):
     def setStr(l):
         l = sorted(list(l))
-        return ';'.join(l)
-    at = customDynamicsAPI['getObjectProperty']((name,), 'atComponent')
-    csvMixing = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'mixing'), {})
-    fnMixing = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'mixing'), {})
-    nameType = customDynamicsAPI['getObjectProperty']((name,), 'type')
-    aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
-    aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, getDictionaryEntry(fnMixing, ('mixableRadius',), 1.0))
-    closeObjects = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
+        return ";".join(l)
+    w = customDynamicsAPI["leetHAXXOR"]()
+    if "customStateVariables" not in w._kinematicTrees[name]:
+        w._kinematicTrees[name]["customStateVariables"] = {}
+    if "mixing" not in w._kinematicTrees[name]["customStateVariables"]:
+        w._kinematicTrees[name]["customStateVariables"]["mixing"] = {}
+    csvMixing = w._kinematicTrees[name]["customStateVariables"]["mixing"]
+    fnMixing = w._kinematicTrees[name].get("fn", {}).get("mixing") or {}
+    nameType = w._kinematicTrees[name].get("type")
+    aabb = w.getAABB((name,))
+    aabbAdj = w.adjustAABBRadius(aabb, (fnMixing.get("mixableRadius") or 0.5))
+    overlaps = set(w.checkOverlap(aabbAdj))
+    closeObjects = set([x[0] for x in overlaps if name != x[0]])
+    mixers = [x for x in closeObjects if w._kinematicTrees[x].get("fn", {}).get("canMix")]
+    mixables = [x for x in closeObjects if w._kinematicTrees[x].get("fn", {}).get("mixable") or w._kinematicTrees[x].get("fn", {}).get("mixMakeable")]
     isMixing = False
-    for closeObject in closeObjects:
-        if not customDynamicsAPI['getObjectProperty']((closeObject,), ('fn', 'canMix'), False):
-            continue
-        fnMixer = customDynamicsAPI['getObjectProperty']((closeObject,), ('fn', 'mixing'), {})
-        mixerLinks = getDictionaryEntry(fnMixer, ('links',), [])
+    for mixer in mixers:
+        fnMixer = w._kinematicTrees[mixer].get("fn").get("mixing") or {}
+        mixerLinks = fnMixer.get("links") or []
         for mixerLink in mixerLinks:
-            mixerRadius = getDictionaryEntry(fnMixer, ('radius', mixerLink), 0.0)
-            if mixerRadius > customDynamicsAPI['getDistance']((name,), (closeObject, mixerLink), mixerRadius):
+            if (mixer, mixerLink) in overlaps:
                 isMixing = True
                 break
         if isMixing:
             break
     if isMixing:
-        aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, getDictionaryEntry(fnMixing, ('substanceRadius',), 0))
-        closeParticles = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
-        closeParticles = [x for x in closeParticles if at == customDynamicsAPI['getObjectProperty']((x,), 'atComponent')]
         neighboringTypes = set([nameType])
-        for particle in closeParticles:
-            pt = customDynamicsAPI['getObjectProperty']((particle,), 'type')
-            if customDynamicsAPI['getObjectProperty']((particle,), ('fn', 'mixable'), False) or customDynamicsAPI['getObjectProperty']((particle,), ('fn', 'mixMakeable'), False):
-                neighboringTypes.add(pt)
+        for particle in mixables:
+            pt = w._kinematicTrees[particle].get("type")
+            neighboringTypes.add(pt)
         bestMatch = None
-        for ingredientList in customDynamicsAPI['getProcessResource']({'process': 'mixing', 'patient': nameType}):
+        for ingredientList in w.getProcessResource({"process": "mixing", "patient": nameType}):
             if 0 == len(set(ingredientList).difference(neighboringTypes)):
                 if (bestMatch is None) or (len(bestMatch) < len(ingredientList)):
                     bestMatch = ingredientList
         if bestMatch is not None:
-            hp = getDictionaryEntry(csvMixing, ('hp',), 0) - 1
+            hp = (csvMixing.get("hp") or 0) - 1
             if 0 < hp:
-                customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'mixing', 'hp'), hp)
+                csvMixing["hp"] = hp
             else:
-                customDynamicsAPI['concludeProcess']({'process': 'mixing', 'patient': setStr(bestMatch)})
+                w.concludeProcess({"process": "mixing", "patient": setStr(bestMatch)}, name)
 

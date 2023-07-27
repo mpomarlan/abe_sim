@@ -6,38 +6,48 @@ import pybullet
 from abe_sim.world import getDictionaryEntry, stubbornTry
 
 def updateShaped(name, customDynamicsAPI):
-    aabb = customDynamicsAPI['getObjectProperty']((name,), 'aabb')
-    aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, 1.0)
-    closeObjects = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
+    w = customDynamicsAPI["leetHAXXOR"]()
+    aabb = w.getAABB((name,))
+    aabbAdj = w.adjustAABBRadius(aabb, 1.0)
+    closeObjects = set([x[0] for x in w.checkOverlap(aabbAdj)])
     for e in closeObjects:
-        if name in customDynamicsAPI['getObjectProperty']((e,), ('customStateVariables', 'provenance'), []):
-            customDynamicsAPI['removeObject']()
+        if name in (w._kinematicTrees[e].get("customStateVariables", {}).get("provenance") or []):
+            w.removeObject((name,))
             return
 
 def updateShaping(name, customDynamicsAPI):
-    fnShaping = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'shaping'))
-    csvShaping = customDynamicsAPI['getObjectProperty']((name,), ('customStateVariables', 'shaping'))
-    for a in getDictionaryEntry(fnShaping, ('actuators',), []):
-        shapedType = getDictionaryEntry(csvShaping, ('outcome', a), None)
-        ingredients = set(getDictionaryEntry(csvShaping, ('ingredients', a), []))
+    w = customDynamicsAPI["leetHAXXOR"]()
+    fnShaping = w._kinematicTrees[name].get("fn", {}).get("shaping") or {}
+    if "customStateVariables" not in w._kinematicTrees[name]:
+        w._kinematicTrees[name]["customStateVariables"] = {}
+    if "shaping" not in w._kinematicTrees[name]["customStateVariables"]:
+        w._kinematicTrees[name]["customStateVariables"]["shaping"] = {}
+    csvShaping = w._kinematicTrees[name]["customStateVariables"]["shaping"]
+    if "ingredients" not in csvShaping:
+        csvShaping["ingredients"] = {}
+    if "outcome" not in csvShaping:
+        csvShaping["outcome"] = {}
+    for a in (fnShaping.get("actuators") or []):
+        shapedType = csvShaping["outcome"].get(a)
+        ingredients = set((csvShaping["ingredients"].get(a) or []))
         if (shapedType is None) or (0 == len(ingredients)):
             continue
-        radius = getDictionaryEntry(fnShaping, ('radius', a), 0)
-        handLink = customDynamicsAPI['getObjectProperty']((name,), ('fn', 'kinematicControl', 'efLink', a))
-        aabb = customDynamicsAPI['getObjectProperty']((name, handLink), 'aabb')
-        aabbAdj = customDynamicsAPI['adjustAABBRadius'](aabb, radius)
-        closeObjects = set([x[0] for x in customDynamicsAPI['checkOverlap'](aabbAdj)])
+        radius = fnShaping.get("radius", {}).get(a) or 0
+        handLink = w._kinematicTrees[name].get("fn", {}).get("kinematicControl", {}).get("efLink", {}).get(a)
+        aabb = w.getAABB((name, handLink))
+        aabbAdj = w.adjustAABBRadius(aabb, radius)
+        closeObjects = set([x[0] for x in w.checkOverlap(aabbAdj)])
         if 0 == len(ingredients.difference(closeObjects)):
-            handP = customDynamicsAPI['getObjectProperty']((name, handLink), 'position')
-            handQ = customDynamicsAPI['getObjectProperty']((name, handLink), 'orientation')
+            handP, handQ, _, _ = w.getKinematicData((name, handLink))
             axis = stubbornTry(lambda : pybullet.rotateVector(handQ, [0,0,-0.07]))
-            objDesc = customDynamicsAPI['getObjectTypeKnowledge'](shapedType)
-            if 'customStateVariables' not in objDesc:
-                objDesc['customStateVariables'] = {}
-            objDesc['customStateVariables']['provenance'] = list(ingredients)
-            objDesc['orientation'] = [0,0,0,1]
-            objDesc['position'] = [handP[0] + axis[0], handP[1] + axis[1], handP[2] + axis[2]]
-            objDesc['name'] = "%s_%d" % (shapedType, customDynamicsAPI['getNewObjectCounter']())
-            customDynamicsAPI['addObject'](objDesc)
-            customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'shaping', 'ingredients', a), [])
-            customDynamicsAPI['setObjectProperty']((), ('customStateVariables', 'shaping', 'outcome', a), None)
+            objDesc = w.getObjectTypeKnowledge(shapedType)
+            if "customStateVariables" not in objDesc:
+                objDesc["customStateVariables"] = {}
+            objDesc["customStateVariables"]["provenance"] = list(ingredients)
+            objDesc["orientation"] = [0,0,0,1]
+            objDesc["position"] = [handP[0] + axis[0], handP[1] + axis[1], handP[2] + axis[2]]
+            objDesc["name"] = "%s_%d" % (shapedType, w.getNewObjectCounter())
+            w.addObject(objDesc)
+            csvShaping["ingredients"][a] = []
+            csvShaping["outcome"][a] = None
+

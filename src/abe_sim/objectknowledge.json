@@ -482,6 +482,167 @@
               }
        },
        {
+              "type": "Bea",
+              "simtype": "ktree",
+              "filename": "3DObjects/Bea/bea.urdf",
+              "immobile": true,
+              "fn": {
+                     "canClopen": true,
+                     "canGrasp": true,
+                     "kinematicallyControlable": true,
+                     "canShape": true,
+                     "clopening": {
+                            "clopeningEFs": [
+                                   "hand_left",
+                                   "hand_right"
+                            ]
+                     },
+                     "grasping": {
+                            "effectors": [
+                                   "hand_left",
+                                   "hand_right"
+                            ],
+                            "graspingActivationRadius": {
+                                   "hand_left": 0.1,
+                                   "hand_right": 0.1
+                            },
+                            "graspingDeactivationRadius": {
+                                   "hand_left": 0.2,
+                                   "hand_right": 0.2
+                            },
+                            "link2EF": {
+                                   "hand_left_roll": "hand_left",
+                                   "hand_right_roll": "hand_right"
+                            }
+                     },
+                     "shaping": {
+                            "actuators": [
+                                   "hand_left",
+                                   "hand_right"
+                            ],
+                            "radius": {
+                                   "hand_left": 0.5,
+                                   "hand_right": 0.5
+                            }
+                     },
+                     "kinematicControl": {
+                            "parkedPosition": {
+                                   "base_yaw": [
+                                          0,
+                                          0,
+                                          0
+                                   ],
+                                   "hand_left_roll": [
+                                          0,
+                                          0.4,
+                                          1
+                                   ],
+                                   "hand_right_roll": [
+                                          0,
+                                          -0.4,
+                                          1
+                                   ]
+                            },
+                            "mobileBaseLink": "base_yaw",
+                            "baseLink": {
+                                   "base_yaw": "world",
+                                   "hand_left_roll": "base_yaw",
+                                   "hand_right_roll": "base_yaw"
+                            },
+                            "accelerationLimitSquared": {
+                                   "base_yaw": 0.001,
+                                   "hand_right_roll": 0.001,
+                                   "hand_left_roll": 0.001
+                            },
+                            "method": "transpose",
+                            "endEffectors": [
+                                   "hand_left",
+                                   "hand_right",
+                                   "base"
+                            ],
+                            "parkedPosition": {
+                                   "hand_left": [
+                                          0,
+                                          0.4,
+                                          0.9
+                                   ],
+                                   "hand_right": [
+                                          0,
+                                          -0.4,
+                                          0.9
+                                   ]
+                            },
+                            "parkedOrientation": {
+                                   "hand_left": [
+                                          0,
+                                          0,
+                                          0,
+                                          1
+                                   ],
+                                   "hand_right": [
+                                          0,
+                                          0,
+                                          0,
+                                          1
+                                   ]
+                            },
+                            "efLink": {
+                                   "hand_left": "hand_left_roll",
+                                   "hand_right": "hand_right_roll",
+                                   "base": "base_yaw"
+                            },
+                            "efBaseLink": {
+                                   "hand_left": "base_yaw",
+                                   "hand_right": "base_yaw"
+                            },
+                            "availableDoFs": {
+                                   "base": [
+                                          "world_to_base_x",
+                                          "base_x_to_base_y",
+                                          "base_y_to_base_yaw"
+                                   ],
+                                   "hand_left": [
+                                          "hand_left_base_to_hand_left_x",
+                                          "hand_left_x_to_hand_left_y",
+                                          "hand_left_y_to_hand_left_z",
+                                          "hand_left_z_to_hand_left_yaw",
+                                          "hand_left_yaw_to_hand_left_pitch",
+                                          "hand_left_pitch_to_hand_left_roll"
+                                   ],
+                                   "hand_right": [
+                                          "hand_right_base_to_hand_right_x",
+                                          "hand_right_x_to_hand_right_y",
+                                          "hand_right_y_to_hand_right_z",
+                                          "hand_right_z_to_hand_right_yaw",
+                                          "hand_right_yaw_to_hand_right_pitch",
+                                          "hand_right_pitch_to_hand_right_roll"
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "clopening": {
+                            "action": {
+                                   "hand_left": null,
+                                   "hand_right": null
+                            }
+                     },
+                     "grasping": {
+                            "intendToGrasp": {
+                                   "hand_left": [],
+                                   "hand_right": []
+                            },
+                            "actuallyGrasping": {
+                                   "hand_left": [],
+                                   "hand_right": []
+                            }
+                     },
+                     "kinematicControl": {
+                            "target": {}
+                     }
+              }
+       },
+       {
               "type": "Bread",
               "simtype": "ktree",
               "filename": "3DObjects/Bread/bread.urdf",

@@ -7,6 +7,7 @@ import platform
 import pybullet
 import pybullet_data
 import copy
+import time
 
 #### The World class
 #
@@ -131,6 +132,15 @@ class World():
         self._customDynamics = []
         if customDynamics is not None:
             self._customDynamics = list(customDynamics)
+        self._profile = 0
+        self._profileCLS = 0
+        self._profileCON = 0
+        self._profileOVR = 0
+        self._profileGET = 0
+        self._profileSET = 0
+        self._detProfGet = {}
+        self._cacheTime = 0
+        self._getObjectPropertyCache = {}
         self._sfr = 240
         self._frameStepCount = 1
         if simFrameRate is not None:
@@ -170,16 +180,17 @@ class World():
         if objectKnowledge is not None:
             self._objectKnowledge = copy.deepcopy(objectKnowledge)
         self._customDynamicsAPIBase = {
+          'leetHAXXOR': (lambda : self),
           'getFrameStepCount': (lambda : self.getFrameStepCount()),
           'setFrameStepCount': (lambda x : self.setFrameStepCount()),
           'getSFR' : (lambda : self.getSFR()),
           'addObject': (lambda x : self.addNewObject(x)), 
-          'getObjectProperty': (lambda x,y,defaultValue=None: self.getObjectProperty(x,y,defaultValue=defaultValue)),
-          'getDistance': (lambda x,y,z,hypotheticalPoses=None: self.getDistance(x,y,z,hypotheticalPoses=hypotheticalPoses)), 
+          'getObjectProperty': (lambda x,y,defaultValue=None: self.PgetObjectProperty(x,y,defaultValue=defaultValue)),
+          'getDistance': (lambda x,y,z: self.getDistance(x,y,z)), 
           'probeClosestPoints': (lambda x, pos, maxDistance=None: self.probeClosestPoints(x, pos, maxDistance=maxDistance)),
-          'checkCollision': (lambda x, identifierB=None, hypotheticalPoses=None : self.checkCollision(x, identifierB=identifierB, hypotheticalPoses=hypotheticalPoses)), 
-          'checkOverlap': (lambda x, hypotheticalPoses=None: self.checkOverlap(x, hypotheticalPoses=hypotheticalPoses)), 
-          'checkClosestPoints': (lambda x,y, maxDistance=None, hypotheticalPoses=None : self.checkClosestPoints(x, y, maxDistance=maxDistance, hypotheticalPoses=hypotheticalPoses)), 
+          'checkCollision': (lambda x, identifierB=None : self.checkCollision(x, identifierB=identifierB)), 
+          'checkOverlap': (lambda x, : self.checkOverlap(x)), 
+          'checkClosestPoints': (lambda x,y, maxDistance=None : self.checkClosestPoints(x, y, maxDistance=maxDistance)), 
           'getCameraImage': (lambda cameraPosition=None, cameraTarget=None, cameraUpAxis=None, fovInDegrees=60.0, aspectRatio=1.0, near=0.1, far=15, xSize=240, ySize=240: self.getCameraImage(cameraPosition=cameraPosition, cameraTarget=cameraTarget, cameraUpAxis=cameraUpAxis, fovInDegrees=fovInDegrees, aspectRatio=aspectRatio, near=near, far=far, xSize=xSize, ySize=ySize)), 
           'adjustAABBRadius': (lambda x,y: self.adjustAABBRadius(x, y)), 
           'addAABBRadius': (lambda x,y: self.addAABBRadius(x, y)), 
@@ -520,7 +531,7 @@ class World():
             retq = base.copy()
             retq['concludeProcess'] = lambda x,link=None: self.concludeProcess(x, name, link=link)
             retq['removeObject'] = lambda : self.removeObject((name,))
-            retq['setObjectProperty'] = lambda x, y, z : self.setObjectProperty(tuple([name] + list(x)), y, z)
+            retq['setObjectProperty'] = lambda x, y, z : self.PsetObjectProperty(tuple([name] + list(x)), y, z)
             retq['applyJointControl'] = lambda jnt, mode=None, targetPosition=None, targetVelocity=None, force=None, positionGain=None, velocityGain=None, maxVelocity=None: self.applyJointControl((name, jnt), mode=mode, targetPosition=targetPosition, targetVelocity=targetVelocity, force=force, positionGain=positionGain, velocityGain=velocityGain, maxVelocity=maxVelocity)
             retq['applyExternalForce'] = lambda x, y, z, inWorldFrame=False : _gateByName(name, x, self.applyExternalForce, (x,y,z), {'inWorldFrame': inWorldFrame})
             retq['applyExternalTorque'] = lambda x, y, inWorldFrame=False : _gateByName(name, x, self.applyExternalTorque, (x,y), {'inWorldFrame': inWorldFrame})
@@ -591,14 +602,24 @@ class World():
     def getAABB(self, identifier):
         if (not self._isIdentifier(identifier)) or (identifier[0] not in self._kinematicTrees):
             return None
+        cachedElement = self._getObjectPropertyCache.get((identifier, "aabb"), None)
+        if (cachedElement is not None) and (self._cacheTime <= cachedElement[0]):
+            return cachedElement[1]
         if (1 < len(identifier)):
             linkId = self._kinematicTrees[identifier[0]]['links'][identifier[1]]['idx']
-            return stubbornTry(lambda : pybullet.getAABB(self._kinematicTrees[identifier[0]]['idx'], linkId, self._pybulletConnection))
+            retq = stubbornTry(lambda : pybullet.getAABB(self._kinematicTrees[identifier[0]]['idx'], linkId, self._pybulletConnection))
+            self._getObjectPropertyCache[(identifier, "aabb")] = [self._cacheTime, retq]
+            return retq
         aabbMin = [None, None, None]
         aabbMax = [None, None, None]
         for l, ld in self._kinematicTrees[identifier[0]]['links'].items():
             lidx = ld['idx']
-            cmin, cmax = stubbornTry(lambda : pybullet.getAABB(self._kinematicTrees[identifier[0]]['idx'], lidx, self._pybulletConnection))
+            cachedElement = self._getObjectPropertyCache.get(((identifier[0],l), "aabb"), None)
+            if (cachedElement is not None) and (self._cacheTime <= cachedElement[0]):
+                cmin,cmax = cachedElement[1]
+            else:
+                cmin, cmax = stubbornTry(lambda : pybullet.getAABB(self._kinematicTrees[identifier[0]]['idx'], lidx, self._pybulletConnection))
+                self._getObjectPropertyCache[((identifier[0],l), "aabb")] = [self._cacheTime, [cmin,cmax]]
             for k, e in enumerate(cmin):
                 if (aabbMin[k] is None) or (aabbMin[k] > e):
                     aabbMin[k] = e
@@ -611,29 +632,142 @@ class World():
         if retq is None:
             return None
         return retq[0]
+    # Sadly, the closest way to "correctly" identify insideness is the expensive closestPoints query.
+    # Because at and atComponent are used a lot we cannot afford it, so must approximate.
+    # Suggestion:
+    #     inside container if contacting container
+    #         if contacting more containers, choose the one with contact normal closest to vertical
+    #     else check whether some neighbor is inside a container and choose that one
+    #     if all else fails, check overlaps with containers
+    def _atComponentInternal(self, identifier, ignore=None):
+        cachedElement = self._getObjectPropertyCache.get((identifier, "atComponent"), None)
+        if (cachedElement is not None) and (self._cacheTime <= cachedElement[0]):
+            return cachedElement[1], []
+        contacts = self.checkCollision(identifier)
+        #containers = [x for x in contacts if (0.8 < x[4][2]) and self.getObjectProperty((x[1][0],), ("fn", "canContain"), False)]
+        containers = sorted([(-x[4][2], x) for x in contacts if self._kinematicTrees[x[1][0]].get("fn", {}).get("canContain", False)])
+        picked = None
+        aabb = self.getAABB(identifier)
+        for e in containers:
+            c = e[1][1]
+            aabbC = self.getAABB(c)
+            if (aabbC[0][0]-0.02 < aabb[0][0]) and (aabbC[0][1]-0.02 < aabb[0][1]) and (aabbC[1][0]+0.02 > aabb[1][0]) and (aabbC[1][1]+0.02 > aabb[1][1]):
+                picked = c
+                self._getObjectPropertyCache[(identifier, "atComponent")] = [self._cacheTime, picked]
+                break
+        if picked is not None:
+            return picked, []
+        if ignore is None:
+            ignore = set([])
+        candidates = set([(x[1][0],) for x in contacts]).difference(ignore)
+        return None, candidates                
     def atComponent(self, identifier):
-        aabbMin, aabbMax = self.getAABB(identifier)
-        if aabbMin is None:
+        cachedElement = self._getObjectPropertyCache.get((identifier, "atComponent"), None)
+        if (cachedElement is not None) and (self._cacheTime <= cachedElement[0]):
+            return cachedElement[1]
+        if identifier[0] not in self._kinematicTrees:
             return None
-        #center = [(a+b)*0.5 for a,b in zip(aabbMin,aabbMax)]
-        aabbMin = [aabbMin[0], aabbMin[1], aabbMin[2] - 0.03]
-        aabbMax = [aabbMax[0], aabbMax[1], aabbMin[2] + 0.03] # Yep, min -- wouldn't want to trigger overlaps with contained containers.
-        closeObjects = self.checkOverlap((aabbMin, aabbMax))
+        ignore = set()
+        aabb = self.getAABB(identifier)
+        todo = [identifier]
         retq = None
-        minD = None
-        for o,c in closeObjects:
-            if (o == identifier[0]) or (not self.getObjectProperty((o,), ("fn", "canContain"), False)) or (c not in self.getObjectProperty((o,), ("fn", "containment", "links"), [])):
-                continue
-            ds = [x[-1] for x in self.checkClosestPoints((identifier), (o,c), maxDistance=0.1)]
-            if 0 < len(ds):
-                d = min(ds)
-                if (None==minD) or (d < minD):
-                    minD = d
-                    retq = [o,c]
+        while todo:
+            cr = todo.pop()
+            ignore.add(cr)
+            retq, candidates = self._atComponentInternal(cr, ignore=ignore)
+            if (retq is not None) and (retq[0] != identifier[0]):
+                aabbC = self.getAABB(retq)
+                if (aabbC[0][0]-0.02 < aabb[0][0]) and (aabbC[0][1]-0.02 < aabb[0][1]) and (aabbC[1][0]+0.02 > aabb[1][0]) and (aabbC[1][1]+0.02 > aabb[1][1]):
+                    break
+            else:
+                retq = None
+            todo += candidates
+        if retq is None:
+            aabbAdj = self.adjustAABBRadius(aabb, 0.02)
+            overlaps = [x for x in self.checkOverlap(aabb) if (x[0] != identifier[0]) and self._kinematicTrees[x[0]].get("fn", {}).get("canContain", False) and (x[1] in self._kinematicTrees[x[0]].get("fn", {}).get("links", []))]
+            for c in overlaps:
+                aabbC = self.getAABB(c)
+                if (aabbC[0][0]-0.02 < aabb[0][0]) and (aabbC[0][1]-0.02 < aabb[0][1]) and (aabbC[1][0]+0.02 > aabb[1][0]) and (aabbC[1][1]+0.02 > aabb[1][1]):
+                    retq = c
+                    break
+        self._getObjectPropertyCache[(identifier, "atComponent")] = [self._cacheTime, retq]
+        if (retq is not None) and (retq[0] == identifier[0]):
+            sys.exit(0)
         return retq
+        #aabbMin, aabbMax = self.getAABB(identifier)
+        #if aabbMin is None:
+        #    return None
+        ##center = [(a+b)*0.5 for a,b in zip(aabbMin,aabbMax)]
+        #aabbMin = [aabbMin[0], aabbMin[1], aabbMin[2] - 0.03]
+        #aabbMax = [aabbMax[0], aabbMax[1], aabbMin[2] + 0.03] # Yep, min -- wouldn't want to trigger overlaps with contained containers.
+        #closeObjects = self.checkOverlap((aabbMin, aabbMax))
+        #retq = None
+        #minD = None
+        #for o,c in closeObjects:
+        #    if (o == identifier[0]) or (not self.getObjectProperty((o,), ("fn", "canContain"), False)) or (c not in self.getObjectProperty((o,), ("fn", "containment", "links"), [])):
+        #        continue
+        #    ds = [x[-1] for x in self.checkClosestPoints((identifier), (o,c), maxDistance=0.1)]
+        #    if 0 < len(ds):
+        #        d = min(ds)
+        #        if (None==minD) or (d < minD):
+        #            minD = d
+        #            retq = [o,c]
+        #return retq
+    def getJointData(self, identifier):
+        objData = self._kinematicTrees[identifier[0]]
+        if (1 < len(identifier)) and (identifier[1] in objData['links']) and (-1 != objData['links'][identifier[1]]):
+            return stubbornTry(lambda : pybullet.getJointState(objData['idx'], objData['links'][identifier[1]]['idx']))
+        return None, None, None, None
+    def getKinematicData(self, identifier):
+        objData = self._kinematicTrees[identifier[0]]
+        linkId = -1
+        if 1 < len(identifier):
+            linkId = objData['links'].get(identifier[1], {}).get('idx', None)
+            if linkId is None:
+                return None
+        if 0 <= linkId:
+            _, _, _, _, position, orientation, linearVelocity, angularVelocity = stubbornTry(lambda : pybullet.getLinkState(objData['idx'], linkId, 1, False, self._pybulletConnection))
+        else:
+            position, orientation = stubbornTry(lambda : pybullet.getBasePositionAndOrientation(objData['idx'], self._pybulletConnection))
+            linearVelocity, angularVelocity = stubbornTry(lambda : pybullet.getBaseVelocity(objData['idx'], self._pybulletConnection))
+        return position, orientation, linearVelocity, angularVelocity
+    def getJointStates(self, identifier):
+        objData = self._kinematicTrees[identifier[0]]
+        jointNames = list(objData["joints"].keys())
+        aux = stubbornTry(lambda : pybullet.getJointStates(objData['idx'], [objData['joints'][j]['idx'] for j in jointNames]))
+        if aux is None:
+            aux = []
+        return {k: v[0] for k, v in zip(jointNames, aux)},  {k: v[1] for k, v in zip(jointNames, aux)}, {k: v[2] for k, v in zip(jointNames, aux)}, {k: v[3] for k, v in zip(jointNames, aux)}
     def getObjectProperty(self, identifier, propertyIdentifier, defaultValue=None):
         if not self._isIdentifier(identifier):
             return None
+        if not isinstance(identifier, tuple):
+            identifier = tuple(identifier)
+        if isinstance(propertyIdentifier, list):
+            propertyIdentifier = tuple(propertyIdentifier)
+        s1 = time.perf_counter()
+        cachedElement = self._getObjectPropertyCache.get((identifier, propertyIdentifier), None)
+        e1 = time.perf_counter()
+        if 'atComponent' == propertyIdentifier:
+            if 'atComponentCached' not in self._detProfGet:
+                self._detProfGet['atComponentCached'] = [0,0]
+            self._detProfGet['atComponentCached'][0] += (e1-s1)
+        if (cachedElement is not None) and (self._cacheTime <= cachedElement[0]):
+            if 'atComponent' == propertyIdentifier:
+                self._detProfGet['atComponentCached'][1] += 1
+            return cachedElement[1]
+        s = time.perf_counter()
+        retq = self._getObjectPropertyInternal(identifier, propertyIdentifier, defaultValue=defaultValue)
+        self._getObjectPropertyCache[(identifier, propertyIdentifier)] = [self._cacheTime, retq]
+        e = time.perf_counter()
+        if 'atComponent' == propertyIdentifier:
+            if 'atComponentUncached' not in self._detProfGet:
+                self._detProfGet['atComponentUncached'] = [0, 0, []]
+            self._detProfGet['atComponentUncached'][0] += (e-s)
+            self._detProfGet['atComponentUncached'][1] += 1
+            self._detProfGet['atComponentUncached'][2].append(identifier)
+        return retq
+    def _getObjectPropertyInternal(self, identifier, propertyIdentifier, defaultValue=None):
         if (isinstance(propertyIdentifier, tuple) or isinstance(propertyIdentifier, list)) and (1 == len(propertyIdentifier)):
             propertyIdentifier = propertyIdentifier[0]
         objData = None
@@ -652,16 +786,11 @@ class World():
                 return None
         elif objData['simtype'] in ['ktree', 'marker']:
             if propertyIdentifier in ["position", "orientation", "linearVelocity", "angularVelocity"]:
-                linkId = -1
-                if 1 < len(identifier):
-                    linkId = objData['links'].get(identifier[1], {}).get('idx', None)
-                    if linkId is None:
-                        return None
-                if 0 <= linkId:
-                    _, _, _, _, position, orientation, linearVelocity, angularVelocity = stubbornTry(lambda : pybullet.getLinkState(objData['idx'], linkId, 1, False, self._pybulletConnection))
-                else:
-                    position, orientation = stubbornTry(lambda : pybullet.getBasePositionAndOrientation(objData['idx'], self._pybulletConnection))
-                    linearVelocity, angularVelocity = stubbornTry(lambda : pybullet.getBaseVelocity(objData['idx'], self._pybulletConnection))
+                position, orientation, linearVelocity, angularVelocity = self.getKinematicData(identifier)
+                self._getObjectPropertyCache[(identifier, "position")] = [self._cacheTime, position]
+                self._getObjectPropertyCache[(identifier, "orientation")] = [self._cacheTime, orientation]
+                self._getObjectPropertyCache[(identifier, "linearVelocity")] = [self._cacheTime, linearVelocity]
+                self._getObjectPropertyCache[(identifier, "angularVelocity")] = [self._cacheTime, angularVelocity]
                 return {"position": position, "orientation": orientation, "linearVelocity": linearVelocity, "angularVelocity": angularVelocity}[propertyIdentifier]
             elif 'parent' == propertyIdentifier:
                 if (1 == len(identifier)) or (identifier[1] not in objData['links']) or (-1 == objData['links'][identifier[1]]['idx']):
@@ -727,11 +856,13 @@ class World():
                 return None
             elif propertyIdentifier in ['jointPositions', 'jointVelocities', 'jointReactionForces', 'jointAppliedTorques']:
                 if 1 == len(identifier):
-                    retq = {}
-                    for j in objData['joints']:
-                        pos, vel, ref, tor = stubbornTry(lambda : pybullet.getJointState(objData['idx'], objData['joints'][j]['idx']))
-                        retq[j] = {'jointPositions': pos, 'jointVelocities': vel, 'jointReactionForces': ref, 'jointAppliedTorques': tor}[propertyIdentifier]
-                    return retq
+                    jointPs, jointVels, jointForces, jointTorques = self.getJointStates(identifier)
+                    self._getObjectPropertyCache[(identifier, 'jointPositions')] = jointPs
+                    self._getObjectPropertyCache[(identifier, 'jointVelocities')] = jointVels
+                    self._getObjectPropertyCache[(identifier, 'jointReactionForces')] = jointForces
+                    self._getObjectPropertyCache[(identifier, 'jointAppliedTorques')] = jointTorques
+                    return {'jointPositions': jointPs, 'jointVelocities': jointVels, 'jointReactionForces': jointForces, 'jointAppliedTorques': jointTorques}[propertyIdentifier]
+
                 return None
             elif 'links' == propertyIdentifier:
                 return list(self._kinematicTrees[identifier[0]]['links'].keys())
@@ -761,6 +892,11 @@ class World():
             return None
         if (isinstance(propertyIdentifier, tuple) or isinstance(propertyIdentifier, list)) and (1 == len(propertyIdentifier)):
             propertyIdentifier = propertyIdentifier[0]
+        if not isinstance(identifier, tuple):
+            identifier = tuple(identifier)
+        if isinstance(propertyIdentifier, list):
+            propertyIdentifier = tuple(propertyIdentifier)
+        self._getObjectPropertyCache[(identifier, propertyIdentifier)] = None
         objData = None
         if identifier[0] in self._markers:
             objData = self._markers[identifier[0]]
@@ -925,6 +1061,8 @@ class World():
                 mapFn[description['simtype']](description)
         for description in newKinematicTrees + newKinematicConstraints + newMarkers:
             self.addObject(description)
+        self._cacheTime += 1
+        stubbornTry(lambda : pybullet.performCollisionDetection(self._pybulletConnection))
         return
     def getCameraImage(self, cameraPosition=None, cameraTarget=None, cameraUpAxis=None, fovInDegrees=60.0, aspectRatio=1.0, near=0.1, far=15, xSize=240, ySize=240):
         if cameraPosition is None:
@@ -995,13 +1133,36 @@ class World():
             frame = pybullet.WORLD_FRAME
         stubbornTry(lambda : pybullet.applyExternalTorque(idxs[0], idxs[1], torque, frame, self._pybulletConnection))
         return True
+    def PgetObjectProperty(self,x,y,defaultValue=None):
+        s = time.perf_counter()
+        retq = self.getObjectProperty(x,y,defaultValue=defaultValue)
+        e = time.perf_counter()
+        self._profileGET += (e-s)
+        return retq
+    def PsetObjectProperty(self, x, y, z):
+        s = time.perf_counter()
+        retq = self.setObjectProperty(x, y, z)
+        e = time.perf_counter()
+        self._profileSET += (e-s)
+        return retq
     def update(self, customDynamics=None):
+        print("FRAME")
+        self._detProfGet = {}
+        s = time.perf_counter()
+        self._cacheTime += 1
+        self._profile = 0
+        self._profileCLS = 0
+        self._profileCON = 0
+        self._profileOVR = 0
+        self._profileGET = 0
+        self._profileSET = 0
         if 0 < len(self._limbo):
             c = self._limbo.pop()
             stubbornTry(lambda : pybullet.removeBody(c['idx']))
         # Only allow custom dynamics to write the properties or potentially remove the object they apply to.
         if customDynamics is None:
             customDynamics = []
+        sD = time.perf_counter()
         for objType, objRecs in [('ktree', self._kinematicTrees), ('kcon', self._kinematicConstraints)]:
             for name in list(objRecs.keys()):
                 if name in objRecs:
@@ -1009,9 +1170,18 @@ class World():
                         if name not in objRecs:
                             break
                         updateFn(name, self._customDynamicsAPI[objType][name])
+        eD = time.perf_counter()
+        sS = time.perf_counter()
         stubbornTry(lambda : pybullet.stepSimulation(self._pybulletConnection))
+        eS = time.perf_counter()
         self._computedCollisions = True
         self._frameStepCount = 1
+        e = time.perf_counter()
+        print("    Frame            %f\t(Sim %f\tDyn %f)" % (e-s, eS-sS, eD-sD))
+        print("    Geometry queries %f\t(CLS %f\tCON %f\tOVR %f)" % (self._profile, self._profileCLS, self._profileCON, self._profileOVR))
+        print("    GetOProp queries %f" % self._profileGET)
+        print("    SetOProp queries %f" % self._profileSET)
+        print("    ", [(k,self._detProfGet[k]) for k in self._detProfGet.keys()])
         # TODO: if enabled, update debug objects such as markers. Currently waiting for a newer pybullet where markers are easier to work with.
         return
     def distance(self, vectorEnd, vectorStart):
@@ -1027,42 +1197,19 @@ class World():
     def handPoseToBringObjectToPose(self, positionObjectInHand, orientationObjectInHand, targetPositionInWorld, targetOrientationInWorld):
         handPositionInObject, handOrientationInObject = stubbornTry(lambda: pybullet.invertTransform(positionObjectInHand, orientationObjectInHand))
         return self.objectPoseRelativeToWorld(targetPositionInWorld, targetOrientationInWorld, handPositionInObject, handOrientationInObject)
-    def _setHypotheticalPoses(self, poseMods):
-        if poseMods is None:
-            return {}, {}
-        identifier2TempIdx = {}
-        tempIdx2Identifier = {}
-        for identifier, pose in poseMods:
-            if self._isKinematicTreeOrLinkIdentifier(identifier):
-                if 1 == len(identifier):
-                    identifier = (identifier[0], self.getObjectProperty(identifier, 'baseLinkName'))
-                if identifier not in identifier2TempIdx:
-                    self._computedCollisions = False
-                    fname = self.getObjectProperty((identifier[0],), 'filename', '')
-                    collisionIdx = self._collisionShapes[(fname, identifier[1])]
-                    identifier2TempIdx[identifier] = stubbornTry(lambda : pybullet.createMultiBody(baseCollisionShapeIndex=collisionIdx, basePosition=pose[0], baseOrientation=pose[1]))
-                    tempIdx2Identifier[identifier2TempIdx[identifier]] = identifier
-        return tempIdx2Identifier, identifier2TempIdx
-    def _clearHypotheticalPoses(self, tempIdx2Identifier):
-        for idx in tempIdx2Identifier.keys():
-            stubbornTry(lambda : pybullet.removeBody(idx))
-    def _reportFromHypothetical(self, bidx, lnkIdx, tempIdx2Identifier, identifier2TempIdx):
-        if bidx in tempIdx2Identifier:
-            return tempIdx2Identifier[bidx]
+    def _reportFromIdx(self, bidx, lnkIdx):
         ktree = self._idx2KinematicTree[bidx]
-        identifier = (ktree, self._kinematicTrees[ktree]['idx2Link'][lnkIdx])
-        if identifier in identifier2TempIdx:
-            return None
-        return identifier
-    def checkCollision(self, identifierA, identifierB=None, hypotheticalPoses=None):
-        def _reportCollision(contactPoint, tempIdx2Identifier, identifier2TempIdx):
+        return (ktree, self._kinematicTrees[ktree]['idx2Link'][lnkIdx])
+    def checkCollision(self, identifierA, identifierB=None):
+        s = time.perf_counter()
+        def _reportCollision(contactPoint):
             _, bidA, bidB, lnkA, lnkB, ponA, ponB, normal, distance, force, lateralFriction1, lateralFriction1Dir, lateralFriction2, lateralFrictionDir2 = contactPoint
-            identifierA = self._reportFromHypothetical(bidA, lnkA, tempIdx2Identifier, identifier2TempIdx)
-            identifierB = self._reportFromHypothetical(bidB, lnkB, tempIdx2Identifier, identifier2TempIdx)
+            identifierA = self._reportFromIdx(bidA, lnkA)
+            identifierB = self._reportFromIdx(bidB, lnkB)
             if (identifierA is None) or (identifierB is None):
                 return None
             return identifierA, identifierB, ponA, ponB, normal, distance, force, lateralFriction1, lateralFriction1Dir, lateralFriction2, lateralFrictionDir2
-        def _getQueries(identifierA, identifierB, tempIdx2Identifier, identifier2TempIdx):
+        def _getQueries(identifierA, identifierB):
             if (not self._isKinematicTreeOrLinkIdentifier(identifierA)) or ((identifierB is not None) and (not self._isKinematicTreeOrLinkIdentifier(identifierB))):
                 return []
             identifiersA = []
@@ -1080,10 +1227,7 @@ class World():
                     identifiersB = [identifierB]
             queries = []
             for identifierA in identifiersA:
-                if identifierA in identifier2TempIdx:
-                    bidA, lnkA = identifier2TempIdx[identifierA], None
-                else:
-                    bidA, lnkA = self._kinematicTrees[identifierA[0]]['idx'], self._kinematicTrees[identifierA[0]]['links'][identifierA[1]]['idx']
+                bidA, lnkA = self._kinematicTrees[identifierA[0]]['idx'], self._kinematicTrees[identifierA[0]]['links'][identifierA[1]]['idx']
                 if [] == identifiersB:
                     kwargs = {'physicsClientId': self._pybulletConnection, 'bodyA': bidA}
                     if lnkA is not None:
@@ -1091,10 +1235,7 @@ class World():
                     queries.append(kwargs)
                 else:
                     for identifierB in identifiersB:
-                        if identifierB in identifier2TempIdx:
-                            bidB, lnkB = identifier2TempIdx[identifierB], None
-                        else:
-                            bidB, lnkB = self._kinematicTrees[identifierB[0]]['idx'], self._kinematicTrees[identifierA[B]]['links'][identifierB[1]]['idx']
+                        bidB, lnkB = self._kinematicTrees[identifierB[0]]['idx'], self._kinematicTrees[identifierA[B]]['links'][identifierB[1]]['idx']
                         kwargs = {'physicsClientId': self._pybulletConnection, 'bodyA': bidA, 'bodyB': bidB}
                         if lnkA is not None:
                             kwargs['linkIndexA'] = lnkA
@@ -1102,40 +1243,39 @@ class World():
                             kwargs['linkIndexB'] = lnkB
                         queries.append(kwargs)
             return queries
-        tempIdx2Identifier, identifier2TempIdx = self._setHypotheticalPoses(hypotheticalPoses)
         if not self._computedCollisions:
             stubbornTry(lambda : pybullet.performCollisionDetection(self._pybulletConnection))
             self._computedCollisions = True
-        queries = _getQueries(identifierA, identifierB, tempIdx2Identifier, identifier2TempIdx)
+        queries = _getQueries(identifierA, identifierB)
         answers = []
         for kwargs in queries:
             answers = answers + list(stubbornTry(lambda : pybullet.getContactPoints(**kwargs)))
-        retq = [_reportCollision(x, tempIdx2Identifier, identifier2TempIdx) for x in answers]
-        self._clearHypotheticalPoses(tempIdx2Identifier)
-        return [x for x in retq if x is not None]
-    def checkOverlap(self, regionSpec, hypotheticalPoses=None):
+        retq = [_reportCollision(x) for x in answers]
+        retq = [x for x in retq if x is not None]
+        e = time.perf_counter()
+        self._profile += (e-s)
+        self._profileCON += (e-s)
+        return retq
+    def checkOverlap(self, regionSpec):
         # Check which kinematic trees/links overlap a region. The region can be an AABB described by a tuple, or a dictionary containing mesh, position, and orientation keys where mesh is a string
         # representing a path to a urdf or mesh file, and position and orientation are appropriately-sized tuples
-        def _reportOverlap(contactPoint, tempIdx2Identifier, identifier2TempIdx):
+        def _reportOverlap(contactPoint):
             _, bidA, bidB, lnkA, lnkB, ponA, ponB, normal, distance, _ = contactPoint
-            identifier = self._reportFromHypothetical(bidB, lnkB, tempIdx2Identifier, identifier2TempIdx)
+            identifier = self._reportFromIdx(bidB, lnkB)
             if identifier is None:
                 return None
             return identifier, ponB, ponA, normal, distance
-        def _checkAABBOverlap(regionSpec, tempIdx2Identifier, identifier2TempIdx):
+        def _checkAABBOverlap(regionSpec):
             aabbMin, aabbMax = regionSpec
             overlaps = stubbornTry(lambda : pybullet.getOverlappingObjects(aabbMin, aabbMax, self._pybulletConnection))
             if overlaps is None:
                 return []
             retq = []
             for idx in overlaps:
-                if idx in tempIdx2Identifier:
-                    retq.append(tempIdx2Identifier[idx])
-                else:
-                    name = self._idx2KinematicTree[idx[0]]
-                    retq.append((name, self._kinematicTrees[name]['idx2Link'][idx[1]]))
+                name = self._idx2KinematicTree[idx[0]]
+                retq.append((name, self._kinematicTrees[name]['idx2Link'][idx[1]]))
             return retq
-        def _checkMeshOverlap(regionSpec, tempIdx2Identifier, identifier2TempIdx):
+        def _checkMeshOverlap(regionSpec):
             colShape = self._getCollisionShape(regionSpec['mesh'])
             if colShape is not None:
                 mb = stubbornTry(lambda : pybullet.createMultiBody(baseCollisionShapeIndex=colShape, basePosition=regionSpec['position'], baseOrientation=regionSpec['orientation'], physicsClientId=self._pybulletConnection))
@@ -1146,21 +1286,25 @@ class World():
                 stubbornTry(lambda : pybullet.removeBody(mb, self._pybulletConnection))
                 stubbornTry(lambda : pybullet.performCollisionDetection(self._pybulletConnection))
                 self._computedCollisions = True
-                return [_reportOverlap(x, tempIdx2Identifier, identifier2TempIdx) for x in contactPoints]
+                return [_reportOverlap(x) for x in contactPoints]
             return []
-        tempIdx2Identifier, identifier2TempIdx = self._setHypotheticalPoses(hypotheticalPoses)
+        s = time.perf_counter()
         if self._isRegionSpec(regionSpec):
-            retq = _checkMeshOverlap(regionSpec, tempIdx2Identifier, identifier2TempIdx)
+            retq = _checkMeshOverlap(regionSpec)
         else:
-            retq = _checkAABBOverlap(regionSpec, tempIdx2Identifier, identifier2TempIdx)
-        self._clearHypotheticalPoses(tempIdx2Identifier)
-        return [x for x in retq if x is not None]
-    def getDistance(self, identifierA, identifierB, maxDistance, hypotheticalPoses=None):
-        closestPoints = self.checkClosestPoints(identifierA, identifierB, maxDistance=maxDistance, hypotheticalPoses=hypotheticalPoses)
+            retq = _checkAABBOverlap(regionSpec)
+        retq = [x for x in retq if x is not None]
+        e = time.perf_counter()
+        self._profile += (e-s)
+        self._profileOVR += (e-s)
+        return retq
+    def getDistance(self, identifierA, identifierB, maxDistance):
+        closestPoints = self.checkClosestPoints(identifierA, identifierB, maxDistance=maxDistance)
         if (closestPoints is None) or (0 == len(closestPoints)):
             return 10*maxDistance
         return min([x[-1] for x in closestPoints])
     def probeClosestPoints(self, identifier, position, maxDistance=None):
+        s = time.perf_counter()
         def _reportClosestPoint(closestPoint):
             _, _, bidB, _, lnkB, _, posB, normal, distance, _, _, _, _, _ = closestPoint
             obName = self._idx2KinematicTree[bidB]
@@ -1179,8 +1323,13 @@ class World():
         stubbornTry(lambda : pybullet.resetBasePositionAndOrientation(self._colliderProbe, position, (0,0,0,1), self._pybulletConnection))
         answers = stubbornTry(lambda : pybullet.getClosestPoints(self._colliderProbe, objId, maxDistance, **kwargs))
         stubbornTry(lambda : pybullet.resetBasePositionAndOrientation(self._colliderProbe, (0,0,-110), (0,0,0,1), self._pybulletConnection))
-        return [_reportClosestPoint(x) for x in answers]
-    def checkClosestPoints(self, regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance=None, hypotheticalPoses=None):
+        retq = [_reportClosestPoint(x) for x in answers]
+        e = time.perf_counter()
+        self._profile += (e-s)
+        self._profileCLS += (e-s)
+        return retq
+    def checkClosestPoints(self, regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance=None):
+        s = time.perf_counter()
         def _parseRegionSpecOrIdentifier(regionSpecOrIdentifier):
             if self._isRegionSpec(regionSpecOrIdentifier):
                 colShape = self._getCollisionShape(regionSpecOrIdentifier['mesh'])
@@ -1196,7 +1345,7 @@ class World():
                         return (regionSpecOrIdentifier[0],regionSpecOrIdentifier[1]), linkMap, self._kinematicTrees[regionSpecOrIdentifier[0]]['idx'], lnkIdx, None
                     return (regionSpecOrIdentifier[0],), linkMap, self._kinematicTrees[regionSpecOrIdentifier[0]]['idx'], lnkIdx, None
             return None, None, None, None, None
-        def _getQueries(regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance, tempIdx2Identifier, identifier2TempIdx):
+        def _getQueries(regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance):
             identifierA, linkMapA, bidA, lnkA, cleanupIdxA = _parseRegionSpecOrIdentifier(regionSpecOrIdentifierA)
             identifierB, linkMapB, bidB, lnkB, cleanupIdxB = _parseRegionSpecOrIdentifier(regionSpecOrIdentifierB)
             if lnkA is None:
@@ -1209,32 +1358,25 @@ class World():
                 identifiersB = [identifierB]
             queries = []
             for identifierA in identifiersA:
-                if identifierA in identifier2TempIdx:
-                    bidA, lnkA = identifier2TempIdx[identifierA], None
-                else:
-                    bidA, lnkA = self._kinematicTrees[identifierA[0]]['idx'], self._kinematicTrees[identifierA[0]]['links'][identifierA[1]]['idx']
+                bidA, lnkA = self._kinematicTrees[identifierA[0]]['idx'], self._kinematicTrees[identifierA[0]]['links'][identifierA[1]]['idx']
                 for identifierB in identifiersB:
-                    if identifierB in identifier2TempIdx:
-                        bidB, lnkB = identifier2TempIdx[identifierB], None
-                    else:
-                        bidB, lnkB = self._kinematicTrees[identifierB[0]]['idx'], self._kinematicTrees[identifierB[0]]['links'][identifierB[1]]['idx']
+                    bidB, lnkB = self._kinematicTrees[identifierB[0]]['idx'], self._kinematicTrees[identifierB[0]]['links'][identifierB[1]]['idx']
                     kwargs = {'physicsClientId': self._pybulletConnection}
                     for val, key in [(lnkA, 'linkIndexA'), (lnkB, 'linkIndexB')]:
                         if val is not None:
                             kwargs[key] = val
                     queries.append([[bidA, bidB, maxDistance], kwargs])
             return queries, cleanupIdxA, cleanupIdxB
-        def _reportClosestPoint(closestPoint, tempIdx2Identifier, identifier2TempIdx):
+        def _reportClosestPoint(closestPoint):
             _, bidA, bidB, lnkA, lnkB, posA, posB, normal, distance, _, _, _, _, _ = closestPoint
-            identifierA = self._reportFromHypothetical(bidA, lnkA, tempIdx2Identifier, identifier2TempIdx)
-            identifierB = self._reportFromHypothetical(bidB, lnkB, tempIdx2Identifier, identifier2TempIdx)
+            identifierA = self._reportFromIdx(bidA, lnkA)
+            identifierB = self._reportFromIdx(bidB, lnkB)
             if (identifierA is None) or (identifierB is None):
                 return None
             return identifierA, identifierB, posA, posB, normal, distance
-        tempIdx2Identifier, identifier2TempIdx = self._setHypotheticalPoses(hypotheticalPoses)
         if maxDistance is None:
             maxDistance = self._worldSize
-        queries, cleanupIdxA, cleanupIdxB = _getQueries(regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance, tempIdx2Identifier, identifier2TempIdx)
+        queries, cleanupIdxA, cleanupIdxB = _getQueries(regionSpecOrIdentifierA, regionSpecOrIdentifierB, maxDistance)
         answers = []
         for args, kwargs in queries:
             answers = answers + list(stubbornTry(lambda : pybullet.getClosestPoints(*args, **kwargs)))
@@ -1246,23 +1388,24 @@ class World():
         if cleanup:
             stubbornTry(lambda : pybullet.performCollisionDetection(self._pybulletConnection))
             self._computedCollisions = True
-        retq = [_reportClosestPoint(x, tempIdx2Identifier, identifier2TempIdx) for x in answers]
-        self._clearHypotheticalPoses(tempIdx2Identifier)
-        return [x for x in retq if x is not None]
-    def rayTestBatch(self, fromPositions, toPositions, hypotheticalPoses=None):
-        def _reportRayResult(x, tempIdx2Identifier, identifier2TempIdx):
+        retq = [_reportClosestPoint(x) for x in answers]
+        retq = [x for x in retq if x is not None]
+        e = time.perf_counter()
+        self._profile += (e-s)
+        self._profileCLS += (e-s)
+        return retq
+    def rayTestBatch(self, fromPositions, toPositions):
+        def _reportRayResult(x):
             oid, lnk, hitFraction, hitNormal = x
             if -1 == oid:
                 return None
-            identifier = self._reportFromHypothetical(oid, lnk, tempIdx2Identifier, identifier2TempIdx)
+            identifier = self._reportFromIdx(oid, lnk)
             if identifier is None:
                 return None
             return (identifier, hitFraction, hitNormal)
         if len(fromPositions) != len(toPositions):
             return None
-        tempIdx2Identifier, identifier2TempIdx = self._setHypotheticalPoses(hypotheticalPoses)
-        retq = [_reportRayResult(x, tempIdx2Identifier, identifier2TempIdx) for x in stubbornTry(lambda : pybullet.rayTestBatch(fromPositions, toPositions, self._pybulletConnection))]
-        self._clearHypotheticalPoses(tempIdx2Identifier)
+        retq = [_reportRayResult(x) for x in stubbornTry(lambda : pybullet.rayTestBatch(fromPositions, toPositions, self._pybulletConnection))]
         return [x for x in retq if x is not None]
     # computes two Jacobians such that xdot_t = Jt*q and xdot_r = Jr*q where xdot_t and xdot_r are linear and angular velocity in the link local frame 
     def computeJacobian(self, name, linkName, positionInLink, positions=None, velocities=None, accelerations=None):
