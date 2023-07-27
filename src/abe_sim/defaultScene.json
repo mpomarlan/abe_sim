@@ -35,23 +35,7 @@
     ["CookingKnife", "cookingKnife", [0.3, 4.25, 0.323], [0, 0, 0.7071068, 0.7071068]],
     ["SugarBag", "sugarBag", [0, 4.25, 1.225], [0,0,0,1]],
     ["ButterBag", "butterBag", [0.2, 4.25, 1.225], [0,0,0,1]],
-    ["Carrot", "carrot", [0.6, 4.25, 1.05], [0, 0, 0.7071068, 0.7071068]],
-    ["Banana", "banana", [1, 4.25, 1.225], [0, 0, 0, 1]],
-    ["Broccoli", "broccoli", [-0.4, 4.25, 1.225], [0, 0, 0, 1]],
-    ["Tomato", "tomato", [-0.6, 4.25, 1.225], [0, 0, 0, 1]],
-    ["EggInShell", "egg", [-0.8, 4.25, 1.225], [0, 0, 0, 1]],
     ["FreshCilantro", "freshCilantro", [-1, 4.25, 1.225], [0.7071068, 0, 0, 0.7071068]],
     ["VanillaExtractBag", "vanillaExtractBag", [-1.2, 4.25, 1.225], [0, 0, 0, 1]],
-    ["AlmondExtractBag", "almondExtractBag", [-1.4, 4.25, 1.225], [0, 0, 0, 1]],
-    ["CoconutOilJar", "coconutOilJar", [-1.6, 4.25, 1.225], [0, 0, 0, 1]],
-    ["ExtraVirginOliveOil", "extraVirginOliveOil", [-1.8, 4.25, 1.225], [0, 0, 0, 1]],
-    ["RedWineVinegar", "redWineVinegar", [-2, 4.25, 1.225], [0, 0, 0, 1]],
-    ["BellPepper", "bellPepper", [-2.2, 4.25, 1.225], [0, 0, 0, 1]],
-    ["Jalapeno", "jalapeno", [-2.4, 4.25, 1.225], [0, 0, 0, 1]],
-    ["RedChiliPepper", "redChiliPepper", [-2.6, 4.25, 1.225], [0, 0, 0, 1]],
-    ["Garlic", "garlic", [-2.8, 4.25, 1.225], [0, 0, 0, 1]],
-    ["GreenOnion", "greenOnion", [1.4, 4.25, 1.225], [0.7071068, 0, 0, 0.7071068]],
-    ["RedOnion", "redOnion", [1.6, 4.25, 1.225], [0, 0, 0, 1]],
-    ["Onion", "onion", [1.8, 4.25, 1.225], [0, 0, 0, 1]]
-
+    ["AlmondExtractBag", "almondExtractBag", [-1.4, 4.25, 1.225], [0, 0, 0, 1]]
 ]
