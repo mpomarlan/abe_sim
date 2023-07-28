@@ -139,15 +139,22 @@ def toGoToPose(requestData, w, agentName, todos):
     tp = [x for x in position if type(x) in [int, float]]
     if (2 != len(tp)) or (type(yaw) not in [int, float]):
         return requests.status_codes.codes.BAD_REQUEST, {'response': 'Pose data is malformed: either the position is not a vector of 2 numbers or the yaw is not a number.'}
+    agent = requestData.get("agent")
+    if agent is None:
+        agent = agentName
+    else:
+        if agent not in w._kinematicTrees:
+            return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested agent does not exist in world.'}
     position = [position[0], position[1], 0]
-    mobileBaseLink = w.getObjectProperty((agentName,), ('fn', 'kinematicControl', 'mobileBaseLink'))
-    baseOrientation = w.getObjectProperty((agentName, mobileBaseLink), 'orientation')
+    mobileBaseLink = w.getObjectProperty((agent,), ('fn', 'kinematicControl', 'mobileBaseLink'))
+    baseOrientation = w.getObjectProperty((agent, mobileBaseLink), 'orientation')
     _, _, crYaw = stubbornTry(lambda : pybullet.getEulerFromQuaternion(baseOrientation))
     yaw = angleAdjust(yaw, crYaw)
-    _cancelClopens(w, agentName)
-    _cancelGardenAction(w, agentName, todos)
+    _cancelClopens(w, agent)
+    if agentName == agent:
+        _cancelGardenAction(w, agent, todos)
     orientation = stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,yaw)))
-    w.setObjectProperty((agentName,), ('customStateVariables', 'kinematicControl', 'target', 'base'), [position, orientation])
+    w.setObjectProperty((agent,), ('customStateVariables', 'kinematicControl', 'target', 'base'), [position, orientation])
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
     
 def toSetJoint(requestData, w, agentName, todos):
