@@ -158,12 +158,12 @@
   <link name="hand_right_roll">
     <visual>
       <geometry>
-        <mesh filename="bea_right_hand.obj"/>
+        <mesh filename="bea_right_hand_new.obj"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="bea_right_hand.obj"/>
+        <mesh filename="bea_right_hand_new.obj"/>
       </geometry>
     </collision>
       <inertial>
@@ -270,12 +270,12 @@
   <link name="hand_left_roll">
     <visual>
       <geometry>
-        <mesh filename="bea_left_hand.obj"/>
+        <mesh filename="bea_left_hand_new.obj"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="bea_left_hand.obj"/>
+        <mesh filename="bea_left_hand_new.obj"/>
       </geometry>
     </collision>
       <inertial>
