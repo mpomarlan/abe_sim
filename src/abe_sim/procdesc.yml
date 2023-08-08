@@ -159,25 +159,45 @@ pouring:
 seeding:
   disposition: [self, fn, seedable]
   progress:
-    relatum:
-      part: [self, fn, seeding, links]
     trajector:
-      disposition: [trajector, fn, canCut]
-      part: [trajector, fn, cutting, links]
+      disposition: [trajector, fn, canSeed]
+      part: [trajector, fn, seeding, links]
     source:
       mode: close
       radius: [self, fn, seeding, radius]
     path:
-      mode: orthogonal
-      reference: [trajector, fn, cutting, axis, $trajector-part]
+      mode: alignment
+      reference: [trajector, fn, seeding, axis, $trajector-part]
       threshold: 0.8
     goal:
-      direction: away
-      threshold: 0.6
+      direction: around
+      threshold: 0.2
   resource: [self, customStateVariables, seeding, hp]
   completion:
     process: seeding
     instrument: [trajector, type]
+#seeding:
+#  disposition: [self, fn, seedable]
+#  progress:
+#    relatum:
+#      part: [self, fn, seeding, links]
+#    trajector:
+#      disposition: [trajector, fn, canCut]
+#      part: [trajector, fn, cutting, links]
+#    source:
+#      mode: close
+#      radius: [self, fn, seeding, radius]
+#    path:
+#      mode: orthogonal
+#      reference: [trajector, fn, cutting, axis, $trajector-part]
+#      threshold: 0.8
+#    goal:
+#      direction: away
+#      threshold: 0.6
+#  resource: [self, customStateVariables, seeding, hp]
+#  completion:
+#    process: seeding
+#    instrument: [trajector, type]
 # An item skims a little from some substance and then carries it
 skimming:
   disposition: [self, fn, canSkim]

@@ -466,6 +466,39 @@ def checkItemInContainer(w, name, item, container, predCache, allowedComponents=
         predCache[((container, item, allowedComponents), "contains")] = retq
     return predCache[((container, item, allowedComponents), "contains")]
 
+def checkItemAboveContainer(w, name, item, container, predCache, hand, sideHold, allowedComponents=None):
+    if item not in w._kinematicTrees:
+        return True
+    if ((container, item, sideHold, allowedComponents), "aboveContainer") not in predCache:
+        aabbItem = w.getAABB((item,))
+        aabbItemMin, aabbItemMax = list(aabbItem[0]), aabbItem[1]
+        aabbItemMin[2] -= 0.05
+        containmentFn = getContainmentFn(w, container, predCache)
+        if allowedComponents is None:
+            allowedComponents = tuple(containmentFn.get("links"))
+        itemP, _, _, _ = getKinematicData(w, (item,), predCache)
+        retq = None
+        if sideHold:
+            handLink = getHandLink(w, name, hand, predCache)
+            _, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
+            if 0.1 < abs(stubbornTry(lambda : pybullet.rotateVector(handQ, [0,0,1]))[2]):
+                retq = False
+        if retq is None:
+            pouringFn = w._kinematicTrees[container].get("fn", {}).get("containment", {}).get("pouring", {}).get("into", {})
+            link = pouringFn.get("link")
+            point = pouringFn.get("point")
+            if link in allowedComponents:
+                cP, cQ, _, _ = getKinematicData(w, (container, link), predCache)
+                entryPoint, _ = w.objectPoseRelativeToWorld(cP, cQ, point, [0,0,0,1])
+                dx = entryPoint[0] - itemP[0]
+                dy = entryPoint[1] - itemP[1]
+                if 0.0009 > (dx*dx + dy*dy):
+                    retq = True
+        if retq is None:
+            retq = False
+        predCache[((container, item, sideHold, allowedComponents), "aboveContainer")] = retq
+    return predCache[((container, item, sideHold, allowedComponents), "aboveContainer")]
+
 def checkItemCoversContainer(w, name, cover, item, predCache, covered, allowedComponents=None):
     if (item not in w._kinematicTrees) or (cover not in w._kinematicTrees):
         return True
@@ -694,6 +727,15 @@ def _checkLoweredItemAt(w, name, description, node, predCache):
     container = description['container']
     allowedComponents = description.get('allowedComponents', None)
     retq = checkItemInContainer(w, name, item, container, predCache, allowedComponents=allowedComponents)
+    return retq
+    
+def _checkItemAboveContainer(w, name, description, node, predCache): # item, hand, container[, sideHold]
+    item = description["item"]
+    hand = description["hand"]
+    container = description["container"]
+    sideHold = description.get("sideHold", False)
+    allowedComponents = description.get('allowedComponents', None)
+    retq = checkItemAboveContainer(w, name, item, container, predCache, hand, sideHold, allowedComponents=allowedComponents)
     return retq
     
 def _checkTransferredAndStored(w, name, description, node, predCache):
@@ -932,6 +974,17 @@ def _checkCutItem(w, name, description, node, predCache):
     node['parked'] = parked
     return (not w._kinematicTrees.get(item, {}).get("fn", {}).get("cuttable")) and (not checkGrasped(w, name, None, tool, predCache)) and checkItemInContainer(w, name, tool, storage, predCache) and parked
 
+def _checkPeeledAndStored(w, name, description, node, predCache): # container, containerForPeels, hand, item, storage, tool
+    item = description['item']
+    tool = description['tool']
+    hand = description['hand']
+    storage = description['storage']
+    disposition = description.get("disposition")
+    parked = node.get('parked', False)
+    parked = checkParked(w, name, hand, parked, predCache)
+    node['parked'] = parked
+    return (not w._kinematicTrees.get(item, {}).get("fn", {}).get(disposition)) and (not checkGrasped(w, name, None, item, predCache)) and (not checkGrasped(w, name, None, tool, predCache)) and checkItemInContainer(w, name, item, container, predCache) and checkItemInContainer(w, name, tool, storage, predCache) and parked
+
 def _checkArmTriggeredPortalHandle(w, name, description, node, predCache):
     container = description.get('container', None)
     component = description.get('component', None)
@@ -1040,6 +1093,9 @@ def _suggestPlacedItem(w, name, description, node, predCache):
 
 def _suggestLoweredItemAt(w, name, description, node, predCache):
     return [{"type": "P", "description": {"process": "loweringItem", "hand": description["hand"], "item": description["item"], "container": description["container"], "allowedComponents": description.get("allowedComponents")}, 'children': [], 'numerics': {}, "target": None}]
+
+def _suggestItemAboveContainer(w, name, description, node, predCache): # item, hand, container[, sideHold]
+    return [{"type": "P", "description": {"process": "holdingItemAbove", "hand": description["hand"], "item": description["item"], "container": description["container"], "allowedComponents": description.get("allowedComponents"), "sideHold": description.get("sideHold", False)}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestTransferredAndStored(w, name, description, node, predCache):
     return [{"type": "P", "description": {"process": "transferringAndStoring", "hand": description["hand"], "item": description["item"], "amount": description["amount"], "container": description["container"], "pouredType": description["pouredType"], "storage": description["storage"], "allowedComponents": description.get("allowedComponents")}, 'children': [], 'numerics': {}, "target": None}]
@@ -1165,6 +1221,18 @@ def _suggestCutItem(w, name, description, node, predCache):
         return [{"type": "P", "description": {"process": "cuttingItem", "hand": description["hand"], "item": item, "storage": description["storage"], "tool": description["tool"]}, 'children': [], 'numerics': {}, "target": None}]
     else:
         return [{"type": "P", "description": {"process": "placingItem", "hand": description["hand"], "item": description["tool"], "container": description["storage"], "allowedComponents": description.get("allowedComponents")}, 'children': [], 'numerics': {}, "target": None}]
+
+def _suggestPeeledAndStored(w, name, description, node, predCache): # container, containerForPeels, hand, item, storage, tool
+    item = description["item"]
+    hand = description["hand"]
+    otherHand = description["otherHand"]
+    disposition = description.get("disposition")
+    if w._kinematicTrees.get(item, {}).get("fn", {}).get(disposition):
+        return [{"type": "P", "description": {"process": "peelingItem", "hand": hand, "item": item, "otherHand": otherHand, "storage": description["storage"], "tool": description["tool"]}, 'children': [], 'numerics': {}, "target": None}]
+    elif (not w._kinematicTrees.get(item, {}).get("fn", {}).get("disposition")) and (checkGrasped(w, name, None, item, predCache)):
+        return [{"type": "P", "description": {"process": "placingItem", "hand": otherHand, "item": description["item"], "container": description["container"], "allowedComponents": description.get("allowedComponents")}, 'children': [], 'numerics': {}, "target": None}]
+    else:
+        return [{"type": "P", "description": {"process": "placingItem", "hand": hand, "item": description["tool"], "container": description["storage"], "allowedComponents": description.get("allowedComponentsStorage")}, 'children': [], 'numerics': {}, "target": None}]
 
 def _suggestOpened(w, name, description, node, predCache):
     container = description.get('container', None)
@@ -1432,6 +1500,75 @@ def _getLoweringItemConditions(w, name, description, node, predCache):
             {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
     return retq
                       
+def _getHoldingItemAboveConditions(w, name, description, node, predCache): # container, hand, item, sideHold[, allowedComponents] |
+    item = description['item']
+    hand = description['hand']
+    container = description['container']
+    allowedComponents = description.get('allowedComponents', None)
+    sideHold = description.get("sideHold", False)
+    freeHand = getFreeHand(w, name, hand, predCache)
+    handLink = getHandLink(w, name, hand, predCache)
+    handP, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
+    itemP, itemQ, _, _ = getKinematicData(w, (item,), predCache)
+    containerP, _, _, _ = getKinematicData(w, (container,), predCache)
+    itemInHandP, itemInHandQ = w.objectPoseRelativeToObject(handP, handQ, itemP, itemQ)
+    facingYaw = getFacingYaw(w, container, containerP, predCache)
+    _, fwdItemQ = w.objectPoseRelativeToWorld((0,0,0), handQ, (0,0,0), itemInHandQ)
+    pouringFn = w._kinematicTrees[container].get("fn", {}).get("containment", {}).get("pouring", {}).get("into", {})
+    component = pouringFn.get("link")
+    pointC = pouringFn.get("point")
+    cP, cQ, _, _ = getKinematicData(w, (container, component), predCache)
+    placementP, _ = w.objectPoseRelativeToWorld(cP, cQ, pointC, [0,0,0,1])
+    placementP = [placementP[0], placementP[1], aabbComponent[1][2] + 0.05 + itemP[2] - aabbItem[0][2]]
+    #component, placementP = getItemPlacement(w, name, item, container, node['numerics'].get('component'), node['numerics'].get('position'), predCache, allowedComponents=allowedComponents)
+    if component is None:
+        node["error"] = "Container %s is full" % container
+        return []
+    node['numerics']['component'] = component
+    node['numerics']['position'] = placementP
+    placementQ = fwdItemQ
+    if description.get('matchOrientation', False) is True:
+        _, placementQ, _, _ = getKinematicData(w, (container,), predCache)
+    entryHeight = getEntryHeight(w, name, {'hand': hand, 'destination': [container, component]}, node['numerics'], predCache)
+    itemEntryHeight = entryHeight + stubbornTry(lambda : pybullet.rotateVector(itemInHandQ, itemInHandP))[2]
+    placementQAdj = placementQ
+    if sideHold:
+        xtg = [math.cos(facingYaw), math.sin(facingYaw), 0]
+        ztg = [-math.sin(facingYaw), math.cos(facingYaw), 0]
+        if "hand_left" == hand:
+            ztg[0] = -ztg[0]
+        sideHoldQ = quatFromVecPairs(([0,0,1], xtg), ([0,0,1], ztg))
+        _, placementQAdj = w.objectPoseRelativeToWorld([0,0,0], sideHoldQ, [0,0,0], itemInHandQ)
+    _, handPlacementQ = w.handPoseToBringObjectToPose(itemInHandP, itemInHandQ, placementP, placementQAdj)
+    #For holding item above container:
+    #  we want p/q: item at placement, hand at orientation selected via sideHold
+    #  We can achieve p by a lowering process that maintains xy/q: itemXY at placementXY, hand at sideHold-selected orientation
+    #  we can achieve xy/q by a rotating process that maintains xy: itemXY at placementXY
+    #  We can achieve xy by a bringing process that maintains z: itemZ at entryHeight (adjusted for item in hand)
+    #  we can achieve z by a lifting process: handZ at entryHeight
+    conp = ['equalp', 'itemP', 'placementP']    
+    tolp = [0.0001, 0.0004]
+    conq = ['equalq', 'handQ', 'handPlacementQ']
+    tolq = [0.99, 0.95]
+    conxy = ['equalxy', 'itemP', 'placementP']
+    tolxy = [0.0001, 0.0004]
+    conz = ['equalz', 'handP', 'entryHeight']
+    tolz = [0.01, 0.05]
+    constraintConjunctions = [[conp, conq], [conxy, conq], [conxy], [conz]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wppq = [placementP, placementQAdj, None, itemInHandP, itemInHandQ, None, None]
+    wpxyq = [[placementP[0], placementP[1], itemEntryHeight], placementQAdj, None, itemInHandP, itemInHandQ, None, None]
+    wpxy = [[placementP[0], placementP[1], itemEntryHeight], placementQ, None, itemInHandP, itemInHandQ, None, None]
+    wpz = [[handP[0], handP[1], entryHeight], handQ, None, None, None, None, None]
+    waypoints = [wpp, wpxy, wpz]
+    tolerances = [[tolp, tolq], [tolxy, tolq], [tolxy], [tolz]]
+    entities = {'handP': handP, 'handQ': handQ, 'itemP': itemP, 'placementP': placementP, 'handPlacementQ': handPlacementQ, 'entryHeight': [0,0,entryHeight]}
+    retq = [{"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": item}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "near", "relatum": container}, "children": [], "previousStatus": None, "numerics": {"position": node["numerics"].get("position")}},
+            {"type": "G", "description": {"goal": "opened", "container": container, "component": node["numerics"].get("component"), "hand": freeHand}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
+    return retq
+
 def _getTransferringAndStoringConditions(w, name, description, node, predCache):
     item = description['item']
     hand = description['hand']
@@ -2139,6 +2276,70 @@ def _getCuttingItemConditions(w, name, description, node, predCache):
             {"type": "G", "description": {"goal": "near", "relatum": item}, "children": [], "previousStatus": None, "numerics": {}},
             {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
 
+def _getPeelingItemConditions(w, name, description, node, predCache): # container, containerForPeels, hand, item, otherHand, storage, tool
+    item = description.get('item', None)
+    hand = description.get('hand', None)
+    otherHand = description.get('otherHand', None)
+    tool = description.get('tool', None)
+    disposition = description.get("disposition", None)
+    containerForPeels = description.get("containerForPeels", None)
+    storage = description.get('storage', None)
+    down = w.getDown()
+    handLink = getHandLink(w, name, hand, predCache)
+    disp = {"peelable": "peeling", "seedable": "seeding"}.get(disposition)
+    dispFn = w._kinematicTrees[tool].get("fn", {}).get(disp, {})
+    blade = dispFn.get("links")[0]
+    handP, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
+    itemP, itemQ, _, _ = getKinematicData(w, (item,), predCache)
+    toolP, toolQ, _, _ = getKinematicData(w, (tool, blade), predCache)
+    handParkedP, handParkedQ, _ = getParkedPose(w, name, hand, predCache)
+    entryHeight = getEntryHeight(w, name, {'hand': hand, 'item': containerForPeels}, {}, predCache)
+    toolPositionInHand, toolOrientationInHand = w.objectPoseRelativeToObject(handP, handQ, toolP, toolQ)
+    bladeAxisInTool = dispFn.get("axis", {}).get(blade) or [0,0,-1]
+    bladeAxis = stubbornTry(lambda : pybullet.rotateVector(toolQ, bladeAxisInTool))
+    bladeAxisInHand = stubbornTry(lambda : pybullet.rotateVector(toolOrientationInHand, bladeAxisInTool))
+    facingYaw = getFacingYaw(w, item, itemP, predCache)
+    fwdTool = dispFn.get("length", {}).get(blade) or [1,0,0]
+    fwdInHand = stubbornTry(lambda : pybullet.rotateVector(toolOrientationInHand, fwdTool))
+    fwd = [math.cos(facingYaw), math.sin(facingYaw),0]
+    tippedOrientation = quatFromVecPairs((fwdInHand, fwd), (bladeAxisInHand, down))
+    entryHeightBlade = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, toolPositionInHand))[2]
+    adjLen = 0.85*w._kinematicTrees[item].get("fn", {}).get(disp, {}).get("radius", 0.8)
+    if "hand_left" == otherHand:
+        adj = [adjLen*math.cos(facingYaw + 0.5*math.pi), adjLen*math.sin(facingYaw + 0.5*math.pi)]
+    elif "hand_right" == otherHand:
+        adj = [adjLen*math.cos(facingYaw - 0.5*math.pi), adjLen*math.sin(facingYaw - 0.5*math.pi)]
+    itemPAdj = [itemP[0] + adj[0], itemP[1] + adj[1], itemP[2]]
+    itemBottom = w.getAABB((item,))[0][2]
+    #For peeling:
+    #  we want xy/ad/bz: bladeXY at adjustedItemXY and blade axis down and bladeZ at item bottom
+    #  we can achieve xy/ad/bz by a lowering process that maintains xy/ad: bladeXY at adjustedItemXY and blade axis down
+    #  we can achieve xy/ad by a tipping process that maintains xy/ez: bladeXY at adjustedItemXY, handZ at entryHeight
+    #  we can achieve xy/ez by a bringing process that maintains ez: handZ at entryHeight
+    #  we can achieve ez by a lifting process
+    conad = ['aligned', 'bladeAxis', 'down']
+    tolad = [0.99, 0.95]
+    conbz = ['equalz', 'bladePoint', 'itemBottom']
+    tolbz = [0.01, 0.05]
+    conxy = ['equalxy', 'bladePoint', 'itemPAdj']
+    tolxy = [0.0001, 0.0004]
+    conez = ['equalz', 'handP', 'entryHeight']
+    tolez = [0.01, 0.05]
+    constraintConjunctions = [[conad, conxy, conbz], [conad, conxy], [conxy, conez], [conez]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpadxybz = [[itemPAdj[0], itemPAdj[1], itemBottom], tippedOrientation, None, toolPositionInHand, None, None, None]
+    wpadxy = [[itemPAdj[0], itemPAdj[1], entryHeightBlade], tippedOrientation, None, toolPositionInHand, None, None, None]
+    wpxyez = [[itemPAdj[0], itemPAdj[1], entryHeightBlade], handQ, None, toolPositionInHand, None, None, None]
+    wpez = [[handP[0], handP[1], entryHeight], handQ, None, None, None, None, None]
+    waypoints = [wpadxybz, wpadxy, wpxyez, wpez]
+    tolerances = [[tolad, tolxy, tolbz], [tolad, tolxy], [tolxy, tolez], [tolez]]
+    entities = {'down': down, 'handP': handP, 'handQ': handQ, 'entryHeight': [0,0,entryHeight], 'bladePoint': toolP, 'itemPAdj': itemPAdj, 'bladeAxis': bladeAxis, 'itemBottom': [0,0,itemBottom]}
+    return [{"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": tool}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "pickedItem", "hand": otherHand, "item": item}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "near", "relatum": item}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "itemAboveContainer", "item": item, "hand": otherHand, "container": containerForPeels, "sideHold": True}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
+
 def _getBringingNearConditions(w, name, description, node, predCache):
     trajector = description.get('trajector', None)
     hand = description.get('hand', None)
@@ -2165,6 +2366,7 @@ goalCheckers = {
     'pickedItem': _checkPickedItem, # hand, item | 
     'placedItem': _checkPlacedItem, # container, hand, item[, allowedComponents] | 
     'loweredItemAt': _checkLoweredItemAt, # container, hand, item[, allowedComponents] | 
+    "itemAboveContainer": _checkItemAboveContainer, # item, hand, container[, sideHold]
     'transferredAndStored': _checkTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _checkTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _checkTransferredContents, # amount, container, hand, item, pouredType |
@@ -2183,6 +2385,7 @@ goalCheckers = {
     'sprinkled': _checkSprinkled, # hand, item, shaker, sprinkledType, storage |
     'bakedItem': _checkBaked,
     'cutItem': _checkCutItem, # hand, item, storage, tool |
+    'peeledAndStored': _checkPeeledAndStored, # container, containerForPeels, disposition, hand, item, otherHand, storage, tool
     'armTriggeredPortalHandle': _checkArmTriggeredPortalHandle,
     'stoppedOpening': _checkStoppedOpening,
     'stoppedClosing': _checkStoppedClosing,
@@ -2203,6 +2406,7 @@ processSuggesters = {
     'pickedItem': _suggestPickedItem, # hand, item | 
     'placedItem': _suggestPlacedItem, # container, hand, item[, allowedComponents] | 
     'loweredItemAt': _suggestLoweredItemAt, # container, hand, item[, allowedComponents] |
+    "itemAboveContainer": _suggestItemAboveContainer, # item, hand, container[, sideHold]
     'transferredAndStored': _suggestTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _suggestTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _suggestTransferredContents, # amount, container, hand, item, pouredType |
@@ -2220,6 +2424,7 @@ processSuggesters = {
     'shapedAndParked': _suggestShapedAndParked, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkled': _suggestSprinkled, # hand, item, shaker, sprinkledType, storage |
     'cutItem': _suggestCutItem, # hand, item, storage, tool |
+    'peeledAndStored': _suggestPeeledAndStored, # container, containerForPeels, disposition, hand, item, otherHand, storage, tool
     'opened': _suggestOpened,
     'closed': _suggestClosed,
     'stoppedOpening': _suggestStoppedOpening,
@@ -2242,6 +2447,7 @@ conditionListers = {
     'pickingItem': _getPickingItemConditions, # hand, item |
     'placingItem': _getPlacingItemConditions, # container, hand, item[, allowedComponents] | 
     'loweringItem': _getLoweringItemConditions, # container, hand, item[, allowedComponents] |
+    "holdingItemAbove": _getHoldingItemAboveConditions, # container, hand, item, sideHold[, allowedComponents] |
     'transferringAndStoring': _getTransferringAndStoringConditions, # amount, container, hand, item, pouredType, storage |
     'transferringAndUprighting': _getTransferringAndUprightingConditions, # amount, container, hand, item, pouredType, storage | positionInHand, orientationInHand
     'transferringContents': _getTransferringContentsConditions, # container, hand, item | positionInHand, orientationInHand
@@ -2259,6 +2465,7 @@ conditionListers = {
     'shaping': _getShapingConditions, # destination, hand, ingredientTypes, item, shapedType |
     'sprinkling': _getSprinklingConditions, # hand, item, shaker, sprinkledType, storage |
     'cuttingItem': _getCuttingItemConditions, # hand, item, storage, tool |
+    'peelingItem': _getPeelingItemConditions, # container, containerForPeels, disposition, hand, item, otherHand, storage, tool
     'liftingItemToPouringEntry': _emptyList,
     'stopOpening': _emptyList,
     'stopClosing': _emptyList,

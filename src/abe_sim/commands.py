@@ -999,6 +999,7 @@ def toCutStart(requestData, w, agentName, todos):
                         [cutPattern, "Request lacks cutPattern parameter"]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
     if item not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
     if tool not in w._kinematicTrees:
@@ -1007,7 +1008,6 @@ def toCutStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested object is not cuttable.'}
     if not w._kinematicTrees[tool].get('fn', {}).get('canCut', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested cuttingTool cannot cut.'}
-    _checkGreatReset(requestData, w)
     garden = {0: {'type': 'G', 'description': {'goal': 'cutItem', 'tool': tool, 'hand': 'hand_right', 'item': item, 'storage': storage}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
@@ -1018,6 +1018,74 @@ def toCutEnd(requestData, w, agentName):
     if requests.status_codes.codes.ALL_OK != status:
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'cutObject': requestData['object'], 'kitchenStateOut': w.worldDump()}}
+
+def toPeelStart(requestData, w, agentName, todos):
+    item = requestData.get("inputIngredient", None)
+    tool = requestData.get("peelingTool", None)
+    container = requestData.get("containerForPeeledIngredient", None)
+    containerForPeels = requestData.get("containerForPeels", None)
+    storage = _getStorage(w, working=True)
+    lacks = _checkArgs([[item, "Request lacks inputIngredient parameter."],
+                        [tool, "Request lacks peelingTool parameter."],
+                        [container, "Request lacks containerForPeeledIngredient."],
+                        [containerForPeels, "Request lacks containerForPeels."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested inputIngredient does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested peelingTool does not exist in world.'}
+    if container not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerForPeeledIngredient does not exist in world.'}
+    if containerForPeels not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerForPeels does not exist in world.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canPeel', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested peelingTool cannot peel.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'peeledAndStored', 'tool': tool, 'hand': 'hand_right', "otherHand": "hand_left", 'item': item, 'storage': storage, 'container': container, "containerForPeels": containerForPeels, "disposition": "peelable"}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toPeelEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {"peeledIngredient": requestData["containerForPeeledIngredient"], 'peelOfIngredient': requestData['inputIngredient'], 'kitchenStateOut': w.worldDump()}}
+
+def toSeedStart(requestData, w, agentName, todos):
+    item = requestData.get("inputIngredient", None)
+    tool = requestData.get("peelingTool", None)
+    container = requestData.get("containerForSeededIngredient", None)
+    containerForSeeds = requestData.get("containerForSeeds", None)
+    storage = _getStorage(w, working=True)
+    lacks = _checkArgs([[item, "Request lacks inputIngredient parameter."],
+                        [tool, "Request lacks seedingTool parameter."],
+                        [container, "Request lacks containerForSeededIngredient."],
+                        [containerForPeels, "Request lacks containerForSeeds."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested inputIngredient does not exist in world.'}
+    if tool not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested seedingTool does not exist in world.'}
+    if container not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerForSeededIngredient does not exist in world.'}
+    if containerForSeeds not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested containerForSeeds does not exist in world.'}
+    if not w._kinematicTrees[tool].get('fn', {}).get('canSeed', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested seedingTool cannot seed.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'peeledAndStored', 'tool': tool, 'hand': 'hand_right', "otherHand": "hand_left", 'item': item, 'storage': storage, 'container': container, "containerForPeels": containerForSeeds, "disposition": "seedable"}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toSeedEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {"seededIngredient": requestData["containerForSeededIngredient"], 'seedOfIngredient': requestData['inputIngredient'], 'kitchenStateOut': w.worldDump()}}
 
 def toPlaceStart(requestData, w, agentName, todos):
     item = requestData.get("object", None)
@@ -1144,6 +1212,8 @@ commandFns = {
     "to-flour": [processActionRequest, toFlourStart, toFlourEnd],
     "to-grease": [processActionRequest, toGreaseStart, toGreaseEnd],
     "to-cut": [processActionRequest, toCutStart, toCutEnd],
+    "to-peel": [processActionRequest, toPeelStart, toPeelEnd],
+    "to-seed": [processActionRequest, toSeedStart, toSeedEnd],
     "to-place": [processActionRequest, toPlaceStart, toPlaceEnd],
     "to-transfer-items": [processActionRequest, toTransferItemsStart, toTransferItemsEnd],
     "to-refrigerate": [processActionRequest, toRefrigerateStart, toRefrigerateEnd]}
