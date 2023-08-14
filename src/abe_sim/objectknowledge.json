@@ -1242,6 +1242,7 @@
                      "canContain": true,
                      "clopenable": true,
                      "canBake": true,
+                     "canUpdateTemperature": true,
                      "containment": {
                             "facing": [
                                    0,
@@ -1312,6 +1313,23 @@
                             "handle": {
                                    "door": "handle"
                             }
+                     },
+                     "thermal": {
+                         "control": {
+                                 "shelf": "heatknob"
+                         },
+                         "controlMin": {
+                                 "shelf": 0
+                         },
+                         "controlMax": {
+                                 "shelf": 3.141
+                         },
+                         "temperatureMin": {
+                                 "shelf": 150
+                         },
+                         "temperatureMax": {
+                                 "shelf": 240
+                         }
                      }
               },
               "customStateVariables": {
