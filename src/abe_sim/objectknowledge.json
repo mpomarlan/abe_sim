@@ -8,10 +8,17 @@
                      "canClopen": true,
                      "canGrasp": true,
                      "canMotionPlan": true,
+                     "canTurn": true,
                      "kinematicallyControlable": true,
                      "processGardener": true,
                      "canShape": true,
                      "canTime": true,
+                     "turning": {
+                         "links": [
+                             "hand_left_roll",
+                             "hand_right_roll"
+                         ]
+                     },
                      "clopening": {
                             "clopeningEFs": [
                                    "hand_left",
@@ -300,6 +307,12 @@
                      "timing": {
                             "timer": 0
                      },
+                     "turning": {
+                         "action": {
+                             "hand_left_roll" : [],
+                             "hand_right_roll" : []
+                         }
+                     },
                      "clopening": {
                             "action": {
                                    "hand_left": null,
@@ -491,6 +504,13 @@
                      "canGrasp": true,
                      "kinematicallyControlable": true,
                      "canShape": true,
+                     "canTurn": true,
+                     "turning": {
+                         "links": [
+                             "hand_left_roll",
+                             "hand_right_roll"
+                         ]
+                     },
                      "clopening": {
                             "clopeningEFs": [
                                    "hand_left",
@@ -621,6 +641,12 @@
                      }
               },
               "customStateVariables": {
+                     "turning": {
+                         "action": {
+                             "hand_left_roll" : [],
+                             "hand_right_roll" : []
+                         }
+                     },
                      "clopening": {
                             "action": {
                                    "hand_left": null,
@@ -1243,6 +1269,22 @@
                      "clopenable": true,
                      "canBake": true,
                      "canUpdateTemperature": true,
+                     "turnable": true,
+                     "turning": {
+                             "links": [
+                                     "heatknob"
+                             ],
+                             "radius": {
+                                     "heatknob": 0.2
+                             },
+                             "axis": {
+                                     "heatknob": [
+                                             0,
+                                             0,
+                                             1
+                                     ]
+                             }
+                     },
                      "containment": {
                             "facing": [
                                    0,
