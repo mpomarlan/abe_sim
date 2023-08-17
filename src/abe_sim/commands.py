@@ -1164,6 +1164,48 @@ def toRefrigerateEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'containerWithIngredientsAtTemperature': requestData['containerWithIngredients'], 'kitchenStateOut': w.worldDump()}}
 
+def toPreheatOvenStart(requestData, w, agentName, todos):
+    oven = requestData.get("oven", None)
+    quantity = requestData.get("quantity", None)
+    unit = requestData.get("unit", None)
+    lacks = _checkArgs([[oven, "Request lacks containerWithIngredients parameter."],
+                        [quantity, "Request lacks quantity parameter."],
+                        [unit, "Request lacks unit parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if oven not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested oven does not exist in world.'}
+    fn = w._kinematicTrees[oven].get('fn', {})
+    if not fn.get('canUpdateTemperature', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven cannot heat.'}
+    ## TODO: make sure to allow picking out oven link; for now, assume this is shelf
+    fnThermal = fn.get("thermal",{})
+    link = fnThermal.get("control",{}).get("shelf",None)
+    if link is None:
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven has no control to set its temperature with.'}
+    if unit.lower() in ["f", "of", "deg fahrenheit", "degrees fahrenheit", "fahrenheit"]:
+        quantity = (quantity-32)/1.8
+    elif unit.lower() in ["k", "ok", "deg kelvin", "degrees kelvin", "kelvin"]:
+        quantity = quantity - 273.15
+    temperatureMin = fnThermal.get("temperatureMin",{}).get("shelf", None)
+    temperatureMax = fnThermal.get("temperatureMax",{}).get("shelf", None)
+    controlMin = fnThermal.get("controlMin",{}).get("shelf", None)
+    controlMax = fnThermal.get("controlMax",{}).get("shelf", None)
+    if (temperatureMin is None) or (temperatureMax is None) or (controlMin is None) or (controlMax is None):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven has ill-defined temperature or control range.'}
+    setting = controlMin + (controlMax-controlMin)*(quantity-temperatureMin)/(temperatureMax-temperatureMin)
+    garden = {0: {'type': 'G', 'description': {'goal': 'turnedControlAndParked', 'item': oven, 'hand': 'hand_right', 'link': link, 'setting': setting}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toPreheatOvenEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'preheatedOven': requestData['oven'], 'kitchenStateOut': w.worldDump()}}
+
 def processActionRequest(fn, requestData, w, agentName, todos):
     if todos['currentAction'] is not None:
         return False, requests.status_codes.codes.SERVICE_UNAVAILABLE, 'Robot already performs an action.'
@@ -1216,5 +1258,6 @@ commandFns = {
     "to-seed": [processActionRequest, toSeedStart, toSeedEnd],
     "to-place": [processActionRequest, toPlaceStart, toPlaceEnd],
     "to-transfer-items": [processActionRequest, toTransferItemsStart, toTransferItemsEnd],
-    "to-refrigerate": [processActionRequest, toRefrigerateStart, toRefrigerateEnd]}
+    "to-refrigerate": [processActionRequest, toRefrigerateStart, toRefrigerateEnd],
+    "to-preheat-oven": [processActionRequest, toPreheatOvenStart, toPreheatOvenEnd]}
 

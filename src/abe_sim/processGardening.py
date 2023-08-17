@@ -562,6 +562,16 @@ def checkUpright(w, itemOrientation, pouringAxis, predCache, th=None):
         predCache[((itemOrientation, pouringAxis), "upright")] = (th > abs(vec[0]*down[0] + vec[1]*down[1] + vec[2]*down[2]))
     return predCache[((itemOrientation, pouringAxis), "upright")]
 
+def checkControlSetting(w, name, hand, item, link, setting, predCache):
+    if ((hand, item, link, setting), "controlSetting") not in predCache:
+        angleDif = abs(description.get("setting", 0) - w.getJointData((description.get("item"), description.get("link"))[0]))
+        isSet = (0.05 > angleDif)
+        handLink = getHandLink(w, name, hand, predCache)
+        v = w._kinematicTrees[name].get("customStateVariables", {}).get("turning", {}).get(handLink, [])
+        isSetting = ([item, link] in v) or ((item, link) in v)
+        predCache[((hand, item, link, setting), "controlSetting")] = (isSet, isSetting)
+    return predCache[((hand, item, link, setting), "controlSetting")]
+    
 def containsIngredients(w, item, ingredientTypes, predCache):
     ingredientTypesK = tuple(sorted(ingredientTypes.items()))
     if ((item, ingredientTypesK), "containsIngredients") not in predCache:
@@ -737,7 +747,18 @@ def _checkItemAboveContainer(w, name, description, node, predCache): # item, han
     allowedComponents = description.get('allowedComponents', None)
     retq = checkItemAboveContainer(w, name, item, container, predCache, hand, sideHold, allowedComponents=allowedComponents)
     return retq
-    
+
+def _checkTurnedControlAndParked(w, name, description, node, predCache): # item, hand, link, setting
+    isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
+    parked = node.get('parked', False)
+    parked = checkParked(w, name, hand, parked, predCache)
+    node['parked'] = parked
+    return isSet and (not isSetting) and parked
+
+def _checkTurnedHand(w, name, description, node, predCache): # item, hand, link, setting
+    isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
+    return isSet and (not isSetting)
+
 def _checkTransferredAndStored(w, name, description, node, predCache):
     storage = description['storage']
     pouredType = description['pouredType']
@@ -1106,6 +1127,29 @@ def _suggestTransferredAndUprighted(w, name, description, node, predCache):
 def _suggestTransferredContents(w, name, description, node, predCache):
     return [{"type": "P", "description": {"process": "transferringContents", "hand": description["hand"], "item": description["item"], "container": description["container"]}, 'children': [], 'numerics': {}, "target": None}]
 
+def _suggestTurnedControlAndParked(w, name, description, node, predCache): # item, hand, link, setting
+    hand = description["hand"]
+    item = description["item"]
+    link = description["link"]
+    setting = description["setting"]
+    isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
+    if isSet and (not isSetting):
+        return [{"type": "P", "description": {"process": "parkingArm", "hand": hand}, 'children': [], 'numerics': {}, "target": None}]
+    else:
+        return [{"type": "P", "description": {"process": "turningControl", "hand": hand, "item": item, "link": link, "setting": setting}, 'children': [], 'numerics': {}, "target": None}]
+
+def _suggestTurnedHand(w, name, description, node, predCache): # item, hand, link, setting
+    hand = description["hand"]
+    item = description["item"]
+    link = description["link"]
+    setting = description["setting"]
+    isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
+    if isSet:
+        target = {hand: {"turning": {"toRemove": [(item, link)]}}}
+    else:
+        target = {hand: {"turning": {"toAdd": [(item, link)]}}}
+    return [{"type": "P", "description": {"process": "turningHand", "hand": hand, "item": item, "link": link, "setting": setting}, 'children': [], 'numerics': {}, "target": target}]
+    
 def _suggestConstraintFollowed(w, name, description, node, predCache): # constraintConjunctions, hand, isTop | waypoints, tolerances
     waypoints = node['numerics']['waypoints']
     if 0 == len(waypoints):
@@ -1635,7 +1679,7 @@ def _getTransferringContentsConditions(w, name, description, node, predCache):
     conT = ['equalq', 'itemQ', 'tippedQ']
     tolT = [0.99, 0.95]
     conXY = ['equalxy', 'pourPoint', 'containerEntry']
-    tolXY = [0.01, 0.05]
+    tolXY = [0.0001, 0.0025] # [0.01, 0.05]
     conZ = ['equalz', 'handP', 'entryHeight']
     tolZ = [0.01, 0.05]
     constraintConjunctions = [[conT, conXY, conZ], [conXY, conZ], [conZ]]
@@ -1649,6 +1693,94 @@ def _getTransferringContentsConditions(w, name, description, node, predCache):
     return [{"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": item}, "children": [], "previousStatus": None, "numerics": {}},
             {"type": "G", "description": {"goal": "near", "relatum": container}, "children": [], "previousStatus": None, "numerics": {}},
             {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
+
+def _getTurningControlConditions(w, name, description, node, predCache): # item, hand, link, setting
+    hand = description["hand"]
+    item = description["item"]
+    link = description["link"]
+    setting = description["setting"]
+    #### TODO CF
+    axisInLink = fnTurning.get("axis", {}).get(link, [0,0,1])
+    pointInLink = fnTurning.get("point", {}).get(link, [0,0,0.1])
+    handLink = getHandLink(w, name, hand, predCache)
+    handP, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
+    linkP, linkQ, _, _ = getKinematicData(w, (item, link), predCache)
+    handTipInHand = w_kinematicTrees[name].get("fn", {}).get("turning", {}).get("point", {}).get(handLink, [0.2, 0, 0])
+    handTipInWorld, _ = w.objectPoseRelativeToWorld(handP, handQ, handTipInHand, [0,0,0,1])
+    controlPointInWorld, _ = w.objectPoseRelativeToWorld(linkP, linkQ, pointInLink, [0,0,0,1])
+    axisInWorld = stubbornTry(lambda : pybullet.rotateVector(linkQ, axisInLink))
+    if 0.8 > abs(axisInWorld[2]):
+        handTwist = [-1,0,0]
+        handOrthogonal = [0,0,1]
+        orthogonalInWorld = [0,0,1]
+    else:
+        handTwist = [0,0,1]
+        facingYaw = getFacingYaw(w, item, itemP, predCache)
+        s = math.sin(facingYaw)
+        c = math.cos(facingYaw)
+        handOrthogonal = [1,0,0]
+        orthogonalInWorld = [c,s,0]
+    alignedQ = quatFromVecPairs((handTwist, axisInWorld), (handOrthogonal, orthogonalInWorld))
+    #For twist prep:
+    #  we want XYZ: hand tip at control point
+    #  we can achieve XYZ by a bringing process that maintains Q: hand orientation aligned to control
+    #  we can achieve Q by a rotating process
+    conXYZ = ['equalp', 'handTip', 'controlPoint']
+    tolXYZ = [0.01, 0.05]
+    conQ = ['equalq', 'handQ', 'alignedQ']
+    tolQ = [0.99, 0.95]
+    constraintConjunctions = [[conXYZ], [conQ]]
+    #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+    wpXYZ = [controlPointInWorld, alignedQ, None, handTipInHand, None, None, None]
+    wpQ = [handP, alignedQ, None, None, None, None, None]
+    waypoints = [wpXYZ, wpQ]
+    tolerances = [[tolXYZ], [tolQ]]
+    entities = {'handTip': handTipInWorld, 'handQ': handQ, 'alignedQ': alignedQ, 'controlPoint': controlPointInWorld}
+    return [{"type": "G", "description": {"goal": "near", "relatum": item}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}},
+            {"type": "G", "description": {"goal": "turnedHand", "hand": hand, "item": item, "link": link, "setting": setting}, "previousStatus": None, "numerics": {}}]
+    
+def _getTurningHandConditions(w, name, description, node, predCache): # item, hand, link, setting
+    hand = description["hand"]
+    item = description["item"]
+    link = description["link"]
+    setting = description["setting"]
+    isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
+    if (not isSet) and isSetting:
+        angle = w.getJointData((item, link))[0]
+        angleDiff = setting - angle
+        # TODO: assumes here the axis given is such that counterclockwise rotation increases joint angle. This should be checked.
+        fnTurning = w._kinematicTrees[item].get("fn", {}).get("turning", {})
+        axisInLink = fnTurning.get("axis", {}).get(link, [0,0,1])
+        pointInLink = fnTurning.get("point", {}).get(link, [0,0,0.1])
+        handLink = getHandLink(w, name, hand, predCache)
+        handP, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
+        linkP, linkQ, _, _ = getKinematicData(w, (item, link), predCache)
+        pointInWorld, _ = w.objectPoseRelativeToWorld(linkP, linkQ, pointInLink, [0,0,0,1])
+        linkQInv = [linkQ[0], linkQ[1], linkQ[2], -linkQ[3]]
+        _, handQInLink = w.objectPoseRelativeToWorld([0,0,0], linkQInv, [0,0,0], handQ)
+        halfIncAngle = 0.005
+        if 0 < angleDiff:
+            halfIncAngle = -halfIncAngle
+        s = math.sin(halfIncAngle)
+        c = math.cos(halfIncAngle)
+        _, handQInLinkAdj = w.objectPoseRelativeToWorld([0,0,0], [axisInLink[0]*s, axisInLink[1]*s, axisInLink[2]*s, c], [0,0,0], handQInLink)
+        _, twistedQ = w.objectPoseRelativeToWorld([0,0,0], linkQ, [0,0,0], handQInLinkAdj)
+        handTipInHand = w_kinematicTrees[name].get("fn", {}).get("turning", {}).get("point", {}).get(handLink, [0.2, 0, 0])
+        #For twisting:
+        #  we want q: hand orientation at twisted orientation (and very precisely so!)
+        #  we can achieve q by a twisting process
+        conQ = ['equalq', 'handQ', 'twistedQ']
+        tolQ = [0.9999, 0.9999]
+        constraintConjunctions = [[conQ]]
+        #positionA, orientation, positionB, positionInLink, orientationInLink, positionCr, linVelCr; positionB, positionCr, linVelCr must be None if the waypoint is not oscillant
+        wpQ = [pointInWorld, twistedQ, None, handTipInHand, None, None, None]
+        waypoints = [wpQ]
+        tolerances = [[tolQ]]
+        entities = {'handQ': handQ, 'twistedQ': twistedQ}
+        return [{"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
+    else:
+        return []
 
 def _getConstraintFollowingConditions(w, name, description, node, predCache):
     constraintConjunctions = description['constraintConjunctions']
@@ -2367,6 +2499,8 @@ goalCheckers = {
     'placedItem': _checkPlacedItem, # container, hand, item[, allowedComponents] | 
     'loweredItemAt': _checkLoweredItemAt, # container, hand, item[, allowedComponents] | 
     "itemAboveContainer": _checkItemAboveContainer, # item, hand, container[, sideHold]
+    "turnedControlAndParked": _checkTurnedControlAndParked, # item, hand, link, setting
+    "turnedHand": _checkTurnedHand, # item, hand, link, setting
     'transferredAndStored': _checkTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _checkTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _checkTransferredContents, # amount, container, hand, item, pouredType |
@@ -2410,6 +2544,8 @@ processSuggesters = {
     'transferredAndStored': _suggestTransferredAndStored, # amount, container, hand, item, pouredType, storage |
     'transferredAndUprighted': _suggestTransferredAndUprighted, # amount, container, hand, item, pouredType |
     'transferredContents': _suggestTransferredContents, # amount, container, hand, item, pouredType |
+    "turnedControlAndParked": _suggestTurnedControlAndParked, # item, hand, link, setting
+    "turnedHand": _suggestTurnedHand, # item, hand, link, setting
     'constraintFollowed': _suggestConstraintFollowed, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixedAndStored': _suggestMixedAndStored, # container, hand, mixedType, storage, tool, toolLink |
     'mixedAndUprighted': _suggestMixedAndUprighted, # container, hand, mixedType, tool, toolLink |
@@ -2451,6 +2587,8 @@ conditionListers = {
     'transferringAndStoring': _getTransferringAndStoringConditions, # amount, container, hand, item, pouredType, storage |
     'transferringAndUprighting': _getTransferringAndUprightingConditions, # amount, container, hand, item, pouredType, storage | positionInHand, orientationInHand
     'transferringContents': _getTransferringContentsConditions, # container, hand, item | positionInHand, orientationInHand
+    "turningControl": _getTurningControlConditions, # item, hand, link, setting
+    "turningHand": _getTurningHandConditions, # item, hand, link, setting
     'constraintFollowing': _getConstraintFollowingConditions, # constraintConjunctions, hand, isTop | waypoints, tolerances, entities
     'mixingAndStoring': _getMixingAndStoringConditions, # container, hand, mixedType, storage, tool, toolLink |
     'mixingAndUprighting': _getMixingAndUprightingConditions, # container, hand, mixedType, tool, toolLink |

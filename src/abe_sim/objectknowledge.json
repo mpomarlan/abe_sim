@@ -17,7 +17,19 @@
                          "links": [
                              "hand_left_roll",
                              "hand_right_roll"
-                         ]
+                         ],
+                         "point": {
+                             "hand_left_roll": [
+                                     0.2,
+                                     0,
+                                     0
+                             ],
+                             "hand_right_roll": [
+                                     0.2,
+                                     0,
+                                     0
+                             ]
+                         }
                      },
                      "clopening": {
                             "clopeningEFs": [
@@ -56,6 +68,10 @@
                      "processGardening": {
                             "actuator": {
                                    "mode": {
+                                          "turning": {
+                                                 "hand_left": "set",
+                                                 "hand_right": "set"
+                                          },
                                           "grasping": {
                                                  "hand_left": "set",
                                                  "hand_right": "set"
@@ -99,6 +115,18 @@
                                                         "shaping",
                                                         "outcome",
                                                         "hand_right"
+                                                 ]
+                                          },
+                                          "turning": {
+                                                 "hand_left": [
+                                                        "customStateVariables",
+                                                        "turning",
+                                                        "hand_left_roll"
+                                                 ],
+                                                 "hand_right": [
+                                                        "customStateVariables",
+                                                        "turning",
+                                                        "hand_right_roll"
                                                  ]
                                           },
                                           "grasping": {
@@ -308,10 +336,8 @@
                             "timer": 0
                      },
                      "turning": {
-                         "action": {
                              "hand_left_roll" : [],
                              "hand_right_roll" : []
-                         }
                      },
                      "clopening": {
                             "action": {
@@ -1276,6 +1302,13 @@
                              ],
                              "radius": {
                                      "heatknob": 0.2
+                             },
+                             "point": {
+                                     "heatknob": [
+                                             0,
+                                             0,
+                                             0.1
+                                     ]
                              },
                              "axis": {
                                      "heatknob": [
