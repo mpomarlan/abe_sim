@@ -369,8 +369,73 @@
               "simtype": "ktree",
               "filename": "3DObjects/Avocado/seeded_half_avocado.urdf",
               "fn": {
+                     "peelable": true,
+                     "graspable": true,
+                     "temperatureUpdateable": true,
+                     "peeling": {
+                            "radius": 0.1
+                     }
+              },
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     }
+              }
+       },
+       {
+              "type": "AvocadoHalfSeededPeeled",
+              "simtype": "ktree",
+              "filename": "3DObjects/Avocado/peeled_seeded_half_avocado.urdf",
+              "fn": {
+                     "graspable": true,
+                     "mashable": true,
+                     "cuttable": true,
+                     "temperatureUpdateable": true,
+                     "mashing": {
+                            "masherVelocity": 0.1,
+                            "radius": 0.1
+                     },
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {
+                     "mashing": {
+                            "hp": 4
+                     },
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
+       },
+       {
+              "type": "AvocadoHalfPeel",
+              "simtype": "ktree",
+              "filename": "3DObjects/Avocado/avocado_peel.urdf",
+              "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "AvocadoParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/Avocado/avocado_particle.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "transportable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedAvocado",
+              "simtype": "ktree",
+              "filename": "3DObjects/Avocado/avocado_cube.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "transportable": true
               },
               "customStateVariables": {}
        },
@@ -754,6 +819,28 @@
               "type": "ButterParticle",
               "simtype": "ktree",
               "filename": "3DObjects/ButterBag/butter_particle.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.3,
+                            "substanceRadius": 0.3
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },
+       {
+              "type": "MeltedButterParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/ButterBag/melted_butter_particle.urdf",
               "fn": {
                      "absorbable": true,
                      "consumable": true,
@@ -2253,6 +2340,16 @@
                             "force": 0.3,
                             "radius": 0.2
                      }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CarrotGreen",
+              "simtype": "ktree",
+              "filename": "3DObjects/Carrot/carrotGreen.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
               },
               "customStateVariables": {}
        },
@@ -7208,5 +7305,96 @@
               "immobile": true,
               "fn": {},
               "customStateVariables": {}
+       },
+       {
+              "type": "BlackOlive",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackOlive/blackOlive.urdf",
+              "fn": {
+                     "seedable": true,
+                     "graspable": true,
+                     "temperatureUpdateable": true,
+                     "seeding": {
+                            "radius": 0.2,
+                            "links": [
+                                   "olive"
+                            ]
+                     }
+              },
+              "customStateVariables": {
+                     "seeding": {
+                            "hp": 10
+                     }
+              }
+       },
+       {
+              "type": "OlivePit",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackOlive/olivePit.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "SeededBlackOlive",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackOlive/seeded_black_olive.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
+              "type": "BlackOliveCan",
+              "simtype": "ktree",
+              "filename": "3DObjects/BlackOlive/blackOliveCan.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "black"
+                            ],
+                            "hp": {
+                                   "black": 240
+                            },
+                            "axis": {
+                                   "black": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.04862,
+                                                 0.02352
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "black": 240
+                            }
+                     }
+              }
        }
 ]
