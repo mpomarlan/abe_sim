@@ -4,6 +4,25 @@ import time
 
 from abe_sim.world import getDictionaryEntry, stubbornTry
 
+def updateTemperatureSetter(name, customDynamicsAPI):
+    w = customDynamicsAPI["leetHAXXOR"]()
+    csv = w._kinematicTrees[name].get("customStateVariables", {})
+    fn = w._kinematicTrees[name].get("fn", {})
+    for link in csv.get("temperature", {}):
+        temperature = fn.get("thermal", {}).get("temperature", {}).get(link)
+        if temperature is not None:
+            csv["temperature"][link] = temperature
+        else:
+            control = fn.get("thermal", {}).get("control", {}).get(link)
+            if control is not None:
+                tempMin = fn.get("thermal", {}).get("temperatureMin", {}).get(link)
+                tempMax = fn.get("thermal", {}).get("temperatureMax", {}).get(link)
+                controlMin = fn.get("thermal", {}).get("controlMin", {}).get(link)
+                controlMax = fn.get("thermal", {}).get("controlMax", {}).get(link)
+                jointPos = w.getObjectProperty((name, control), "jointPosition")
+                if (jointPos is not None) and (controlMin is not None) and (controlMax is not None) and (tempMin is not None) and (tempMax is not None):
+                    csv["temperature"][link] = tempMin + (tempMax - tempMin)*((jointPos-controlMin)/(controlMax-controlMin))
+
 def updateTemperatureGetter(name, customDynamicsAPI):
     #sT = time.perf_counter()
     w = customDynamicsAPI["leetHAXXOR"]()

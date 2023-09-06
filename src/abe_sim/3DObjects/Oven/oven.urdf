@@ -40,6 +40,66 @@
       </surface>
     </collision>
   </link>
+  <link name="heatmarker">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-4" ixy="0" ixz="0" iyy="2e-4" iyz="0" izz="2e-4"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="heatmarker.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="heatmarker.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>  
+  <link name="heatmarkerspots">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-4" ixy="0" ixz="0" iyy="2e-4" iyz="0" izz="2e-4"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="heatmarkerspots.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="heatmarkerspots.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>  
+  <link name="heatknob">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-4" ixy="0" ixz="0" iyy="2e-4" iyz="0" izz="2e-4"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="heatknob.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="heatknob.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>  
   <link name="top_back">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -228,6 +288,24 @@
     <parent link="base"/>
     <child link="top"/>
     <origin rpy="0 0 0" xyz="0 0.068 1.205"/>
+  </joint>
+  <joint name="top_to_heatmarker" type="fixed">
+    <parent link="top"/>
+    <child link="heatmarker"/>
+    <origin rpy="-1.57 0 0" xyz="0.91 0.73 0"/>
+  </joint>
+  <joint name="heatmarker_to_heatmarkerspots" type="fixed">
+    <parent link="heatmarker"/>
+    <child link="heatmarkerspots"/>
+    <origin rpy="0 0 0" xyz="0 0 0.005"/>
+  </joint>
+  <joint name="heatmarker_to_heatknob" type="revolute">
+    <parent link="heatmarker"/>
+    <child link="heatknob"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="0" upper="3.141" velocity="1."/>
+    <joint_properties damping="0.0" friction="0.0"/>
+    <origin rpy="0 0 0" xyz="0 0 0.03"/>
   </joint>
   <joint name="base_to_top_back" type="fixed">
     <parent link="base"/>
