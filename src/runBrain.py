@@ -171,20 +171,21 @@ def runBrain():
                 if "jointPositions" in spec:
                     for lnk, pos in spec["jointPositions"].items():
                         w.setObjectProperty((oname, lnk), "jointPosition", pos)
-    
-    # Get Bea's pybullet ID
-    idBea = w._kinematicTrees["bea"]["idx"]
-    # Get amount of jointIds for Bea
-    beaJoints = len(w._kinematicTrees["bea"]["joints"])
-    # Get Abe's pybullet ID
-    idAbe = w._kinematicTrees["abe"]["idx"]
-    # Get amount of jointIds for Abe
-    abeJoints = len(w._kinematicTrees["abe"]["joints"])
-
-    #Turn off collision between all combinations of abe's and bea's joints
-    for i in range(-1,beaJoints):
-        for j in range(-1,abeJoints):
-            pybullet.setCollisionFilterPair(idBea, idAbe, i, j, 0)
+                        
+    # Make it so agents -- local abes or remote beas -- do not collide with each other
+    agentTypes = {"Abe", "Bea"} # TODO: <<- that is a good place to insert a query to an OWL reasoner
+    sceneAgentNames = [k for k in w._kinematicTrees.keys() if w._kinematicTrees[k]["type"] in agentTypes]
+    for a in sceneAgentNames:
+        idxA = w._kinematicTrees[a]["idx"]
+        aLinks = w._kinematicTrees[a]["links"]
+        for b in sceneAgentNames:
+            if a!=b:
+                idxB = w._kinematicTrees[b]["idx"]
+                bLinks = w._kinematicTrees[b]["links"]
+                #Turn off collision between all combinations of abe's and bea's joints
+                for _, i in bLinks.items():
+                    for _, j in aLinks.items():
+                        world.stubbornTry(lambda : pybullet.setCollisionFilterPair(idxB, idxA, i["idx"], j["idx"], 0))
 
     waitingFor = 0
     
