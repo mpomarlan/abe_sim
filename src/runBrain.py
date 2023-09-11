@@ -102,6 +102,19 @@ def handleINT(signum, frame):
     sys.exit(0)
 
 def runBrain():
+    def groupDisableAllCollisions(w, groupA, groupB):
+        for a in groupA:
+            idxA = w._kinematicTrees[a]["idx"]
+            aLinks = w._kinematicTrees[a]["links"]
+            for b in groupB:
+                if a!=b:
+                    idxB = w._kinematicTrees[b]["idx"]
+                    bLinks = w._kinematicTrees[b]["links"]
+                    #Turn off collision between all combinations of abe's and bea's joints
+                    for _, i in bLinks.items():
+                        for _, j in aLinks.items():
+                            world.stubbornTry(lambda : pybullet.setCollisionFilterPair(idxB, idxA, i["idx"], j["idx"], 0))
+
     parser = argparse.ArgumentParser(prog='runBrain', description='Run the Abe Sim', epilog='kwargs for the loadObjectList is a dictionary. Possible keys are linearVelocity (of base, value is a float), angularVelocity (of base, value is a float) and jointPositions (value is a dictionary where keys are link names and values are floats representing the position of the parent joint for the link).')
     parser.add_argument('-fdf', '--frameDurationFactor', default="1.0", help='Attempts to adjust the ratio of real time of frame to simulated time of frame. A frame will always last, in real time, at least as long as it is computed. WARNING: runBrain will become unresponsive to HTTP API calls if this is set too low. Recommended values are above 0.2.')
     parser.add_argument('-sfr', '--simFrameRate', default="160", help='Number of frames in one second of simulated time. Should be above 60.')
@@ -174,19 +187,15 @@ def runBrain():
                         
     # Make it so agents -- local abes or remote beas -- do not collide with each other
     agentTypes = {"Abe", "Bea"} # TODO: <<- that is a good place to insert a query to an OWL reasoner
-    sceneAgentNames = [k for k in w._kinematicTrees.keys() if w._kinematicTrees[k]["type"] in agentTypes]
-    for a in sceneAgentNames:
-        idxA = w._kinematicTrees[a]["idx"]
-        aLinks = w._kinematicTrees[a]["links"]
-        for b in sceneAgentNames:
-            if a!=b:
-                idxB = w._kinematicTrees[b]["idx"]
-                bLinks = w._kinematicTrees[b]["links"]
-                #Turn off collision between all combinations of abe's and bea's joints
-                for _, i in bLinks.items():
-                    for _, j in aLinks.items():
-                        world.stubbornTry(lambda : pybullet.setCollisionFilterPair(idxB, idxA, i["idx"], j["idx"], 0))
-
+    ghosterTypes = {"Bea"}
+    # TODO: these are also a good opportunity to use OWL reasoning queries
+    sceneAgents = [k for k in w._kinematicTrees.keys() if w._kinematicTrees[k]["type"] in agentTypes]
+    sceneGhosters = [k for k in w._kinematicTrees.keys() if w._kinematicTrees[k]["type"] in ghosterTypes]
+    sceneFurniture = [k for k in w._kinematicTrees.keys() if (not w._kinematicTrees[k].get("fn",{}).get("graspable", False)) and ("Floor" != w._kinematicTrees[k]["type"])]
+    
+    groupDisableAllCollisions(w, sceneAgents, sceneAgents)
+    groupDisableAllCollisions(w, sceneGhosters, sceneFurniture)
+    
     waitingFor = 0
     
     if (agentName is None) or (agentName not in w._kinematicTrees.keys()):
