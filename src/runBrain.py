@@ -144,6 +144,8 @@ def runBrain():
         
     w.setGravity(gravity)
 
+    objectInstances = []
+
     if preloads is not None:
         preloads = json.loads(open(preloads).read())
         for oType, oname, position in toPreload:
@@ -159,7 +161,8 @@ def runBrain():
                 otype, oname, position, orientation, spec = x
             else:
                 continue
-            w.addObjectInstance(otype, oname, position, orientation)
+            objI = w.addObjectInstance(otype, oname, position, orientation)
+            objectInstances.append(objI)
             if spec is not None:
                 if "linearVelocity" in spec:
                     w.setObjectProperty((oname), "linearVelocity", spec["linearVelocity"])
@@ -169,6 +172,20 @@ def runBrain():
                     for lnk, pos in spec["jointPositions"].items():
                         w.setObjectProperty((oname, lnk), "jointPosition", pos)
     
+    # Get Bea's pybullet ID
+    idBea = w._kinematicTrees["bea"]["idx"]
+    # Get amount of jointIds for Bea
+    beaJoints = len(w._kinematicTrees["bea"]["joints"])
+    # Get Abe's pybullet ID
+    idAbe = w._kinematicTrees["abe"]["idx"]
+    # Get amount of jointIds for Abe
+    abeJoints = len(w._kinematicTrees["abe"]["joints"])
+
+    #Turn off collision between all combinations of abe's and bea's joints
+    for i in range(-1,beaJoints):
+        for j in range(-1,abeJoints):
+            pybullet.setCollisionFilterPair(idBea, idAbe, i, j, 0)
+
     waitingFor = 0
     
     if (agentName is None) or (agentName not in w._kinematicTrees.keys()):
