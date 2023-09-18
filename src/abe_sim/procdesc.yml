@@ -91,6 +91,18 @@ cutting:
   completion:
     process: cutting
     instrument: [trajector, type]
+# Something fries if left for long enough in a container that can fry.
+frying:
+  disposition: [self, fn, fryable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canFry]
+    source:
+      mode: transitive-at
+  resource: [self, customStateVariables, frying, hp]
+  completion:
+    process: frying
+    instrument: [trajector, type]
 # Something gets mashed -- replaced with shards -- if a masher moves in an appropriate way long enough.
 mashing:
   disposition: [self, fn, mashable]

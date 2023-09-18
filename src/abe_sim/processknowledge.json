@@ -363,6 +363,13 @@
                                 }
                         }
                 },
+                "frying": {
+                        "Bacon": {
+                                "default": {
+                                        "toReplace": "Cookie"
+                                }
+                        }
+                },
                 "gettingSpreadUpon": {
                         "BreadSlice": {
                                 "default": {

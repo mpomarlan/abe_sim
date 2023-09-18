@@ -1394,8 +1394,17 @@
                      "canContain": true,
                      "clopenable": true,
                      "canBake": true,
+                     "canFry": true,
                      "canUpdateTemperature": true,
                      "turnable": true,
+                     "processingAreas": {
+                         "bakeable": [
+                             "shelf"
+                         ],
+                         "fryable": [
+                             "shelf"
+                         ]
+                     },
                      "turning": {
                              "links": [
                                      "heatknob"
@@ -2333,6 +2342,8 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "cuttable": true,
+                     "fryable": true,
+                     "transportable": true,
                      "cutting": {
                             "force": 0.3,
                             "radius": 0.2
@@ -2341,6 +2352,9 @@
               "customStateVariables": {
                      "cutting": {
                             "hp": 5
+                     },
+                     "frying": {
+                         "hp": 200
                      }
               }
        },
@@ -7091,7 +7105,7 @@
                      "graspable": true,
                      "containment": {
                             "height": {
-                                   "fryingPan": 0.5
+                                   "pan": 0.5
                             },
                             "pouring": {
                                    "outof": {

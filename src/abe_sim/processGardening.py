@@ -180,6 +180,7 @@ def getHeldAABB(w, name, hand, predCache):
     return predCache[((name, hand), "heldAABB")]
 
 def getComponentHeight(w, container, component, predCache):
+    print("GCH", container, component)
     if ((container, component), "height") not in predCache:
         retq = None
         containerFn = w._kinematicTrees[container].get("fn", {}).get("containment", {})
@@ -188,7 +189,8 @@ def getComponentHeight(w, container, component, predCache):
             if 0 < len(components):
                 component = components[0]
         while retq is None:
-            retq = containerFn.get("height", {}).get(component)
+            retq = w._kinematicTrees[container].get("fn", {}).get("containment", {}).get("height", {}).get(component)
+            print("    ", container, component, retq)
             if retq is None:
                 container, component = getContainerComponent(w, container)
                 if container is None:
@@ -986,7 +988,7 @@ def _checkBaked(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    processDisposition = description.get('processDisposition', 'bakable')
+    processDisposition = description.get('processDisposition', 'bakeable')
     baked = checkBakedContents(w, item, bakedType, processDisposition, predCache)
     container, component = getContainerComponent(w, item)
     atOven = (container == oven)
@@ -1334,7 +1336,7 @@ def _suggestBakedItem(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    processDisposition = description.get('processDisposition', 'bakable')
+    processDisposition = description.get('processDisposition', 'bakeable')
     timeAmount = description.get('timeAmount')
     timeUnit = description.get('timeUnit')
     return [{'type': 'P', 'description': {'process': 'bakingItem', 'item': item, 'hand': hand, 'oven': oven, 'destination': destination, 'bakedType': bakedType, 'processDisposition': processDisposition, 'timeAmount': timeAmount, 'timeUnit': timeUnit}, 'sourceContainer': node.get('sourceContainer'), 'sourceComponent': node.get('sourceComponent')}]
@@ -2244,21 +2246,22 @@ def _getBakingConditions(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    processDisposition = description.get('processDisposition', 'bakable')
-    timeAmount = description.get("timeAmount")
+    processDisposition = description.get('processDisposition', 'bakeable')
+    timeAmount = float(description.get("timeAmount"))
     timeUnit = description.get("timeUnit")
     source = node.get('sourceContainer')
     sourcePart = node.get('sourceComponent')
+    allowedComponents = tuple(w._kinematicTrees[oven].get("fn",{}).get("processingAreas", {}).get(processDisposition))
     if checkBakedContents(w, item, bakedType, processDisposition, predCache):
         return [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': destination}}]
-    retq = [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': oven}}]
-    if (timeAmount is not None) and (checkItemInContainer(w, name, item, oven, predCache)) and (not checkGrasped(w, name, None, item, predCache)):
+    retq = [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': oven, 'allowedComponents': allowedComponents}}]
+    if (timeAmount is not None) and (checkItemInContainer(w, name, item, oven, predCache, allowedComponents=allowedComponents)) and (not checkGrasped(w, name, None, item, predCache)):
         if timeUnit is None:
             timeUnit = 1.0
         timeAmount = timeAmount*timeUnit
         previousStartTime = node.get("previousStartTime")
         if (previousStartTime is None):
-            previousStartTime = w._kinematicTrees[agentName].get("customStateVariables", {}).get("timing", {}).get("timer",0)
+            previousStartTime = w._kinematicTrees[name].get("customStateVariables", {}).get("timing", {}).get("timer",0)
         retq.append({'type': 'G', 'description': {'goal': 'waited', 'timeEnd': timeAmount + previousStartTime}})
         node["previousStartTime"] = previousStartTime
     return retq

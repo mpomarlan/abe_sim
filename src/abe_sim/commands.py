@@ -825,7 +825,7 @@ def toBoilStart(requestData, w, agentName, todos):
     heatingMode = requestData.get("heatingMode", None)
     timeToBoilAmount = requestData.get("timeToBoilQuantity", None)
     timeToBoilUnit = requestData.get("timeToBoilUnit", None)
-    destination = getStorage(w)
+    destination = _getStorage(w, working=True)
     boiledType = 'BoiledPotatoes' ### TODO
     lacks = _checkArgs([[item, "Request lacks thingToBoil parameter."],
                         [oven, "Request lacks stoveToBoilOn parameter."],
@@ -858,8 +858,8 @@ def toFryStart(requestData, w, agentName, todos):
     heatingMode = requestData.get("heatingMode", None)
     timeToFryAmount = requestData.get("timeToFryQuantity", None)
     timeToFryUnit = requestData.get("timeToFryUnit", None)
-    destination = getStorage(w)
-    friedType = 'FriedChicken' ### TODO
+    destination = _getStorage(w, working=True)
+    friedType = 'Cookie' ### TODO
     lacks = _checkArgs([[item, "Request lacks thingToFry parameter."],
                         [oven, "Request lacks stoveToFryOn parameter."],
                         [heatingMode, "Request lacks heatingMode parameter."],
@@ -874,7 +874,12 @@ def toFryStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested stoveToFryOn does not exist in world.'}
     if not w._kinematicTrees[oven].get('fn', {}).get('canFry', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested stoveToFryOn cannot fry.'}
-    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': friedType, "processDisposition": "fryable", "timeAmount": timeToFryAmount, "timeUnit": timeToFryUnit}}}
+    unit = 1.0
+    if timeToFryUnit in ["min", "m", "minute", "minutes"]:
+        unit = 60.0
+    elif timeToFryUnit in ["hr", "hrs", "h", "hour", "hours"]:
+        unit = 3600
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': friedType, "processDisposition": "fryable", "timeAmount": timeToFryAmount, "timeUnit": unit}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
@@ -888,7 +893,7 @@ def toFryEnd(requestData, w, agentName):
 def toMeltStart(requestData, w, agentName, todos):
     item = requestData.get("containerWithInputIngredients", None)
     oven = requestData.get("meltingTool", None)
-    destination = getStorage(w)
+    destination = _getStorage(w, working=True)
     meltedType = 'MeltedButter' ### TODO
     lacks = _checkArgs([[item, "Request lacks containerWithInputIngredients parameter."],
                         [oven, "Request lacks meltingTool parameter."]])
