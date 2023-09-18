@@ -8,7 +8,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="mediumbowlLid.obj"/>
+        <mesh filename="mediumBowlLid.obj"/>
       </geometry>
     </visual>
     <collision>

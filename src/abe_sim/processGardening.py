@@ -2141,8 +2141,8 @@ def _getCoveringConditions(w, name, description, node, predCache): # hand, item,
     entryHeight = getEntryHeight(w, name, {'hand': hand, 'item': item}, {}, predCache)
     coveringFn = w._kinematicTrees[cover].get("fn", {}).get("covering", {})
     itemCoveringFn = w._kinematicTrees[item].get("fn", {}).get("covering", {})
-    covAxisInCov = liningFn.get("axis") or [1,0,0]
-    covPointInCov = liningFn.get("point") or [0,0,0]
+    covAxisInCov = coveringFn.get("axis") or [1,0,0]
+    covPointInCov = coveringFn.get("point") or [0,0,0]
     covAxis = stubbornTry(lambda : pybullet.rotateVector(covQ, covAxisInCov))
     itemAxisInItem = itemCoveringFn.get("axis") or [1,0,0]
     itemCovPointInItem = itemCoveringFn.get("point") or [0,0,0]

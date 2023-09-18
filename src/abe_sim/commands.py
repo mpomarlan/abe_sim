@@ -708,7 +708,7 @@ def toUncoverStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
     _checkGreatReset(requestData, w)
     storage = _getStorage(w)
-    contacts = [x for x in w.checkCollision((item,)) if w._kinematicTrees[x].get("fn",{}).get("canCover", False)]
+    contacts = [x[1][0] for x in w.checkCollision((item,)) if w._kinematicTrees[x[1][0]].get("fn",{}).get("canCover", False)]
     if 0 == len(contacts):
         garden = {0: {'type': "G", "description": {"goal": "done"}}}
         cover = None

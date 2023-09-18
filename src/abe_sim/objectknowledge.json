@@ -1319,6 +1319,7 @@
               "fn": {
                      "canContain": true,
                      "graspable": true,
+                     "coverable": true,
                      "temperatureUpdateable": true,
                      "grasping": {
                             "handle": "mediumbowl",
@@ -1329,6 +1330,18 @@
                                           0
                                    ]
                             }
+                     },
+                     "covering": {
+                         "point": [
+                                 0,
+                                 0,
+                                 0                         
+                         ],
+                         "axis": [
+                                 1,
+                                 0,
+                                 0
+                         ]
                      },
                      "containment": {
                             "height": {
@@ -3095,7 +3108,8 @@
               "filename": "3DObjects/LargeBowl/largebowlLid.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "graspable": true,
+                     "canCover": true
               },
               "customStateVariables": {}
        },
@@ -3107,6 +3121,7 @@
                      "canContain": true,
                      "temperatureUpdateable": true,
                      "graspable": true,
+                     "coverable": true,
                      "grasping": {
                             "handle": "handle",
                             "axis": {
@@ -3166,7 +3181,20 @@
               "filename": "3DObjects/MediumBowl/mediumbowlLid.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "graspable": true,
+                     "canCover": true,
+                     "covering": {
+                         "point": [
+                                 0,
+                                 0,
+                                 0                         
+                         ],
+                         "axis": [
+                                 1,
+                                 0,
+                                 0
+                         ]
+                     }
               },
               "customStateVariables": {}
        },
@@ -3176,7 +3204,8 @@
               "filename": "3DObjects/SmallBowl/smallbowlLid.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "graspable": true,
+                     "canCover": true
               },
               "customStateVariables": {}
        },
@@ -3188,6 +3217,7 @@
                      "temperatureUpdateable": true,
                      "canContain": true,
                      "graspable": true,
+                     "coverable": true,
                      "containment": {
                             "height": {
                                    "smallbowl": 0.5
