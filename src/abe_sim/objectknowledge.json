@@ -1886,6 +1886,16 @@
                      "canMash": true,
                      "graspable": true,
                      "temperatureUpdateable": true,
+                     "grasping": {
+                            "handle": "handle",
+                            "axis": {
+                                   "handle": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
                      "mashing": {
                             "links": [
                                    "masher"
