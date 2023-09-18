@@ -15,6 +15,7 @@ def updateTurning(name, customDynamicsAPI):
         w._kinematicTrees[name]["customStateVariables"]["turning"] = {}
     turnableLinks = fnTurning.get("links") or []
     for link in turnableLinks:
+        turning = False
         p, q, _, _ = w.getKinematicData((name, link))
         turningRadius = fnTurning.get("radius", {}).get(link) or 0.2
         turningAxisInLink = fnTurning.get("axis", {}).get(link) or [0,0,1]
@@ -36,7 +37,10 @@ def updateTurning(name, customDynamicsAPI):
                     qI[3] = -qI[3]
                     turnOmega = stubbornTry(lambda : pybullet.rotateVector(qI, turnOmega))
                     turnOmega = turnOmega[0]*turningAxisInLink[0] + turnOmega[1]*turningAxisInLink[1] + turnOmega[2]*turningAxisInLink[2]
-                    w.applyJointControl((name,joint), mode="velocity", targetVelocity=turnOmega)
+                    w.applyJointControl((name,joint), mode="velocity", targetVelocity=turnOmega, force=100)
+                    turning = True
+        if not turning:
+           w.applyJointControl((name,joint), mode="velocity", targetVelocity=0, force=100)
     #endD = time.perf_counter()
     #print("    turn %s %f" % (name, endD-startD))
     return

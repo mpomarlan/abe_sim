@@ -1168,7 +1168,7 @@ def toPreheatOvenStart(requestData, w, agentName, todos):
     oven = requestData.get("oven", None)
     quantity = requestData.get("quantity", None)
     unit = requestData.get("unit", None)
-    lacks = _checkArgs([[oven, "Request lacks containerWithIngredients parameter."],
+    lacks = _checkArgs([[oven, "Request lacks oven parameter."],
                         [quantity, "Request lacks quantity parameter."],
                         [unit, "Request lacks unit parameter."]])
     if 0 < len(lacks):
@@ -1195,7 +1195,7 @@ def toPreheatOvenStart(requestData, w, agentName, todos):
     if (temperatureMin is None) or (temperatureMax is None) or (controlMin is None) or (controlMax is None):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven has ill-defined temperature or control range.'}
     setting = controlMin + (controlMax-controlMin)*(quantity-temperatureMin)/(temperatureMax-temperatureMin)
-    garden = {0: {'type': 'G', 'description': {'goal': 'turnedControlAndParked', 'item': oven, 'hand': 'hand_right', 'link': link, 'setting': setting}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'turnedControlAndParked', 'item': oven, 'hand': 'hand_left', 'link': link, 'setting': setting}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}

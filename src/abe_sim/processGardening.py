@@ -568,7 +568,7 @@ def checkUpright(w, itemOrientation, pouringAxis, predCache, th=None):
 
 def checkControlSetting(w, name, hand, item, link, setting, predCache):
     if ((hand, item, link, setting), "controlSetting") not in predCache:
-        angleDif = abs(description.get("setting", 0) - w.getJointData((description.get("item"), description.get("link"))[0]))
+        angleDif = abs(setting - w.getJointData((item, link))[0])
         isSet = (0.05 > angleDif)
         handLink = getHandLink(w, name, hand, predCache)
         v = w._kinematicTrees[name].get("customStateVariables", {}).get("turning", {}).get(handLink, [])
@@ -753,6 +753,10 @@ def _checkItemAboveContainer(w, name, description, node, predCache): # item, han
     return retq
 
 def _checkTurnedControlAndParked(w, name, description, node, predCache): # item, hand, link, setting
+    item = description["item"]
+    hand = description["hand"]
+    link = description["link"]
+    setting = description["setting"]
     isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
     parked = node.get('parked', False)
     parked = checkParked(w, name, hand, parked, predCache)
@@ -760,6 +764,10 @@ def _checkTurnedControlAndParked(w, name, description, node, predCache): # item,
     return isSet and (not isSetting) and parked
 
 def _checkTurnedHand(w, name, description, node, predCache): # item, hand, link, setting
+    item = description["item"]
+    hand = description["hand"]
+    link = description["link"]
+    setting = description["setting"]
     isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
     return isSet and (not isSetting)
 
@@ -1149,9 +1157,9 @@ def _suggestTurnedHand(w, name, description, node, predCache): # item, hand, lin
     setting = description["setting"]
     isSet, isSetting = checkControlSetting(w, name, hand, item, link, setting, predCache)
     if isSet:
-        target = {hand: {"turning": {"toRemove": [(item, link)]}}}
+        target = {"turning": {hand: {"toRemove": [(item, link)]}}}
     else:
-        target = {hand: {"turning": {"toAdd": [(item, link)]}}}
+        target = {"turning": {hand: {"toAdd": [(item, link)]}}}
     return [{"type": "P", "description": {"process": "turningHand", "hand": hand, "item": item, "link": link, "setting": setting}, 'children': [], 'numerics': {}, "target": target}]
     
 def _suggestConstraintFollowed(w, name, description, node, predCache): # constraintConjunctions, hand, isTop | waypoints, tolerances
@@ -1704,12 +1712,13 @@ def _getTurningControlConditions(w, name, description, node, predCache): # item,
     link = description["link"]
     setting = description["setting"]
     #### TODO CF
+    fnTurning = w._kinematicTrees[item].get("fn", {}).get("turning", {})
     axisInLink = fnTurning.get("axis", {}).get(link, [0,0,1])
     pointInLink = fnTurning.get("point", {}).get(link, [0,0,0.1])
     handLink = getHandLink(w, name, hand, predCache)
     handP, handQ, _, _ = getKinematicData(w, (name, handLink), predCache)
     linkP, linkQ, _, _ = getKinematicData(w, (item, link), predCache)
-    handTipInHand = w_kinematicTrees[name].get("fn", {}).get("turning", {}).get("point", {}).get(handLink, [0.2, 0, 0])
+    handTipInHand = w._kinematicTrees[name].get("fn", {}).get("turning", {}).get("point", {}).get(handLink, [0.2, 0, 0])
     handTipInWorld, _ = w.objectPoseRelativeToWorld(handP, handQ, handTipInHand, [0,0,0,1])
     controlPointInWorld, _ = w.objectPoseRelativeToWorld(linkP, linkQ, pointInLink, [0,0,0,1])
     axisInWorld = stubbornTry(lambda : pybullet.rotateVector(linkQ, axisInLink))
@@ -1763,14 +1772,14 @@ def _getTurningHandConditions(w, name, description, node, predCache): # item, ha
         pointInWorld, _ = w.objectPoseRelativeToWorld(linkP, linkQ, pointInLink, [0,0,0,1])
         linkQInv = [linkQ[0], linkQ[1], linkQ[2], -linkQ[3]]
         _, handQInLink = w.objectPoseRelativeToWorld([0,0,0], linkQInv, [0,0,0], handQ)
-        halfIncAngle = 0.005
+        halfIncAngle = 0.05
         if 0 < angleDiff:
             halfIncAngle = -halfIncAngle
         s = math.sin(halfIncAngle)
         c = math.cos(halfIncAngle)
         _, handQInLinkAdj = w.objectPoseRelativeToWorld([0,0,0], [axisInLink[0]*s, axisInLink[1]*s, axisInLink[2]*s, c], [0,0,0], handQInLink)
         _, twistedQ = w.objectPoseRelativeToWorld([0,0,0], linkQ, [0,0,0], handQInLinkAdj)
-        handTipInHand = w_kinematicTrees[name].get("fn", {}).get("turning", {}).get("point", {}).get(handLink, [0.2, 0, 0])
+        handTipInHand = w._kinematicTrees[name].get("fn", {}).get("turning", {}).get("point", {}).get(handLink, [0.2, 0, 0])
         #For twisting:
         #  we want q: hand orientation at twisted orientation (and very precisely so!)
         #  we can achieve q by a twisting process
