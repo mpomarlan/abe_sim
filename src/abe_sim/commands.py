@@ -1150,7 +1150,7 @@ def toRefrigerateStart(requestData, w, agentName, todos):
     fn = w._kinematicTrees[refrigerator].get('fn', {})
     if not fn.get('canRefrigerate', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested refrigerator cannot refrigerate.'}
-    allowedComponents = list(set(fn.get('refrigeration', {}).get('links', [])).intersection(fn.get('containment', {}).get('links', [])))
+    allowedComponents = tuple(set(fn.get('refrigeration', {}).get('links', [])).intersection(fn.get('containment', {}).get('links', [])))
     if 0 == len(allowedComponents):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested refrigerator has no room to refrigerate in.'}
     garden = {0: {'type': 'G', 'description': {'goal': 'placedItem', 'container': refrigerator, 'hand': 'hand_right', 'item': item, 'allowedComponents': allowedComponents}}}

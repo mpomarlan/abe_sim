@@ -435,6 +435,8 @@ def checkGrasped(w, name, hand, item, predCache):
     return predCache[((name, hand), item, 'grasps')]
 
 def checkItemInContainer(w, name, item, container, predCache, allowedComponents=None):
+    if isinstance(allowedComponents,list):
+        allowedComponents = tuple(allowedComponents)
     ## TODO: test whether transitive closure of at includes container
     if item not in w._kinematicTrees:
         return True
