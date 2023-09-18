@@ -393,6 +393,10 @@ def getItemPlacement(w, name, item, container, component, targetPosition, predCa
         for l in getLocations(w, container, c, aabb, w._kinematicTrees[item].get("fn", {}).get("canLine"), predCache):
             if feasible(w, aabb, c, l, handRadius, handGraspTolerance, itemHeight):
                 return c, l
+    #print("OOPS, nothing available?")
+    #print("  tried", components)
+    #print("    ", [getLocations(w, container, c, aabb, w._kinematicTrees[item].get("fn", {}).get("canLine"), predCache) for c in components])
+    #sys.exit(0)
     return None, None
 
 def checkNear(w, name, item, previous, predCache, position=None):
@@ -615,16 +619,16 @@ def checkSprinkled(w, name, item, sprinkledType, predCache):
     return predCache[((item, sprinkledType), "sprinkled")]
 
 def checkBakedContents(w, item, bakedType, process, predCache):
-    if ((item, bakedType, process), "baked") not in predCache:
+    if ((item, bakedType, process), process) not in predCache:
         contents = getContents(w, item, predCache)
-        baked = False
+        processed = True
         # TODO: need a smarter check here: all that is bakeable/processable into bakedType must be baked.
         for x in contents:
-            if bakedType == w._kinematicTrees[x].get("type"):
-                baked = True
+            if (w._kinematicTrees[x].get("fn", {}).get(process, False)) and (bakedType != w._kinematicTrees[x].get("type")):
+                processed = False
                 break
-        predCache[((item, bakedType, process), "baked")] = baked
-    return predCache[((item, bakedType, process), "baked")]
+        predCache[((item, bakedType, process), process)] = processed
+    return predCache[((item, bakedType, process), process)]
 
 def checkOpened(w, container, component, predCache):
     if ((container, component), "open") not in predCache:
@@ -972,8 +976,8 @@ def _checkBaked(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    process = description.get('process', 'baking')
-    baked = checkBakedContents(w, item, bakedType, process, predCache)
+    processDisposition = description.get('processDisposition', 'bakable')
+    baked = checkBakedContents(w, item, bakedType, processDisposition, predCache)
     container, component = getContainerComponent(w, item)
     atOven = (container == oven)
     atDestination = (container == destination)
@@ -1320,10 +1324,10 @@ def _suggestBakedItem(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
-    process = description.get('process', 'baking')
+    processDisposition = description.get('processDisposition', 'bakable')
     timeAmount = description.get('timeAmount')
     timeUnit = description.get('timeUnit')
-    return [{'type': 'P', 'description': {'process': 'bakingItem', 'item': item, 'hand': hand, 'oven': oven, 'destination': destination, 'bakedType': bakedType, 'process': process, 'timeAmount': timeAmount, 'timeUnit': timeUnit}, 'sourceContainer': node.get('sourceContainer'), 'sourceComponent': node.get('sourceComponent')}]
+    return [{'type': 'P', 'description': {'process': 'bakingItem', 'item': item, 'hand': hand, 'oven': oven, 'destination': destination, 'bakedType': bakedType, 'processDisposition': processDisposition, 'timeAmount': timeAmount, 'timeUnit': timeUnit}, 'sourceContainer': node.get('sourceContainer'), 'sourceComponent': node.get('sourceComponent')}]
 
 def _suggestBroughtNear(w, name, description, node, predCache):
     return [{'type': 'P', 'description': {"process": "bringingNear", "trajector": description["trajector"], "hand": description["hand"], "relatum": description["relatum"]}, "children": [], "numerics": {}, "target": None}]
@@ -1886,7 +1890,7 @@ def _getMixingConditions(w, name, description, node, predCache): # container, ha
     conad = ['aligned', 'mixAxis', 'down']
     tolad = [0.95, 0.9]
     conxy = ['equalxy', 'mixPoint', 'containerEntry']
-    tolxy = [0.0001, 0.0004]
+    tolxy = [0.0001, 0.0025]
     conez = ['equalz', 'handP', 'entryHeight']
     tolez = [0.01, 0.05]
     conpo = ['equalq', 'handQ', 'handParkedQ']
@@ -2229,11 +2233,12 @@ def _getBakingConditions(w, name, description, node, predCache):
     oven = description.get('oven', None)
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
+    processDisposition = description.get('processDisposition', 'bakable')
     timeAmount = description.get("timeAmount")
     timeUnit = description.get("timeUnit")
     source = node.get('sourceContainer')
     sourcePart = node.get('sourceComponent')
-    if checkBakedContents(w, item, bakedType, process, predCache):
+    if checkBakedContents(w, item, bakedType, processDisposition, predCache):
         return [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': destination}}]
     retq = [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': oven}}]
     if (timeAmount is not None) and (checkItemInContainer(w, name, item, oven, predCache)) and (not checkGrasped(w, name, None, item, predCache)):

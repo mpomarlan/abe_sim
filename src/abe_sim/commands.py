@@ -808,7 +808,7 @@ def toBakeStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested oven cannot bake.'}
     if not w._kinematicTrees[destination].get('fn', {}).get('canContain', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested inputDestinationContainer cannot contain.'}
-    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': bakedType}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'processDisposition': 'bakeable', 'bakedType': bakedType}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
@@ -841,7 +841,7 @@ def toBoilStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested stoveToBoilOn does not exist in world.'}
     if not w._kinematicTrees[oven].get('fn', {}).get('canBoil', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested stoveToBoilOn cannot boil.'}
-    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': boiledType, "process": "boiling", "timeAmount": timeToBoilAmount, "timeUnit": timeToBoilUnit}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': boiledType, "processDisposition": "boilable", "timeAmount": timeToBoilAmount, "timeUnit": timeToBoilUnit}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
@@ -874,7 +874,7 @@ def toFryStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested stoveToFryOn does not exist in world.'}
     if not w._kinematicTrees[oven].get('fn', {}).get('canFry', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested stoveToFryOn cannot fry.'}
-    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': friedType, "process": "frying", "timeAmount": timeToFryAmount, "timeUnit": timeToFryUnit}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': friedType, "processDisposition": "fryable", "timeAmount": timeToFryAmount, "timeUnit": timeToFryUnit}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
@@ -901,7 +901,7 @@ def toMeltStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested meltingTool does not exist in world.'}
     if not w._kinematicTrees[oven].get('fn', {}).get('canMelt', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested meltingTool cannot melt.'}
-    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': meltedType, "process": "melting"}}}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': oven, 'hand': 'hand_right', 'item': item, 'destination': destination, 'bakedType': meltedType, "processDisposition": "meltable"}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
     todos['goals'] = []
     return requests.status_codes.codes.ALL_OK, {}
