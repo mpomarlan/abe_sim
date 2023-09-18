@@ -63,12 +63,12 @@
   <joint name="handle_to_shaft" type="fixed">
     <parent link="handle"/>
     <child link="shaft"/>
-    <origin rpy="0 0 0" xyz="0.24 0 0"/>
+    <origin rpy="0 0 0" xyz="0.12 0 0"/>
   </joint>
   <joint name="shaft_to_masher" type="fixed">
     <parent link="shaft"/>
     <child link="masher"/>
-    <origin rpy="0 0 0" xyz="0.12 0 0"/>
+    <origin rpy="0 0 0" xyz="0.06 0 0"/>
   </joint>
 </robot>
 
