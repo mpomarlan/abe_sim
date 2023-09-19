@@ -2537,6 +2537,37 @@
               }
        },
        {
+              "type": "ChoppedCookedBacon",
+              "simtype": "ktree",
+              "filename": "3DObjects/Bacon/choppedCookedBacon.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true,
+                     "transportable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CookedBacon",
+              "simtype": "ktree",
+              "filename": "3DObjects/Bacon/cookedBacon.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true,
+                     "cuttable": true,
+                     "transportable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
+       },
+       {
               "type": "RedChiliPepper",
               "simtype": "ktree",
               "filename": "3DObjects/ChiliPepper/chiliRed.urdf",
@@ -4031,9 +4062,15 @@
               "filename": "3DObjects/Bacon/choppedBacon.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "graspable": true,
+                     "transportable": true,
+                     "fryable": true
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                  "frying": {
+                          "hp": 100
+                  }
+              }
        },
        {
               "type": "FrozenCorn",
@@ -4172,8 +4209,8 @@
                                           ],
                                           "point": [
                                                  0,
-                                                 0.066,
-                                                 0.08
+                                                 0.033,
+                                                 0.04
                                           ],
                                           "tipped": [
                                                  -0.707,
