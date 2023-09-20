@@ -13,6 +13,8 @@ def updateGraspingConstraint(name, customDynamicsAPI):
     parentActuallyGrasps = w._kinematicTrees[parent].get("customStateVariables", {}).get("grasping", {}).get("actuallyGrasping", {}).get(parentEF) or []
     if [[child], name] not in parentActuallyGrasps:
         w.removeObject((name,))
+        if "customStateVariables" in w._kinematicTrees[child]:
+            w._kinematicTrees[child]["customStateVariables"]["graspedBy"] = None
 
 def updateGrasping(name, customDynamicsAPI):
     def _toIdentifier(x):
@@ -74,6 +76,9 @@ def updateGrasping(name, customDynamicsAPI):
                 constraintName = ("GRASPING_%s_%s_%s_%s" % (name, efLink, child, childLink))
                 w.addObject({"fn": {"graspingConstraint": True}, "name": constraintName, "simtype": "kcon", "parent": name, "child": child, "parentLink": efLink, "childLink": childLink, "jointType": "fixed", "maxForce": maxForce})
                 actuallyGraspedEF[e] = constraintName
+                if "customStateVariables" not in w._kinematicTrees[child]:
+                    w._kinematicTrees[child]["customStateVariables"] = {}
+                w._kinematicTrees[child]["customStateVariables"]["graspedBy"] = constraintName
         newActuallyGrasped[ef] = sorted([[list(k), v] for k, v in actuallyGraspedEF.items()])
     csvGrasping["actuallyGrasping"] = newActuallyGrasped
 

@@ -1291,7 +1291,7 @@
                         },
                         "Broccoli": {
                                 "default": {
-                                        "toReplace": "BroccoliStem",
+                                        "toDelete": true,
                                         "toAdd": [
                                                 [
                                                         "ChoppedBroccoli",
@@ -3657,8 +3657,8 @@
                                                                 [
                                                                         [
                                                                                 0,
-                                                                                0,
-                                                                                0.3084
+                                                                                0.04,
+                                                                                0.10
                                                                         ],
                                                                         [
                                                                                 0,
@@ -5540,11 +5540,36 @@
                                 "default": {
                                         "toReplace": "DoughParticle"
                                 }
+                        },
+                        "CiderVinegarParticle;MayonnaiseParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
+                        },
+                        "CiderVinegarParticle;DressingParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
+                        },
+                        "DressingParticle;MayonnaiseParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
                         }
                 }
         },
         "resource": {
                 "mixing": {
+                        "CiderVinegarParticle": [
+                                [
+                                    "CiderVinegarParticle",
+                                    "MayonnaiseParticle"
+                                ],
+                                [
+                                    "CiderVinegarParticle",
+                                    "DressingParticle"
+                                ]
+                        ],
                         "ButterParticle": [
                                 [
                                         "ButterParticle",
@@ -5553,6 +5578,16 @@
                                 [
                                         "ButterParticle",
                                         "DoughParticle"
+                                ]
+                        ],
+                        "MayonnaiseParticle": [
+                                [
+                                    "CiderVinegarParticle",
+                                    "MayonnaiseParticle"
+                                ],
+                                [
+                                    "DressingParticle",
+                                    "MayonnaiseParticle"
                                 ]
                         ],
                         "SugarParticle": [

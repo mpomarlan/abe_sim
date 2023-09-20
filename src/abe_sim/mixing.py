@@ -10,14 +10,14 @@ def updateMingling(name, customDynamicsAPI):
     if "mingling" not in w._kinematicTrees[name]["customStateVariables"]:
         w._kinematicTrees[name]["customStateVariables"]["mingling"] = {}
     csvMingling = w._kinematicTrees[name]["customStateVariables"]["mingling"]
-    nameType = w._kinematicTrees[name]("type")
+    nameType = w._kinematicTrees[name]["type"]
     aabb = w.getAABB((name,))
-    aabbAdj = w.adjustAABBRadius(aabb, (fnMingling.get("minglableRadius") or 0.5))
+    aabbAdj = w.adjustAABBRadius(aabb, (fnMingling.get("radius") or 0.3))
     overlaps = [x for x in customDynamicsAPI['checkOverlap'](aabbAdj) if name != x[0]]
     minglers = set([x[0] for x in overlaps if w._kinematicTrees[x[0]].get("fn", {}).get("canMingle")])
     isMingling = False
     for mingler in minglers:
-        fnMingler = w._kinematicTrees[closeObject].get("fn", {}).get("mingling") or {}
+        fnMingler = w._kinematicTrees[mingler].get("fn", {}).get("mingling") or {}
         minglerLinks = fnMingler.get("links") or []
         for minglerLink in minglerLinks:
             if (mingler, minglerLink) in overlaps:
@@ -26,20 +26,26 @@ def updateMingling(name, customDynamicsAPI):
         if isMingling:
             break
     if isMingling:
-        hp = (csvMingling.get("hp") or 0) - 1
+        hp = csvMingling.get("hp", 0) - 1
         if 0 < hp:
             nameP, _, _, _ = w.getKinematicData((name,))
-            minglerP, _, _, _ = w.getKinematicData((closeObject, minglerLink))
+            minglerP, _, _, _ = w.getKinematicData((mingler, minglerLink))
             dx = nameP[0] - minglerP[0]
             dy = nameP[1] - minglerP[1]
             norm = math.sqrt(dx*dx+dy*dy)
-            if 0.1 < norm:
-                dx = 0.05*dx/norm
-                dy = 0.05*dy/norm
-            force = [-dy, dx, 0]
-            w.applyExternalForce((name,), force, nameP, inWorldFrame=True)
+            #mass = w.getObjectProperty((name,), "mass")
+            #if 0.1 < norm:
+            #    dx = 0.05*dx/norm
+            #    dy = 0.05*dy/norm
+            #force = [-20*mass*dy, 20*mass*dx, 0]
+            w.setObjectProperty((name,), "linearVelocity", [-dy,dx,0])
+            w.setObjectProperty((name,), "angularVelocity", [0,0,0.4])
+            #w.applyExternalForce((name,), force, nameP, inWorldFrame=True)
+            #w.applyExternalTorque((name,), force, inWorldFrame=True)
             csvMingling["mingling"] = True
-            csvMingling["hp"] = hp
+        else:
+            csvMingling["mingling"] = False
+        csvMingling["hp"] = hp
     else:
         csvMingling["mingling"] = False
 

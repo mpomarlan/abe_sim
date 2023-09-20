@@ -859,7 +859,7 @@ def toFryStart(requestData, w, agentName, todos):
     timeToFryAmount = requestData.get("timeToFryQuantity", None)
     timeToFryUnit = requestData.get("timeToFryUnit", None)
     destination = _getStorage(w, working=True)
-    friedType = 'Cookie' ### TODO
+    friedType = 'CookedBacon' ### TODO
     lacks = _checkArgs([[item, "Request lacks thingToFry parameter."],
                         [oven, "Request lacks stoveToFryOn parameter."],
                         [heatingMode, "Request lacks heatingMode parameter."],
@@ -1160,7 +1160,7 @@ def toRefrigerateStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested refrigerator has no room to refrigerate in.'}
     garden = {0: {'type': 'G', 'description': {'goal': 'placedItem', 'container': refrigerator, 'hand': 'hand_right', 'item': item, 'allowedComponents': allowedComponents}}}
     w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
-    todos['goals'] = []
+    todos['goals'] = [{0: {'type': 'G', 'description': {'goal': 'closed', 'container': refrigerator, "component": l, 'hand': 'hand_left'}}} for l in fn.get('containment', {}).get('links', [])]
     return requests.status_codes.codes.ALL_OK, {}
 
 def toRefrigerateEnd(requestData, w, agentName):

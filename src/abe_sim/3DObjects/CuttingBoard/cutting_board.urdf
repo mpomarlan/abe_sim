@@ -53,7 +53,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="edge.obj"/>
+        <mesh filename="edgeCollider.obj"/>
       </geometry>
       <surface>
            <bounce restitution_coefficient = "0.1"/>

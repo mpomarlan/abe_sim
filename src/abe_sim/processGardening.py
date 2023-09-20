@@ -64,6 +64,9 @@ def quaternionCloseness(a, b, t):
     by = stubbornTry(lambda : pybullet.rotateVector(b, [0,1,0]))
     return ((t < (ax[0]*bx[0] + ax[1]*bx[1] + ax[2]*bx[2])) and (t < (ay[0]*by[0] + ay[1]*by[1] + ay[2]*by[2])))
 
+def getPGParent(w, name, node):
+    return w._kinematicTrees[name]["customStateVariables"]["processGardening"]["garden"].get(node.get("parent"), {})
+
 def getAxisInWorld(w, item, axis, predCache):
     if axis is not None:
         axis = tuple(axis)
@@ -359,8 +362,15 @@ def getItemPlacement(w, name, item, container, component, targetPosition, predCa
     aabb = toOriginAABB(w.getAABB((item,)), itemP)
     aabbLocal = w._kinematicTrees[item]["localAABB"][0]
     itemHeight = aabbLocal[1][2] - aabbLocal[0][2]
+    itemLength = aabbLocal[1][0] - aabbLocal[0][0]
+    itemWidth = aabbLocal[1][1] - aabbLocal[0][1]
+    #TODO: smarter placement than aabb based; perhaps use another process?
+    if 1.1*itemWidth < itemLength:
+        aabb = ((aabbLocal[0][0], aabbLocal[0][0], aabb[0][2]),(aabbLocal[1][0], aabbLocal[1][0], aabb[1][2]))
+    elif 1.1*itemLength < itemWidth:
+        aabb = ((aabbLocal[0][1], aabbLocal[0][1], aabb[0][2]),(aabbLocal[1][1], aabbLocal[1][1], aabb[1][2]))
     # TODO: get hand radius from hand local aabb; hand grasp tolerance from ???
-    handRadius = 0.1
+    handRadius = 0.15
     handGraspTolerance = 0.01
     if (component is not None) and (targetPosition is not None):
         if feasible(w, aabb, component, targetPosition):
@@ -548,7 +558,7 @@ def checkTransferred(w, name, item, pouredType, amount, container, predCache):
 def checkMixed(w, name, container, mixedType, predCache):
     if ((container, mixedType), "mixed") not in predCache:
         if mixedType is None:
-            retq = all([0 == w._kinematicTrees[x].get("customStateVariables", {}).get("mingling", {}).get("hp", 0) for x in getContents(w, container, predCache)])
+            retq = all([0 >= w._kinematicTrees[x].get("customStateVariables", {}).get("mingling", {}).get("hp", 0) for x in getContents(w, container, predCache)])
         else:
             # TODO: needs a smarter check: should be, mixable into mixedType
             notDones = [x for x in getContents(w, container, predCache) if (mixedType != w._kinematicTrees[x].get("type")) and (w._kinematicTrees[x].get("fn", {}).get("mixable"))]
@@ -1015,6 +1025,7 @@ def _checkPeeledAndStored(w, name, description, node, predCache): # container, c
     item = description['item']
     tool = description['tool']
     hand = description['hand']
+    container = description["container"]
     storage = description['storage']
     disposition = description.get("disposition")
     parked = node.get('parked', False)
@@ -1068,7 +1079,8 @@ def _checkOpened(w, name, description, node, predCache):
     parked = node.get('parked', False)
     parked = checkParked(w, name, hand, parked, predCache)
     node['parked'] = parked
-    retq = checkOpened(w, container, component, predCache) and parked
+    parentUsesHand = (hand == getPGParent(w, name, node).get("description",{}).get("hand"))
+    retq = checkOpened(w, container, component, predCache) and (parked or parentUsesHand)
     return retq
 
 def _checkClosed(w, name, description, node, predCache):
@@ -1287,10 +1299,12 @@ def _suggestPeeledAndStored(w, name, description, node, predCache): # container,
     hand = description["hand"]
     otherHand = description["otherHand"]
     disposition = description.get("disposition")
+    container = description.get("container")
+    containerForPeels = description.get("containerForPeels", None)
     if w._kinematicTrees.get(item, {}).get("fn", {}).get(disposition):
-        return [{"type": "P", "description": {"process": "peelingItem", "hand": hand, "item": item, "otherHand": otherHand, "storage": description["storage"], "tool": description["tool"]}, 'children': [], 'numerics': {}, "target": None}]
+        return [{"type": "P", "description": {"process": "peelingItem", "container": container, "containerForPeels": containerForPeels, "disposition": disposition, "hand": hand, "item": item, "otherHand": otherHand, "storage": description["storage"], "tool": description["tool"]}, 'children': [], 'numerics': {}, "target": None}]
     elif (not w._kinematicTrees.get(item, {}).get("fn", {}).get("disposition")) and (checkGrasped(w, name, None, item, predCache)):
-        return [{"type": "P", "description": {"process": "placingItem", "hand": otherHand, "item": description["item"], "container": description["container"], "allowedComponents": description.get("allowedComponents")}, 'children': [], 'numerics': {}, "target": None}]
+        return [{"type": "P", "description": {"process": "placingItem", "hand": otherHand, "item": description["item"], "container": container, "allowedComponents": description.get("allowedComponents")}, 'children': [], 'numerics': {}, "target": None}]
     else:
         return [{"type": "P", "description": {"process": "placingItem", "hand": hand, "item": description["tool"], "container": description["storage"], "allowedComponents": description.get("allowedComponentsStorage")}, 'children': [], 'numerics': {}, "target": None}]
 
@@ -1541,9 +1555,9 @@ def _getLoweringItemConditions(w, name, description, node, predCache):
     #  We can achieve xy by a bringing process that maintains z: itemZ at entryHeight (adjusted for item in hand)
     #  we can achieve z by a lifting process: handZ at entryHeight
     conp = ['equalp', 'itemP', 'placementP']
-    tolp = [0.0001, 0.0004]
+    tolp = [0.0001, 0.001]
     conxy = ['equalxy', 'itemP', 'placementP']
-    tolxy = [0.0001, 0.0004]
+    tolxy = [0.0001, 0.001]
     conz = ['equalz', 'handP', 'entryHeight']
     tolz = [0.01, 0.05]
     constraintConjunctions = [[conp], [conxy], [conz]]
@@ -1579,6 +1593,8 @@ def _getHoldingItemAboveConditions(w, name, description, node, predCache): # con
     pointC = pouringFn.get("point")
     cP, cQ, _, _ = getKinematicData(w, (container, component), predCache)
     placementP, _ = w.objectPoseRelativeToWorld(cP, cQ, pointC, [0,0,0,1])
+    aabbComponent = w.getAABB((container, component))
+    aabbItem = w.getAABB((item,))
     placementP = [placementP[0], placementP[1], aabbComponent[1][2] + 0.05 + itemP[2] - aabbItem[0][2]]
     #component, placementP = getItemPlacement(w, name, item, container, node['numerics'].get('component'), node['numerics'].get('position'), predCache, allowedComponents=allowedComponents)
     if component is None:
@@ -1594,10 +1610,10 @@ def _getHoldingItemAboveConditions(w, name, description, node, predCache): # con
     placementQAdj = placementQ
     if sideHold:
         xtg = [math.cos(facingYaw), math.sin(facingYaw), 0]
-        ztg = [-math.sin(facingYaw), math.cos(facingYaw), 0]
+        ztg = [math.sin(facingYaw), math.cos(facingYaw), 0]
         if "hand_left" == hand:
             ztg[0] = -ztg[0]
-        sideHoldQ = quatFromVecPairs(([0,0,1], xtg), ([0,0,1], ztg))
+        sideHoldQ = quatFromVecPairs(([1,0,0], xtg), ([0,0,1], ztg))
         _, placementQAdj = w.objectPoseRelativeToWorld([0,0,0], sideHoldQ, [0,0,0], itemInHandQ)
     _, handPlacementQ = w.handPoseToBringObjectToPose(itemInHandP, itemInHandQ, placementP, placementQAdj)
     #For holding item above container:
@@ -1620,7 +1636,7 @@ def _getHoldingItemAboveConditions(w, name, description, node, predCache): # con
     wpxyq = [[placementP[0], placementP[1], itemEntryHeight], placementQAdj, None, itemInHandP, itemInHandQ, None, None]
     wpxy = [[placementP[0], placementP[1], itemEntryHeight], placementQ, None, itemInHandP, itemInHandQ, None, None]
     wpz = [[handP[0], handP[1], entryHeight], handQ, None, None, None, None, None]
-    waypoints = [wpp, wpxy, wpz]
+    waypoints = [wppq, wpxyq, wpxy, wpz]
     tolerances = [[tolp, tolq], [tolxy, tolq], [tolxy], [tolz]]
     entities = {'handP': handP, 'handQ': handQ, 'itemP': itemP, 'placementP': placementP, 'handPlacementQ': handPlacementQ, 'entryHeight': [0,0,entryHeight]}
     retq = [{"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": item}, "children": [], "previousStatus": None, "numerics": {}},
@@ -2457,11 +2473,11 @@ def _getPeelingItemConditions(w, name, description, node, predCache): # containe
     entryHeightBlade = entryHeight + stubbornTry(lambda : pybullet.rotateVector(handQ, toolPositionInHand))[2]
     adjLen = 0.85*w._kinematicTrees[item].get("fn", {}).get(disp, {}).get("radius", 0.8)
     if "hand_left" == otherHand:
-        adj = [adjLen*math.cos(facingYaw + 0.5*math.pi), adjLen*math.sin(facingYaw + 0.5*math.pi)]
-    elif "hand_right" == otherHand:
         adj = [adjLen*math.cos(facingYaw - 0.5*math.pi), adjLen*math.sin(facingYaw - 0.5*math.pi)]
+    elif "hand_right" == otherHand:
+        adj = [adjLen*math.cos(facingYaw + 0.5*math.pi), adjLen*math.sin(facingYaw + 0.5*math.pi)]
     itemPAdj = [itemP[0] + adj[0], itemP[1] + adj[1], itemP[2]]
-    itemBottom = w.getAABB((item,))[0][2]
+    itemBottom = w.getAABB((item,))[0][2] + toolP[2] - w.getAABB((tool,blade))[0][2]
     #For peeling:
     #  we want xy/ad/bz: bladeXY at adjustedItemXY and blade axis down and bladeZ at item bottom
     #  we can achieve xy/ad/bz by a lowering process that maintains xy/ad: bladeXY at adjustedItemXY and blade axis down
@@ -2485,9 +2501,8 @@ def _getPeelingItemConditions(w, name, description, node, predCache): # containe
     waypoints = [wpadxybz, wpadxy, wpxyez, wpez]
     tolerances = [[tolad, tolxy, tolbz], [tolad, tolxy], [tolxy, tolez], [tolez]]
     entities = {'down': down, 'handP': handP, 'handQ': handQ, 'entryHeight': [0,0,entryHeight], 'bladePoint': toolP, 'itemPAdj': itemPAdj, 'bladeAxis': bladeAxis, 'itemBottom': [0,0,itemBottom]}
-    return [{"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": tool}, "children": [], "previousStatus": None, "numerics": {}},
-            {"type": "G", "description": {"goal": "pickedItem", "hand": otherHand, "item": item}, "children": [], "previousStatus": None, "numerics": {}},
-            {"type": "G", "description": {"goal": "near", "relatum": item}, "children": [], "previousStatus": None, "numerics": {}},
+    return [{"type": "G", "description": {"goal": "pickedItem", "hand": otherHand, "item": item}, "children": [], "previousStatus": None, "numerics": {}},
+            {"type": "G", "description": {"goal": "pickedItem", "hand": hand, "item": tool}, "children": [], "previousStatus": None, "numerics": {}},
             {"type": "G", "description": {"goal": "itemAboveContainer", "item": item, "hand": otherHand, "container": containerForPeels, "sideHold": True}, "children": [], "previousStatus": None, "numerics": {}},
             {"type": "G", "description": {"goal": "constraintFollowed", "hand": hand, "constraintConjunctions": constraintConjunctions, "isTop": True}, "children": [], "previousStatus": None, "numerics": {"waypoints": waypoints, "tolerances": tolerances, "entities": entities}}]
 
@@ -2747,6 +2762,8 @@ def updateSubforest(garden, nodeId, mode, newNodes):
                 garden[found]['numerics'] = n['numerics']
             newChildren.append(found)
     garden[nodeId]['children'] = newChildren
+    for e in newChildren:
+        garden[e]['parent'] = nodeId
 
 def updateGarden(name, customDynamicsAPI):
     w = customDynamicsAPI["leetHAXXOR"]()

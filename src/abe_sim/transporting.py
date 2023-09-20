@@ -31,7 +31,7 @@ def updateTransporting(name, customDynamicsAPI):
     if at is None:
         return
     atFn = w._kinematicTrees[at[0]].get("fn", {})
-    atGraspable = atFn.get("graspable") or False
+    atGraspable = atFn.get("graspable", False)
     relativeStillness = atGraspable
     _, atOrientation, atVelocity, _ = w.getKinematicData(at) # WARNING: assumes single-link transporter, or at least one where all links have the same orientation always.
     if atGraspable and (transportedBy is None):
@@ -41,7 +41,7 @@ def updateTransporting(name, customDynamicsAPI):
         if 0.0001 < dv:
             relativeStillness = False
     mingling = csv.get("mingling", {}).get("mingling") or False
-    if relativeStillness and (not mingling):
+    if relativeStillness and (not mingling) and (w._kinematicTrees[at[0]].get("customStateVariables", {}).get("graspedBy") is not None):
         pourAxisInAt = atFn.get("containment", {}).get("pouring", {}).get("outof", {}).get("axis") or (0,1,0)
         pourAxis = stubbornTry(lambda : pybullet.rotateVector(atOrientation, pourAxisInAt))
         down = w.getDown()
@@ -65,7 +65,7 @@ def updateTransporting(name, customDynamicsAPI):
                 newTransportedBy = transportedBy
                 if newTransportedBy is None:
                     nameBaseLink = w._kinematicTrees[name]["idx2Link"][-1] # base link name
-                    newTransportedBy = ("GRASPING_%s_%s_%s_%s" % (at[0], at[1], name, nameBaseLink))
+                    newTransportedBy = ("TRANSPORTING_%s_%s_%s_%s" % (at[0], at[1], name, nameBaseLink))
                     maxForce = atFn.get("transporting", {}).get("maxForce") or 1000
                     w.addNewObject({"fn": {"transportingConstraint": True}, "name": newTransportedBy, "simtype": "kcon", "parent": at[0], "child": name, "parentLink": at[1], "childLink": nameBaseLink, "jointType": "fixed", "maxForce": maxForce})
     csv["transporting"]["constraint"] = newTransportedBy

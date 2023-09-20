@@ -1402,7 +1402,7 @@
                              "shelf"
                          ],
                          "fryable": [
-                             "shelf"
+                             "top_base"
                          ]
                      },
                      "turning": {
@@ -1434,13 +1434,15 @@
                                    0
                             ],
                             "height": {
-                                   "shelf": 0.5
+                                   "shelf": 0.5,
+                                   "top_base": 0.5
                             },
                             "door": {
                                    "shelf": "door"
                             },
                             "links": [
-                                   "shelf"
+                                   "shelf",
+                                   "top_base"
                             ],
                             "pouring": {
                                    "into": {
@@ -1704,6 +1706,7 @@
               "filename": "3DObjects/Whisk/whisk.urdf",
               "fn": {
                      "canMix": true,
+                     "canMingle": true,
                      "graspable": true,
                      "temperatureUpdateable": true,
                      "grasping": {
@@ -1715,6 +1718,11 @@
                                           0
                                    ]
                             }
+                     },
+                     "mingling": {
+                            "links": [
+                                   "whisk"
+                            ]
                      },
                      "mixing": {
                             "links": [
@@ -1874,9 +1882,14 @@
               "filename": "3DObjects/Potato/potato_particle.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "transportable": true
+                     "transportable": true,
+                     "mingleable": true
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                      "mingling": {
+                              "hp": 900
+                      }
+              }
        },
        {
               "type": "Masher",
@@ -2593,7 +2606,12 @@
               "filename": "3DObjects/CiderVinegar/ciderVinegarParticle.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "transportable": true,
+                     "mixable": true,
+                     "mixing": {
+                            "mixableRadius": 0.3,
+                            "substanceRadius": 0.3
+                     }
               },
               "customStateVariables": {}
        },
@@ -2605,6 +2623,16 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "pourable": true,
+                     "grasping": {
+                            "handle": "cap",
+                            "axis": {
+                                   "cap": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     },
                      "pouring": {
                             "links": [
                                    "body"
@@ -2631,7 +2659,7 @@
                                           "point": [
                                                  0,
                                                  0.04,
-                                                 0.156
+                                                 0.10
                                           ],
                                           "tipped": [
                                                  -0.707,
@@ -2912,6 +2940,23 @@
                                    "body": 240
                             }
                      }
+              }
+       },
+       {
+              "type": "DressingParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/DressingParticle/dressingParticle.urdf",
+              "fn": {
+                     "transportable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixMakeable": true,
+                     "mingleable": true
+              },
+              "customStateVariables": {
+                      "mingling": {
+                              "hp": 0
+                      }
               }
        },
        {
@@ -4042,9 +4087,14 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true,
-                     "transportable": true
+                     "transportable": true,
+                     "mingleable": true
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                      "mingling": {
+                              "hp": 900
+                      }
+              }
        },
        {
               "type": "BroccoliStem",
@@ -4300,7 +4350,12 @@
               "filename": "3DObjects/Mayonnaise/mayonnaiseParticle.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "transportable": true,
+                     "mixable": true,
+                     "mixing": {
+                            "mixableRadius": 0.3,
+                            "substanceRadius": 0.3
+                     }
               },
               "customStateVariables": {}
        },
@@ -4322,6 +4377,16 @@
                                    "jar": [
                                           0,
                                           1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "grasping": {
+                            "handle": "jar",
+                            "axis": {
+                                   "jar": [
+                                          1,
+                                          0,
                                           0
                                    ]
                             }
