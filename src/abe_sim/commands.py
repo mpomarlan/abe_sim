@@ -917,6 +917,38 @@ def toMeltEnd(requestData, w, agentName):
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'containerWithMeltedIngredients': requestData['containerWithInputIngredients'], 'kitchenStateOut': w.worldDump()}}
 
+def toWashStart(requestData, w, agentName, todos):
+    item = requestData.get("thingToWash", None)
+    sink = requestData.get("sink", None)
+    destination = requestData.get("inputDestinationContainer", None)
+    washedType = 'Broccoli' ### TODO
+    lacks = _checkArgs([[item, "Request lacks thingToWash parameter."],
+                        [sink, "Request lacks sink parameter."],
+                        [destination, "Request lacks inputDestinationContainer parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    if item not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested thingToWash does not exist in world.'}
+    if sink not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested sink does not exist in world.'}
+    if destination not in w._kinematicTrees:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested inputDestinationContainer does not exist in world.'}
+    if not w._kinematicTrees[sink].get('fn', {}).get('canWash', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested sink cannot bake.'}
+    if not w._kinematicTrees[destination].get('fn', {}).get('canContain', False):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested inputDestinationContainer cannot contain.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'bakedItem', 'oven': sink, 'hand': 'hand_right', 'item': item, 'destination': destination, 'processDisposition': 'washable', 'bakedType': washedType}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+
+def toWashEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'thingWashed': requestData['thingToWash'], 'outputDestinationContainer': requestData['inputDestinationContainer'], 'kitchenStateOut': w.worldDump()}}
+
 def toSprinkleStart(requestData, w, agentName, todos):
     item = requestData.get("object", None)
     shaker = requestData.get("toppingContainer", None)

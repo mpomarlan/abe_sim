@@ -293,6 +293,18 @@ gettingSpreadUpon:
     process: gettingSpreadUpon
     instrument: [trajector, type]
     substance: $trajector-substance
+# Something is washed if left for long enough in a container that can wash.
+washing:
+  disposition: [self, fn, washable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canWash]
+    source:
+      mode: transitive-at
+  resource: [self, customStateVariables, washing, hp]
+  completion:
+    process: washing
+    instrument: [trajector, type]
 # An item absorbs then carries a substance it contacts
 wiping:
   disposition: [self, fn, canWipe]
