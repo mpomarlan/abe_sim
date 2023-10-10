@@ -80,8 +80,8 @@
   (gethash "response"
            (send-request "/abe-sim-command/to-cut"
                          (encode-request `(("object"         . ,object)
-                                           ("cuttingTool"    . ,cutting-cool)
-                                           ("cuttingPattern" . ,cutting-pattern)
+                                           ("cuttingTool"    . ,cutting-tool)
+                                           ("cutPattern"     . ,cutting-pattern)
                                            ("kitchenStateIn" . ,kitchen-state-in)
                                            ("setWorldState"  . ,(not (not kitchen-state-in))))))))
 
@@ -103,7 +103,7 @@
                          (encode-request `(("containerToFlour"      . ,container-to-flour)
                                            ("ingredientToFlourWith" . ,ingredient-to-flour-with)
                                            ("kitchenStateIn"        . ,kitchen-state-in)
-                                           ("setWorldState"         . ,(not (not kitchen-state-in)))))))))
+                                           ("setWorldState"         . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-grease ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-grease (container-to-grease ingredient-to-grease-with &optional (kitchen-state-in nil))
@@ -112,7 +112,7 @@
                          (encode-request `(("containerToGrease"      . ,container-to-grease)
                                            ("ingredientToGreaseWith" . ,ingredient-to-grease-with)
                                            ("kitchenStateIn"         . ,kitchen-state-in)
-                                           ("setWorldState"          . ,(not (not kitchen-state-in)))))))))
+                                           ("setWorldState"          . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-sprinkle ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-sprinkle (object topping-container &optional (kitchen-state-in nil))
@@ -121,7 +121,7 @@
                          (encode-request `(("object"           . ,object)
                                            ("toppingContainer" . ,topping-container)
                                            ("kitchenStateIn"   . ,kitchen-state-in)
-                                           ("setWorldState"    . ,(not (not kitchen-state-in)))))))))
+                                           ("setWorldState"    . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-bake ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-bake (thing-to-bake oven input-destination-container &optional (kitchen-state-in nil))
@@ -134,13 +134,13 @@
                                            ("setWorldState"             . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-boil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-boil (thing-to-boil stove heatingMode time-to-boil-amount time-to-boil-unit destination &optional (kitchen-state-in nil))
+(defun request-to-boil (thing-to-boil stove heatingMode time-to-boil-quantity time-to-boil-unit destination &optional (kitchen-state-in nil))
   (gethash "response"
            (send-request "/abe-sim-command/to-boil"
                          (encode-request `(("thingToBoil"        . ,thing-to-boil)
                                            ("stoveToBoilOn"      . ,stove)
                                            ("heatingMode"        . ,heatingMode)
-                                           ("timeToBoilQuantity" . ,time-to-boil-amount)
+                                           ("timeToBoilQuantity" . ,time-to-boil-quantity)
                                            ("timeToBoilUnit"     . ,time-to-boil-unit)
                                            ("destination"        . ,destination)
                                            ("kitchenStateIn"     . ,kitchen-state-in)
@@ -230,46 +230,46 @@
                                            ("setWorldState"     . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-leave-for-time ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-leave-for-time (container amount unit &optional (kitchen-state-in nil))
+(defun request-to-leave-for-time (container quantity unit &optional (kitchen-state-in nil))
   (gethash "response"
            (send-request "/abe-sim-command/to-leave-for-time"
                          (encode-request `(("containerWithIngredients" . ,container)
-                                           ("coolingQuantity"          . ,amount)
+                                           ("coolingQuantity"          . ,quantity)
                                            ("timeUnit"                 . ,unit)
                                            ("kitchenStateIn"           . ,kitchen-state-in)
                                            ("setWorldState"            . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-bring-to-temperature ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-bring-to-temperature (container amount unit &optional (kitchen-state-in nil))
+(defun request-to-bring-to-temperature (container quantity unit &optional (kitchen-state-in nil))
   (gethash "response"
            (send-request "/abe-sim-command/to-bring-to-temperature"
                          (encode-request `(("containerWithIngredients" . ,container)
-                                           ("temperatureQuantity"      . ,amount)
+                                           ("temperatureQuantity"      . ,quantity)
                                            ("temperatureUnit"          . ,unit)
                                            ("kitchenStateIn"           . ,kitchen-state-in)
                                            ("setWorldState"            . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-preheat-oven ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-preheat-oven (oven amount unit &optional (kitchen-state-in nil))
+(defun request-to-preheat-oven (oven quantity unit &optional (kitchen-state-in nil))
   (gethash "response"
            (send-request "/abe-sim-command/to-preheat-oven"
                          (encode-request `(("oven"           . ,oven)
-                                           ("amount"         . ,amount)
+                                           ("quantity"       . ,quantity)
                                            ("unit"           . ,unit)
                                            ("kitchenStateIn" . ,kitchen-state-in)
                                            ("setWorldState"  . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-fry ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-fry (thingToFry stoveToFryOn heatingMode timeToFryAmount timeToFryUnit &optional (kitchen-state-in nil))
+(defun request-to-fry (thingToFry stoveToFryOn heatingMode timeToFryQuantity timeToFryUnit &optional (kitchen-state-in nil))
   (gethash "response"
            (send-request "/abe-sim-command/to-fry"
-                         (encode-request `(("thingToFry"      . ,thingToFry)
-                                           ("stoveToFryOn"    . ,stoveToFryOn)
-                                           ("heatingMode"     . ,heatingMode)
-                                           ("timeToFryAmount" . ,timeToFryAmount)
-                                           ("timeToFryUnit"   . ,timeToFryUnit)
-                                           ("kitchenStateIn"  . ,kitchen-state-in)
-                                           ("setWorldState"   . ,(not (not kitchen-state-in))))))))
+                         (encode-request `(("thingToFry"        . ,thingToFry)
+                                           ("stoveToFryOn"      . ,stoveToFryOn)
+                                           ("heatingMode"       . ,heatingMode)
+                                           ("timeToFryQuantity" . ,timeToFryQuantity)
+                                           ("timeToFryUnit"     . ,timeToFryUnit)
+                                           ("kitchenStateIn"    . ,kitchen-state-in)
+                                           ("setWorldState"     . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-place ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-place (object container &optional (kitchen-state-in nil))
@@ -354,17 +354,6 @@
                                            ("minglingTool"                  . ,minglingTool)
                                            ("kitchenStateIn"                . ,kitchen-state-in)
                                            ("setWorldState"                 . ,(not (not kitchen-state-in))))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-refrigerate ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-refrigerate (container amount unit &optional (kitchen-state-in nil))
-  (gethash "response"
-           (send-request "/abe-sim-command/to-refrigerate"
-                         (encode-request `(("containerWithIngredients" . ,container)
-                                           ("refrigerator"             . ,refrigerator)
-                                           ("amount"                   . ,amount)
-                                           ("unit"                     . ,unit)
-                                           ("kitchenStateIn"           . ,kitchen-state-in)
-                                           ("setWorldState"            . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-portion-and-arrange ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-portion-and-arrange (containerWithDough destination &optional (kitchen-state-in nil))

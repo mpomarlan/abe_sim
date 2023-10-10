@@ -2263,7 +2263,7 @@ def _getBakingConditions(w, name, description, node, predCache):
     destination = description.get('destination', None)
     bakedType = description.get('bakedType', None)
     processDisposition = description.get('processDisposition', 'bakeable')
-    timeAmount = float(description.get("timeAmount"))
+    timeAmount = (description.get("timeAmount"))
     timeUnit = description.get("timeUnit")
     source = node.get('sourceContainer')
     sourcePart = node.get('sourceComponent')
@@ -2272,6 +2272,7 @@ def _getBakingConditions(w, name, description, node, predCache):
         return [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': destination}}]
     retq = [{'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'hand': hand, 'container': oven, 'allowedComponents': allowedComponents}}]
     if (timeAmount is not None) and (checkItemInContainer(w, name, item, oven, predCache, allowedComponents=allowedComponents)) and (not checkGrasped(w, name, None, item, predCache)):
+        timeAmount = float(timeAmount)
         if timeUnit is None:
             timeUnit = 1.0
         timeAmount = timeAmount*timeUnit

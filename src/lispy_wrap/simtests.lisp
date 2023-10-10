@@ -1,16 +1,24 @@
 (in-package :abesimtests)
 
+;; From http://sodaware.sdf.org/notes/cl-read-file-into-string/
+(defun file-get-contents (filename)
+  (with-open-file (stream filename)
+    (let ((contents (make-string (file-length stream))))
+      (read-sequence contents stream)
+      contents)))
+
 (defun place-all (ptype dest)
   (mapcar (lambda (objname)
             (request-to-place objname dest))
-          (loop for k being hash-key
+          (loop for k being the hash-key
                     using (hash-value v)
                     of (cdr (request-get-kitchen "ks"))
                     when (equal ptype (gethash "type" v))
                       collect k)))
 
 (defun test-broccoli-salad ()
-  ;; TODO: load appropriate initial WS
+  (request-to-cancel)
+  (request-set-kitchen (com.inuoe.jzon:parse (file-get-contents (merge-pathnames (asdf:system-source-directory "abesimtests") "broccoliSaladInitialState.json"))))
   (request-to-preheat-oven "oven" 200 "C")
   (request-to-fry "fryingPan" "oven" "medium" 1 "min")
   (request-to-preheat-oven "oven" 150 "C")
@@ -38,7 +46,8 @@
   (request-to-refrigerate "largeBowl1" "fridge" 4 "C"))
 
 (defun test-almond-cookies ()
-  ;; TODO: load appropriate initial WS
+  (request-to-cancel)
+  (request-set-kitchen (com.inuoe.jzon:parse (file-get-contents (merge-pathnames (asdf:system-source-directory "abesimtests") "almondCookiesInitialState.json"))))
   (request-to-fetch "mediumBowl1")
   (request-to-portion "sugarBag" "mediumBowl1" 134)
   (request-to-fetch "mediumBowl2")
