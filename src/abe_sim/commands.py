@@ -618,10 +618,10 @@ def toGrindEnd(requestData, w, agentName):
     return requests.status_codes.codes.ALL_OK, {'response': {'containerWithGroundIngredients': requestData.get('containerWithIngredientsToBeGround', None), 'kitchenStateOut': w.worldDump()}}
 
 def toFlattenStart(requestData, w, agentName, todos):
-    portions = requestData.get("portions", None)
-    tool = requestData.get("canFlattenTool", None)
+    portions = requestData.get("portion", None)
+    tool = requestData.get("flatteningTool", None)
     lacks = _checkArgs([[portions, "Request lacks portions parameter."],
-                        [tool, "Request lacks canFlattenTool parameter."]])
+                        [tool, "Request lacks flatteningTool parameter."]])
     if 0 < len(lacks):
         return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
     if 0 == len(portions):
@@ -630,9 +630,9 @@ def toFlattenStart(requestData, w, agentName, todos):
     if any([x not in w._kinematicTrees for x in portions]):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested portion does not exist in world.'}
     if tool not in w._kinematicTrees:
-        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested canFlattenTool does not exist in world.'}
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested flatteningTool does not exist in world.'}
     if not w._kinematicTrees[tool].get('fn', {}).get('canFlatten', False):
-        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested canFlattenTool cannot flatten.'}
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested flatteningTool cannot flatten.'}
     toolLink = w._kinematicTrees[tool]['fn']['flattening']['links'][0]
     storage = _getStorage(w)
     requestData["at"] = w.at((portions[0],))
@@ -1092,7 +1092,7 @@ def toPeelEnd(requestData, w, agentName):
 
 def toSeedStart(requestData, w, agentName, todos):
     item = requestData.get("inputIngredient", None)
-    tool = requestData.get("peelingTool", None)
+    tool = requestData.get("seedingTool", None)
     container = requestData.get("containerForSeededIngredient", None)
     containerForSeeds = requestData.get("containerForSeeds", None)
     storage = _getStorage(w, working=True)
