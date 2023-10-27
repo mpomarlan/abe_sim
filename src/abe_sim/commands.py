@@ -385,6 +385,35 @@ def toBringToTemperatureEnd():
         return status, response
     return requests.status_codes.codes.ALL_OK, {'response': {'containerWithIngredientsAtTemperature': requestData.get('containerWithIngredients', None), 'kitchenStateOut': w.worldDump()}}
 
+def toWaitStart(requestData, w, agentName, todos):
+    time = requestData.get('timeToWait', None)
+    unit = requestData.get('timeUnit', None)
+    lacks = _checkArgs([[time, "Request lacks timeToWait parameter."],
+                        [unit, "Request lacks timeUnit parameter."]])
+    if 0 < len(lacks):
+        return requests.status_codes.codes.BAD_REQUEST, {'response': ' '.join(lacks)}
+    _checkGreatReset(requestData, w)
+    conversion = {'s': 1, 'sec': 1, 'second': 1, 'seconds': 1,
+                  'm': 60, 'min': 60, 'minute': 60, 'minutes': 60,
+                  'h': 3600, 'hr': 3600, 'hrs': 3600, 'hour': 3600, 'hours': 3600,
+                  'd': 86400, 'ds': 86400, 'day': 86400, 'days': 86400}.get(unit, None)
+    if conversion is None:
+        return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested unit not found among time units.'}
+    time = 1.0*time
+    timeStart = w.getObjectProperty((agentName,), ('customStateVariables', 'timing', 'timer'), None)
+    if timeStart is None:
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Agent is not able to keep time.'}
+    garden = {0: {'type': 'G', 'description': {'goal': 'waited', 'timeEnd': time + timeStart}}}
+    w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+    todos['goals'] = []
+    return requests.status_codes.codes.ALL_OK, {}
+    
+def toWaitEnd(requestData, w, agentName):
+    topGoal, status, response = _checkTopGoal(w, agentName)
+    if requests.status_codes.codes.ALL_OK != status:
+        return status, response
+    return requests.status_codes.codes.ALL_OK, {'response': {'kitchenStateOut': w.worldDump()}}
+
 def toLeaveForTimeStart(requestData, w, agentName, todos):
     container = requestData.get('containerWithIngredients', None)
     time = requestData.get('coolingQuantity', None)
@@ -1269,6 +1298,7 @@ commandFns = {
     "to-get-location": [processInstantRequest, toGetLocation, None],
     "to-fetch": [processActionRequest, toFetchStart, toFetchEnd],
     "to-bring-to-temperature": [processActionRequest, toBringToTemperatureStart, toBringToTemperatureEnd],
+    "to-wait": [processActionRequest, toWaitStart, toWaitEnd],
     "to-leave-for-time": [processActionRequest, toLeaveForTimeStart, toLeaveForTimeEnd],
     "to-portion": [processActionRequest, toPortionStart, toPortionEnd],
     "to-transfer": [processActionRequest, toTransferStart, toTransferEnd],

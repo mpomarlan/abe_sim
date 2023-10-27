@@ -64,16 +64,20 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-get-time ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-get-time ()
-  (let ((time (gethash "response"
-                       (send-request "/abe-sim-command/to-get-time"
-                                     (encode-request `())))))
+  (let ((time (gethash "time"
+                       (gethash "response"
+                         (send-request "/abe-sim-command/to-get-time"
+                                       (encode-request `()))))))
     time))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-wait ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-wait (frames-to-wait)
+(defun request-to-wait (time-to-wait time-unit &optional (kitchen-state-in nil))
   (gethash "response"
            (send-request "/abe-sim-command/to-wait"
-                         (encode-request `(("frames" . ,frames-to-wait))))))
+                         (encode-request `(("timeToWait"     . ,time-to-wait)
+                                           ("timeUnit"       . ,time-unit)
+                                           ("kitchenStateIn" . ,kitchen-state-in)
+                                           ("setWorldState"  . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-cut ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun request-to-cut (object cutting-tool cutting-pattern &optional (kitchen-state-in nil))
@@ -203,12 +207,13 @@
                                            ("setWorldState"                 . ,(not (not kitchen-state-in))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; to-portion ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun request-to-portion (container-with-ingredient target-container quantity &optional (kitchen-state-in nil))
+(defun request-to-portion (container-with-ingredient target-container quantity unit &optional (kitchen-state-in nil))
   (gethash "response" 
            (send-request "/abe-sim-command/to-portion"
                          (encode-request `(("containerWithIngredient" . ,container-with-ingredient)
                                            ("targetContainer"         . ,target-container)
                                            ("quantity"                . ,quantity)
+                                           ("unit"                    . ,unit)
                                            ("kitchenStateIn"          . ,kitchen-state-in)
                                            ("setWorldState"           . ,(not (not kitchen-state-in))))))))
 
