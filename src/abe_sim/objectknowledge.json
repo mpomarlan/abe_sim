@@ -879,8 +879,8 @@
                      "sticky": true,
                      "temperatureUpdateable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {
@@ -901,8 +901,8 @@
                      "sticky": true,
                      "temperatureUpdateable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {
@@ -1606,8 +1606,8 @@
                      "sticky": true,
                      "temperatureUpdateable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {
@@ -2610,8 +2610,8 @@
                      "sticky": true,
                      "mixable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {}
@@ -4360,8 +4360,8 @@
                      "sticky": true,
                      "mixable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {}
@@ -5058,7 +5058,11 @@
                      "transportable": true,
                      "sticky": true,
                      "mixable": true,
-                     "graspable": false
+                     "graspable": false,
+                     "mixing": {
+                             "mixableRadius": 0.4,
+                             "substanceRadius": 0.4
+                     }
               },
               "customStateVariables": {}
        },
@@ -6492,8 +6496,8 @@
                      "sticky": true,
                      "temperatureUpdateable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {
@@ -6874,8 +6878,8 @@
                      "sticky": true,
                      "temperatureUpdateable": true,
                      "mixing": {
-                            "mixableRadius": 0.3,
-                            "substanceRadius": 0.3
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
                      }
               },
               "customStateVariables": {
