@@ -2607,6 +2607,7 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "transportable": true,
+                     "sticky": true,
                      "mixable": true,
                      "mixing": {
                             "mixableRadius": 0.3,
@@ -4355,6 +4356,7 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "transportable": true,
+                     "sticky": true,
                      "mixable": true,
                      "mixing": {
                             "mixableRadius": 0.3,
@@ -5052,7 +5054,10 @@
               "simtype": "ktree",
               "filename": "3DObjects/PowderedWhiteSugar/powdered_white_sugar_particle.urdf",
               "fn": {
-                     "graspable": true
+                     "transportable": true,
+                     "sticky": true,
+                     "mixable": true,
+                     "graspable": false
               },
               "customStateVariables": {}
        },
@@ -5854,6 +5859,9 @@
               "simtype": "ktree",
               "filename": "3DObjects/BrownSugar/brown_sugar_particle.urdf",
               "fn": {
+                     "transportable": true,
+                     "sticky": true,
+                     "mixable": true,
                      "graspable": true
               },
               "customStateVariables": {}

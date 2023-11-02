@@ -5555,6 +5555,26 @@
                                 "default": {
                                         "toReplace": "DressingParticle"
                                 }
+                        },
+                        "CiderVinegarParticle;MayonnaiseParticle;PowderedWhiteSugarParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
+                        },
+                        "DressingParticle;PowderedWhiteSugarParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
+                        },
+                        "CiderVinegarParticle;MayonnaiseParticle;SugarParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
+                        },
+                        "DressingParticle;SugarParticle": {
+                                "default": {
+                                        "toReplace": "DressingParticle"
+                                }
                         }
                 }
         },
