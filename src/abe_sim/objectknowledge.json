@@ -4216,6 +4216,7 @@
               "filename": "3DObjects/GratedMozzarellaBag/grated_mozzarella.urdf",
               "fn": {
                      "temperatureUpdateable": true,
+                     "transportable": true,
                      "sticky": true,
                      "graspable": true
               },
