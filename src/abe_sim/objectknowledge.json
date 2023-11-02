@@ -4076,6 +4076,7 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true,
+                     "sticky": true,
                      "transportable": true
               },
               "customStateVariables": {}
@@ -4088,6 +4089,7 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "transportable": true,
+                     "sticky": true,
                      "mingleable": true
               },
               "customStateVariables": {
@@ -4114,6 +4116,7 @@
                      "temperatureUpdateable": true,
                      "graspable": true,
                      "transportable": true,
+                     "sticky": true,
                      "fryable": true
               },
               "customStateVariables": {
@@ -4212,6 +4215,7 @@
               "filename": "3DObjects/GratedMozzarellaBag/grated_mozzarella.urdf",
               "fn": {
                      "temperatureUpdateable": true,
+                     "sticky": true,
                      "graspable": true
               },
               "customStateVariables": {}
