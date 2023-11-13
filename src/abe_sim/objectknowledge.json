@@ -4047,6 +4047,8 @@
               "filename": "3DObjects/Onion/redOnionPeel.urdf",
               "fn": {
                      "temperatureUpdateable": true,
+                     "transportable": true,
+                     "sticky": true,
                      "graspable": true
               },
               "customStateVariables": {}
