@@ -21,6 +21,7 @@
     ["MediumBowl", "mediumBowl1", [-1.4, 4.5, 1.2], [0,0,0,1]],
     ["MediumBowl", "mediumBowl2", [-1.1, 4.5, 1.2], [0,0,0,1]],
     ["LargeBowl", "largeBowl1", [-0.6, 4.5, 1.2], [0,0,0,1]],
+    ["LargeBowl", "largeBowl2", [2.3, 4.5, 1.2], [0,0,0,1]],
     ["SugarBag", "sugarBag", [0, 4.5, 1.225], [0,0,0,1]],
     ["GratedMozzarellaBag", "mozzarellaBag", [0.3, 4.5, 1.225], [0,0,0,1]],
     ["CuttingBoard", "cuttingBoard", [0.7, 4.5, 1.2], [0,0,0,1]],
