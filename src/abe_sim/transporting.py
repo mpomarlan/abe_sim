@@ -34,6 +34,7 @@ def updateTransporting(name, customDynamicsAPI):
     atGraspable = atFn.get("graspable", False)
     relativeStillness = atGraspable
     _, atOrientation, atVelocity, _ = w.getKinematicData(at) # WARNING: assumes single-link transporter, or at least one where all links have the same orientation always.
+    wobbly = (0.99 > stubbornTry(lambda : pybullet.rotateVector(atOrientation, [0,0,1]))[2])
     if atGraspable and (transportedBy is None):
         _, _, nameVelocity, _ = w.getKinematicData((name,))
         dv = [x-y for x,y in zip(atVelocity, nameVelocity)]
@@ -41,7 +42,7 @@ def updateTransporting(name, customDynamicsAPI):
         if 0.0001 < dv:
             relativeStillness = False
     mingling = csv.get("mingling", {}).get("mingling") or False
-    if relativeStillness and (not mingling) and (w._kinematicTrees[at[0]].get("customStateVariables", {}).get("graspedBy") is not None):
+    if relativeStillness and (not mingling) and ((w._kinematicTrees[at[0]].get("customStateVariables", {}).get("graspedBy") is not None) or (wobbly)):
         pourAxisInAt = atFn.get("containment", {}).get("pouring", {}).get("outof", {}).get("axis") or (0,1,0)
         pourAxis = stubbornTry(lambda : pybullet.rotateVector(atOrientation, pourAxisInAt))
         down = w.getDown()
