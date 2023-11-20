@@ -3,7 +3,7 @@
     ["NorthWall", "northWall", [-4.8,0,1.14154], [0,0,0,1]],
     ["EastWall", "eastWall", [0,5.5,1.14154], [0,0,0,1]],
     ["SouthWall", "southWall", [10,0,1.14154], [0,0,0,1]],
-    ["WestWall", "westWall", [0,-5.3,1.14154], [0,0,0,1]],
+    ["WestWall", "westWall", [0,-5.5,1.14154], [0,0,0,1]],
     ["Ceiling", "ceiling", [0,0,3.6], [0,0,0,1]],
     ["PottedPlant", "pottedPlant", [5.9,4.9,0], [0,0,0,1]],
     ["TrashCan", "trashCan", [4.0,4.9,0], [0,0,0,1]],

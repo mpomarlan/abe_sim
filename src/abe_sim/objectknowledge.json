@@ -2367,6 +2367,7 @@
                      "cuttable": true,
                      "fryable": true,
                      "transportable": true,
+                     "sticky": true,
                      "cutting": {
                             "force": 0.3,
                             "radius": 0.2
@@ -2430,6 +2431,8 @@
               "filename": "3DObjects/Broccoli/broccoli.urdf",
               "fn": {
                      "temperatureUpdateable": true,
+                     "transportable": true,
+                     "sticky": true,
                      "graspable": true,
                      "cuttable": true,
                      "cutting": {
@@ -2556,6 +2559,7 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true,
+                     "sticky": true,
                      "transportable": true
               },
               "customStateVariables": {}
@@ -2569,6 +2573,7 @@
                      "graspable": true,
                      "cuttable": true,
                      "transportable": true,
+                     "sticky": true,
                      "cutting": {
                             "force": 0.3,
                             "radius": 0.2
@@ -3074,6 +3079,7 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true,
+                     "sticky": true,
                      "transportable": true
               },
               "customStateVariables": {}
@@ -3086,6 +3092,8 @@
                      "temperatureUpdateable": true,
                      "cuttable": true,
                      "graspable": true,
+                     "transportable": true,
+                     "sticky": true,
                      "cutting": {
                             "force": 0.3,
                             "radius": 0.2
@@ -4029,6 +4037,8 @@
               "filename": "3DObjects/Onion/redOnion.urdf",
               "fn": {
                      "temperatureUpdateable": true,
+                     "transportable": true,
+                     "sticky": true,
                      "peelable": true,
                      "graspable": true,
                      "peeling": {
@@ -4060,6 +4070,8 @@
               "fn": {
                      "temperatureUpdateable": true,
                      "cuttable": true,
+                     "transportable": true,
+                     "sticky": true,
                      "graspable": true,
                      "cutting": {
                             "force": 0.3,
@@ -4107,6 +4119,8 @@
               "filename": "3DObjects/Broccoli/broccoliStem.urdf",
               "fn": {
                      "temperatureUpdateable": true,
+                     "transportable": true,
+                     "sticky": true,
                      "graspable": true
               },
               "customStateVariables": {}
