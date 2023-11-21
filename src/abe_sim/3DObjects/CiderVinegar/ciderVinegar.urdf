@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<robot name="ciderVinegar">
+  <link name="body">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.02"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="vinegarBottle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="vinegarBottle.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="cap">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.005"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="vinegarCork.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="vinegarCork.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="label">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.002"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="ciderVinegarLabel.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="ciderVinegarLabel.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="bottom">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.2"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="bottom.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="bottom.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="body_to_cap" type="fixed">
+    <parent link="body"/>
+    <child link="cap"/>
+    <origin rpy="0 0 0" xyz="0 0 0.083"/>
+  </joint>
+  <joint name="body_to_label" type="fixed">
+    <parent link="body"/>
+    <child link="label"/>
+    <origin rpy="0 0 0" xyz="0.034 0 -0.01"/>
+  </joint>
+  <joint name="body_to_bottom" type="fixed">
+    <parent link="body"/>
+    <child link="bottom"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.06"/>
+  </joint>
+</robot>
+

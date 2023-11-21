@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="sift">
+  <link name="sift">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="Sift.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="SiftCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="holes">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="SiftHoles.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="SiftHolesCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+<joint name="sift_to_holes" type="fixed">
+    <parent link="sift"/>
+    <child link="holes"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+</robot>
+

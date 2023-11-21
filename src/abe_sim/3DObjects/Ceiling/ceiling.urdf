@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot name="ceiling">
+  <link name="ceiling">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="ceiling.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="ceiling.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="lamp">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="lamp.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="lamp.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="lightbulb">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="lightbulb.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="lightbulb.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ceiling_to_lamp" type="fixed">
+    <parent link="ceiling"/>
+    <child link="lamp"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.1"/>
+  </joint>
+  <joint name="ceiling_to_lightbulb" type="fixed">
+    <parent link="ceiling"/>
+    <child link="lightbulb"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.1"/>
+  </joint>
+</robot>
+

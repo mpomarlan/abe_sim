@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="bread">
+  <link name="core">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.2"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="loaf_core.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="loaf_core.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="crust">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.02"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="loaf_crust.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="loaf_crust.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="core_to_crust" type="fixed">
+    <parent link="core"/>
+    <child link="crust"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.011"/>
+  </joint>
+</robot>
+

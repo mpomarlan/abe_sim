@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot name="kitchen_sink">
+  <link name="base">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="30.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="kitchenSinkBase.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="kitchenSinkBase.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="cupboard">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="30.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="kitchenSinkCupboard.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="kitchenSinkCupboardCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="sink">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="30.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="kitchenSink.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="kitchenSinkCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="base_to_cupboard" type="fixed">
+    <parent link="base"/>
+    <child link="cupboard"/>
+    <origin rpy="0 0 0" xyz="0.013559 0.238745 0.56188"/>
+  </joint>
+  <joint name="cupboard_to_sink" type="fixed">
+    <parent link="cupboard"/>
+    <child link="sink"/>
+    <origin rpy="0 0 0" xyz="0 -0.386331 0.390619"/>
+  </joint>
+</robot>
+

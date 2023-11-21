@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<robot name="bread_slice">
+  <link name="core">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.02"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="slice_core.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="slice_core.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="crust">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.002"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="slice_crust.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="slice_crust.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="butter">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.002"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="slice_butter.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="slice_butter.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="pepper">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="slice_pepper.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="slice_pepper.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="core_to_crust" type="fixed">
+    <parent link="core"/>
+    <child link="crust"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.011"/>
+  </joint>
+  <joint name="core_to_butter" type="fixed">
+    <parent link="core"/>
+    <child link="butter"/>
+    <origin rpy="0 0 0" xyz="0.005 0.009 -0.021"/>
+  </joint>
+  <joint name="core_to_pepper" type="fixed">
+    <parent link="core"/>
+    <child link="pepper"/>
+    <origin rpy="0 0 0" xyz="0.004 0.025 -0.01"/>
+  </joint>
+</robot>
+

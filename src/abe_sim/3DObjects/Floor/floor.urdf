@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="floor">
+  <link name="floor">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.00"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="floor2.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="floor2.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+

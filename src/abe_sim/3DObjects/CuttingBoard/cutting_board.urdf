@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot name="cutting_board">
+  <link name="base">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="base.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="base.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="pit">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="pit.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="pit.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="edge">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="4.4e-5" ixy="0" ixz="0" iyy="0" iyz="0" izz="4.4e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="edge.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="edgeCollider.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="base_to_pit" type="fixed">
+    <parent link="base"/>
+    <child link="pit"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <joint name="base_to_edge" type="fixed">
+    <parent link="base"/>
+    <child link="edge"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+</robot>
+

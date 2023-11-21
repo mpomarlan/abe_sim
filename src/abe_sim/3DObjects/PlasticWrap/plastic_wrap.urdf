@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot name="plastic_wrap">
+  <link name="plastic_wrap">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="3.67e-5" ixy="0" ixz="0" iyy="5.6e-4" iyz="0" izz="5.9e-4"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="PlasticWrap.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="PlasticWrap.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+

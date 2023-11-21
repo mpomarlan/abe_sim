@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="countertop">
+  <link name="base">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="30.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="base.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="base_collision.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="countertop">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="30.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="countertop.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="countertop.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="base_to_countertop" type="fixed">
+    <parent link="base"/>
+    <child link="countertop"/>
+    <origin rpy="0 0 0" xyz="0 0 0.72"/>
+  </joint>
+</robot>
+

@@ -1,0 +1,359 @@
+<?xml version="1.0"?>
+<robot name="fridge">
+  <link name="base">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="base.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="base.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="top">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="top.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="top.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="back">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="back.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="back.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="wall_left">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="wall.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="wall.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="wall_middle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="wall.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="wall.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="wall_right">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="wall.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="wall.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="fridge_shelf_bottom">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="fridge_shelf.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="fridge_shelf.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="fridge_shelf_top">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="fridge_shelf.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="fridge_shelf.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="freezer_shelf_bottom">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="freezer_shelf.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="freezer_shelf.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="freezer_shelf_top">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.0"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="freezer_shelf.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="freezer_shelf.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="fridge_door">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.314 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="fridge_door.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.314 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="fridge_door.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="freezer_door">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.202 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="freezer_door.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.202 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="freezer_door.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="fridge_door_handle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <link name="freezer_door_handle">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="2e-2" ixy="0" ixz="0" iyy="2e-2" iyz="0" izz="2e-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="handle.obj"/>
+      </geometry>
+      <surface>
+           <bounce restitution_coefficient = "0.1"/>
+      </surface>
+    </collision>
+  </link>
+  <joint name="base_to_top" type="fixed">
+    <parent link="base"/>
+    <child link="top"/>
+    <origin rpy="0 0 0" xyz="0 -0.16 1.54"/>
+  </joint>
+  <joint name="base_to_back" type="fixed">
+    <parent link="base"/>
+    <child link="back"/>
+    <origin rpy="0 0 0" xyz="0 -0.656 0.755"/>
+  </joint>
+  <joint name="base_to_wall_left" type="fixed">
+    <parent link="base"/>
+    <child link="wall_left"/>
+    <origin rpy="0 0 0" xyz="0.74 -0.16 0.769"/>
+  </joint>
+  <joint name="base_to_wall_middle" type="fixed">
+    <parent link="base"/>
+    <child link="wall_middle"/>
+    <origin rpy="0 0 0" xyz="-0.14355 -0.16 0.769"/>
+  </joint>
+  <joint name="base_to_wall_right" type="fixed">
+    <parent link="base"/>
+    <child link="wall_right"/>
+    <origin rpy="0 0 0" xyz="-0.74 -0.16 0.769"/>
+  </joint>
+  <joint name="base_to_fridge_shelf_top" type="fixed">
+    <parent link="base"/>
+    <child link="fridge_shelf_top"/>
+    <origin rpy="0 0 0" xyz="0.29838 -0.123 0.8"/>
+  </joint>
+  <joint name="base_to_fridge_shelf_bottom" type="fixed">
+    <parent link="base"/>
+    <child link="fridge_shelf_bottom"/>
+    <origin rpy="0 0 0" xyz="0.29838 -0.123 0.058"/>
+  </joint>
+  <joint name="base_to_freezer_shelf_top" type="fixed">
+    <parent link="base"/>
+    <child link="freezer_shelf_top"/>
+    <origin rpy="0 0 0" xyz="-0.44174 -0.123 0.8"/>
+  </joint>
+  <joint name="base_to_freezer_shelf_bottom" type="fixed">
+    <parent link="base"/>
+    <child link="freezer_shelf_bottom"/>
+    <origin rpy="0 0 0" xyz="-0.44174 -0.123 0.058"/>
+  </joint>
+  <joint name="fridge_door_to_handle" type="fixed">
+    <parent link="fridge_door"/>
+    <child link="fridge_door_handle"/>
+    <origin rpy="0 0 0" xyz="-0.752 0.05 0"/>
+  </joint>
+  <joint name="freezer_door_to_handle" type="fixed">
+    <parent link="freezer_door"/>
+    <child link="freezer_door_handle"/>
+    <origin rpy="0 0 0" xyz="0.515 0.05 0"/>
+  </joint>
+  <joint name="base_to_fridge_door" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="base"/>
+    <child link="fridge_door"/>
+    <origin rpy="0 0 0" xyz="0.742 0.436 0.795"/>
+    <limit effort="1000.0" lower="-2.5" upper="0" velocity="1."/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <joint name="base_to_freezer_door" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="base"/>
+    <child link="freezer_door"/>
+    <origin rpy="0 0 0" xyz="-0.742 0.436 0.795"/>
+    <limit effort="1000.0" lower="0" upper="2.5" velocity="1."/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+</robot>
+

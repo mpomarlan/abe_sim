@@ -1,0 +1,296 @@
+<?xml version="1.0"?>
+<robot name="bea">
+  <link name="world"/>
+  <link name="base_x">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="world_to_base_x" type="prismatic">
+    <axis xyz="1 0 0"/>
+    <parent link="world"/>
+    <child link="base_x"/>
+    <limit effort="1000.0" lower="-15" upper="15" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="base_y">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="base_x_to_base_y" type="prismatic">
+    <axis xyz="0 1 0"/>
+    <parent link="base_x"/>
+    <child link="base_y"/>
+    <limit effort="1000.0" lower="-15" upper="15" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="base_yaw">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="base_y_to_base_yaw" type="continuous">
+    <axis xyz="0 0 1"/>
+    <parent link="base_y"/>
+    <child link="base_yaw"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <limit effort="1000" velocity="15."/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="head">
+    <visual>
+      <geometry>
+        <mesh filename="bea_head.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="bea_head.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2"/>
+      <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="base_yaw_to_head" type="fixed">
+    <parent link="base_yaw"/>
+    <child link="head"/>
+    <origin xyz="0 0 1.32" rpy="0 0 0"/>
+  </joint>
+  <link name="hand_right_base">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="base_yaw_to_hand_right_base" type="fixed">
+    <parent link="base_yaw"/>
+    <child link="hand_right_base"/>
+    <origin xyz="0 -0.4 0.95" rpy="0 0 0"/>
+  </joint>
+  <link name="hand_right_x">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_right_base_to_hand_right_x" type="prismatic">
+    <axis xyz="1 0 0"/>
+    <parent link="hand_right_base"/>
+    <child link="hand_right_x"/>
+    <limit effort="1000.0" lower="-1" upper="2.5" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_right_y">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_right_x_to_hand_right_y" type="prismatic">
+    <axis xyz="0 1 0"/>
+    <parent link="hand_right_x"/>
+    <child link="hand_right_y"/>
+    <limit effort="1000.0" lower="-3" upper="3" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_right_z">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_right_y_to_hand_right_z" type="prismatic">
+    <axis xyz="0 0 1"/>
+    <parent link="hand_right_y"/>
+    <child link="hand_right_z"/>
+    <limit effort="1000.0" lower="-1" upper="2.5" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_right_yaw">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_right_z_to_hand_right_yaw" type="continuous">
+    <axis xyz="0 0 1"/>
+    <parent link="hand_right_z"/>
+    <child link="hand_right_yaw"/>
+    <limit effort="1000.0" velocity="15."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_right_pitch">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_right_yaw_to_hand_right_pitch" type="revolute">
+    <axis xyz="0 1 0"/>
+    <parent link="hand_right_yaw"/>
+    <child link="hand_right_pitch"/>
+    <limit effort="1000.0" lower="-1.47" upper="1.47" velocity="15."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_right_roll">
+    <visual>
+      <geometry>
+        <mesh filename="bea_right_hand_new.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="bea_right_hand_new.obj"/>
+      </geometry>
+    </collision>
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.2"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_right_pitch_to_hand_right_roll" type="continuous">
+    <axis xyz="1 0 0"/>
+    <parent link="hand_right_pitch"/>
+    <child link="hand_right_roll"/>
+    <limit effort="1000.0" velocity="15."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_left_base">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="base_yaw_to_hand_left_base" type="fixed">
+    <parent link="base_yaw"/>
+    <child link="hand_left_base"/>
+    <origin xyz="0 0.4 0.95" rpy="0 0 0"/>
+  </joint>
+  <link name="hand_left_x">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_left_base_to_hand_left_x" type="prismatic">
+    <axis xyz="1 0 0"/>
+    <parent link="hand_left_base"/>
+    <child link="hand_left_x"/>
+    <limit effort="1000.0" lower="-1" upper="2.5" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_left_y">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_left_x_to_hand_left_y" type="prismatic">
+    <axis xyz="0 1 0"/>
+    <parent link="hand_left_x"/>
+    <child link="hand_left_y"/>
+    <limit effort="1000.0" lower="-3" upper="3" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_left_z">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_left_y_to_hand_left_z" type="prismatic">
+    <axis xyz="0 0 1"/>
+    <parent link="hand_left_y"/>
+    <child link="hand_left_z"/>
+    <limit effort="1000.0" lower="-1" upper="2.5" velocity="3."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_left_yaw">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_left_z_to_hand_left_yaw" type="continuous">
+    <axis xyz="0 0 1"/>
+    <parent link="hand_left_z"/>
+    <child link="hand_left_yaw"/>
+    <limit effort="1000.0" velocity="15."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_left_pitch">
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.1"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_left_yaw_to_hand_left_pitch" type="revolute">
+    <axis xyz="0 1 0"/>
+    <parent link="hand_left_yaw"/>
+    <child link="hand_left_pitch"/>
+    <limit effort="1000.0" lower="-1.57" upper="1.57" velocity="15."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="hand_left_roll">
+    <visual>
+      <geometry>
+        <mesh filename="bea_left_hand_new.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="bea_left_hand_new.obj"/>
+      </geometry>
+    </collision>
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <mass value="0.2"/>
+          <inertia ixx="4e-6" ixy="0" ixz="0" iyy="4e-6" iyz="0" izz="4e-6"/>
+      </inertial>
+  </link>
+  <joint name="hand_left_pitch_to_hand_left_roll" type="continuous">
+    <axis xyz="1 0 0"/>
+    <parent link="hand_left_pitch"/>
+    <child link="hand_left_roll"/>
+    <limit effort="1000.0" velocity="15."/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+  </joint>
+</robot>
+
