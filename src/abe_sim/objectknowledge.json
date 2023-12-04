@@ -2360,7 +2360,7 @@
        {
               "type": "Bacon",
               "simtype": "ktree",
-              "filename": "3DObjects/Bacon/bacon.urdf",
+              "filename": "3DObjects/Bacon/baconDemoPatch.urdf",
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true,

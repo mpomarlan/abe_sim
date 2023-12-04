@@ -256,7 +256,12 @@ def runBrain():
                         todos["goals"] = todos["goals"][1:]
         stepEnd = time.perf_counter()
         #print(w.getObjectProperty(('abe', 'hand_right_roll'), 'position'), w.getObjectProperty(('abe', 'hand_right_roll'), 'linearVelocity'), pybullet.getContactPoints(bodyA=w._kinematicTrees['abe']['idx']))
-        if not isAMac:
+        # TODO: clarify whether this branch is still needed.
+        #     - it was inserted here because of M1 troubles in the Venice meeting(?)
+        #     - does not seem needed on MacOS for Intel procs at least, in fact it makes command reception less responsive
+        #     by making lock passing between threads difficult
+        #if not isAMac:
+        if True:
             time.sleep(max((frameDurationFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))
 
 if "__main__" == __name__:
