@@ -7678,5 +7678,94 @@
                             }
                      }
               }
+       },
+       {
+              "type": "Lentil",
+              "simtype": "ktree",
+              "filename": "3DObjects/Lentil/lentil.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "LentilBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/Lentil/lentilBag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "ShreddedCarrot",
+              "simtype": "ktree",
+              "filename": "3DObjects/Carrot/shreddedCarrot.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedCherryTomato",
+              "simtype": "ktree",
+              "filename": "3DObjects/CherryTomato/choppedCherryTomato.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedCeleryStick",
+              "simtype": "ktree",
+              "filename": "3DObjects/Celery/choppedCeleryStick.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
        }
 ]

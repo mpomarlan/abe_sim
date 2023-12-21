@@ -2985,6 +2985,44 @@
                                         ]
                                 }
                         },
+                        "CherryTomato": {
+                                "default": {
+                                        "toDelete": true,
+                                        "toAdd": [
+                                                [
+                                                        "ChoppedCherryTomato",
+                                                        [
+                                                                [
+                                                                        [
+                                                                                0,
+                                                                                0,
+                                                                                -0.003972
+                                                                        ],
+                                                                        [
+                                                                                0,
+                                                                                0,
+                                                                                0,
+                                                                                1
+                                                                        ]
+                                                                ],
+                                                                [
+                                                                        [
+                                                                                0,
+                                                                                0,
+                                                                                0.003972
+                                                                        ],
+                                                                        [
+                                                                                0,
+                                                                                1,
+                                                                                0,
+                                                                                0
+                                                                        ]
+                                                                ]
+                                                        ]
+                                                ]
+                                        ]
+                                }
+                        },
                         "Avocado": {
                                 "default": {
                                         "toReplace": "AvocadoHalf",
@@ -3293,6 +3331,30 @@
                                         "toAdd": [
                                                 [
                                                         "EggWhiteParticle",
+                                                        [
+                                                                [
+                                                                        [
+                                                                                0,
+                                                                                0.085,
+                                                                                0.08
+                                                                        ],
+                                                                        [
+                                                                                0,
+                                                                                0,
+                                                                                0,
+                                                                                1
+                                                                        ]
+                                                                ]
+                                                        ]
+                                                ]
+                                        ]
+                                }
+                        },
+                        "LentilBag": {
+                                "default": {
+                                        "toAdd": [
+                                                [
+                                                        "Lentil",
                                                         [
                                                                 [
                                                                         [
