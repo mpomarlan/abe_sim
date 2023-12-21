@@ -6857,9 +6857,19 @@
               "simtype": "ktree",
               "filename": "3DObjects/Celery/celeryStick.urdf",
               "fn": {
-                     "graspable": true
+                     "temperatureUpdateable": true,
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "CeleryLeaves",
