@@ -1,5 +1,6 @@
 import argparse
 import copy
+import functools
 import json
 import math
 import numpy
@@ -8,9 +9,12 @@ import platform
 import pybullet
 import requests
 import signal
+import subprocess
 import sys
 import threading
 import time
+import websockets
+import websockets.sync.server
 
 from flask import Flask, request
 
@@ -98,7 +102,22 @@ def thread_function_flask(requestDictionary, responseDictionary, updating, execu
         return serviceRequest(command, request, requestDictionary, responseDictionary, updating, executingAction)
     flask.run(port=54321, debug=True, use_reloader=False)
 
+def publishTree(websocket, cond, lock, gardenCopy):
+    while True:
+        with cond:
+            cond.wait()
+        with lock:
+            websocket.send(gardenCopy)
+
+def thread_function_websockets(cond, lock, gardenCopy):
+    with websockets.sync.server.serve(functools.partial(publishTree, cond=cond, lock = lock, gardenCopy = gardenCopy), "localhost", 54322) as server:
+        server.serve_forever()
+
+chProcs = []
 def handleINT(signum, frame):
+    for e in chProcs:
+        if e.poll() is None:
+            e.kill()
     sys.exit(0)
 
 def runBrain():
@@ -124,6 +143,7 @@ def runBrain():
     parser.add_argument('-p', '--preloads', default=None, help='Path to a file containing a json list of objects to preload. Each element of this list must be of form [type, name, position]')
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation, kwargs] (kwargs optional)')
+    parser.add_argument('-vpg', '--visualizeProcessGarden',action="store_true", help="Enable visualization of the process garden in a separate text window.")
     arguments = parser.parse_args()
     customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'canUpdateTemperature'), updateTemperatureSetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening], [('fn', 'turnable'), updateTurning], [('fn', 'mingleable'), updateMingling]]
 
@@ -141,6 +161,7 @@ def runBrain():
     frameDurationFactor = float(arguments.frameDurationFactor)
     sfr = int(arguments.simFrameRate)
     agentName = arguments.agent
+    vpg = arguments.visualizeProcessGarden
 
     if useOpenGL:
         pybulletOptions = "--opengl3"
@@ -202,6 +223,9 @@ def runBrain():
         agentName = [x['name'] for x in w._kinematicTrees.values() if 'Abe' == x['type']][0]
     
     executingAction = threading.Condition()
+    updateTreeViz = threading.Condition()
+    gardenCopy = [{}]
+    gardenCopyLock = threading.Lock()
     updating = threading.Lock()
     requestDictionary = {}
     responseDictionary = {}
@@ -209,11 +233,16 @@ def runBrain():
 
     flaskThread = threading.Thread(target=thread_function_flask, args=(requestDictionary, responseDictionary, updating, executingAction))
     flaskThread.start()
+    #signal.signal(signal.SIGBREAK, handleINT)
     signal.signal(signal.SIGINT, handleINT)
     signal.signal(signal.SIGTERM, handleINT)
-    
     todos = {"currentAction": None, "goals": [], "requestData": {}, "command": None, "cancelled": False}
-    
+    if vpg:
+        cmd = "python3 %s" % str(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./abe_sim/vistreewrapper.py"))
+        visProc = subprocess.Popen(cmd, subprocess.PIPE, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        treeVizThread = threading.Thread(target=thread_function_websockets, args=(updateTreeViz, gardenCopyLock, gardenCopy))
+        treeVizThread.start()
+        chProcs.append(visProc)
     while True:
         stepStart = time.perf_counter()
         with updating:
@@ -236,10 +265,15 @@ def runBrain():
                 with answeringRequest:
                     answeringRequest.notify_all()
             w.update()
+            garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
+            if vpg:
+                with gardenCopyLock:
+                    gardenCopy[0] = json.dumps(garden).encode("utf-8")
+                with updateTreeViz:
+                    updateTreeViz.notify_all()
             #print(todos)
             #print(w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {}))
             if todos["currentAction"] is not None:
-                garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
                 if (0 not in garden) or (garden[0].get('previousStatus', False)) or ("error" in garden[0]):
                     if (0 == len(todos["goals"])) or ("error" in garden[0]):
                         requestDictionary.pop(todos["currentAction"])

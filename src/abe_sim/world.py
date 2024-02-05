@@ -1146,7 +1146,7 @@ class World():
         self._profileSET += (e-s)
         return retq
     def update(self, customDynamics=None):
-        print("FRAME")
+        #print("FRAME")
         self._detProfGet = {}
         s = time.perf_counter()
         self._cacheTime += 1
@@ -1177,11 +1177,11 @@ class World():
         self._computedCollisions = True
         self._frameStepCount = 1
         e = time.perf_counter()
-        print("    Frame            %f\t(Sim %f\tDyn %f)" % (e-s, eS-sS, eD-sD))
-        print("    Geometry queries %f\t(CLS %f\tCON %f\tOVR %f)" % (self._profile, self._profileCLS, self._profileCON, self._profileOVR))
-        print("    GetOProp queries %f" % self._profileGET)
-        print("    SetOProp queries %f" % self._profileSET)
-        print("    ", [(k,self._detProfGet[k]) for k in self._detProfGet.keys()])
+        #print("    Frame            %f\t(Sim %f\tDyn %f)" % (e-s, eS-sS, eD-sD))
+        #print("    Geometry queries %f\t(CLS %f\tCON %f\tOVR %f)" % (self._profile, self._profileCLS, self._profileCON, self._profileOVR))
+        #print("    GetOProp queries %f" % self._profileGET)
+        #print("    SetOProp queries %f" % self._profileSET)
+        #print("    ", [(k,self._detProfGet[k]) for k in self._detProfGet.keys()])
         # TODO: if enabled, update debug objects such as markers. Currently waiting for a newer pybullet where markers are easier to work with.
         return
     def distance(self, vectorEnd, vectorStart):

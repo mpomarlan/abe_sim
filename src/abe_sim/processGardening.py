@@ -183,7 +183,7 @@ def getHeldAABB(w, name, hand, predCache):
     return predCache[((name, hand), "heldAABB")]
 
 def getComponentHeight(w, container, component, predCache):
-    print("GCH", container, component)
+    #print("GCH", container, component)
     if ((container, component), "height") not in predCache:
         retq = None
         containerFn = w._kinematicTrees[container].get("fn", {}).get("containment", {})
@@ -193,7 +193,7 @@ def getComponentHeight(w, container, component, predCache):
                 component = components[0]
         while retq is None:
             retq = w._kinematicTrees[container].get("fn", {}).get("containment", {}).get("height", {}).get(component)
-            print("    ", container, component, retq)
+            #print("    ", container, component, retq)
             if retq is None:
                 container, component = getContainerComponent(w, container)
                 if container is None:
@@ -2899,7 +2899,7 @@ def updateGarden(name, customDynamicsAPI):
                     targetValue = value
                 customDynamicsAPI['setObjectProperty']((), targetVariable, targetValue)
     endD = time.perf_counter()
-    print("    garden %f\t(GRD %f\tUP %f\tCG %f\tAC %f)" % (endD-startD, startC-startG, profileUP, profileCG, endD-startA))
+    #print("    garden %f\t(GRD %f\tUP %f\tCG %f\tAC %f)" % (endD-startD, startC-startG, profileUP, profileCG, endD-startA))
 
 
 '''

@@ -139,5 +139,5 @@ def updateKinematicControl(name, customDynamicsAPI):
                 w.applyJointControl((name, d), targetVelocity=jointVels[k], force=force)
                 k = k + 1
     endD = time.perf_counter()
-    print("    kinematicC %f" % (endD-startD))
+    #print("    kinematicC %f" % (endD-startD))
     return
