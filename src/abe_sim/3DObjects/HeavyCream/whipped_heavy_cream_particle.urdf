@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot name="corn">
-  <link name="corn">
+<robot name="whipped_heavy_cream_particle">
+  <link name="whipped_heavy_cream_particle">
     <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <mass value="0.001"/>
@@ -8,12 +8,12 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="corn.obj"/>
+        <mesh filename="WhippedHeavyCreamParticle.obj"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="corn.obj"/>
+        <mesh filename="WhippedHeavyCreamParticle.obj"/>
       </geometry>
     </collision>
   </link>

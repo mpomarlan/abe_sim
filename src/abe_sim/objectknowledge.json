@@ -2591,9 +2591,18 @@
               "filename": "3DObjects/ChiliPepper/chiliRed.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "GreenChiliPepper",
@@ -2601,9 +2610,18 @@
               "filename": "3DObjects/ChiliPepper/chiliGreen.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "CiderVinegarParticle",
@@ -2822,9 +2840,9 @@
               }
        },
        {
-              "type": "Corn",
+              "type": "CornCob",
               "simtype": "ktree",
-              "filename": "3DObjects/Corn/corn.urdf",
+              "filename": "3DObjects/Corn/cornCob.urdf",
               "fn": {
                      "temperatureUpdateable": true,
                      "graspable": true
@@ -3207,9 +3225,18 @@
               "filename": "3DObjects/Jalapeno/jalapeno.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "LargeBowlLid",
@@ -3961,7 +3988,11 @@
                             "radius": 0.2
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "CubedShallot",
@@ -6115,9 +6146,18 @@
               "simtype": "ktree",
               "filename": "3DObjects/Garlic/GarlicClove.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "GarlicPeel",
@@ -6455,27 +6495,54 @@
               "simtype": "ktree",
               "filename": "3DObjects/FreshBasil/fresh_basil.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "FreshOregano",
               "simtype": "ktree",
               "filename": "3DObjects/FreshOregano/fresh_oregano.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "FreshCilantro",
               "simtype": "ktree",
               "filename": "3DObjects/FreshCilantro/fresh_cilantro.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "Cucumber",
@@ -6487,9 +6554,38 @@
                      "cutting": {
                             "force": 0.3,
                             "radius": 0.2
+                     },
+                     "peelable": true,
+                     "peeling": {
+                            "radius": 0.1
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "peeling": {
+                            "hp": 10
+                     },
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
+       },
+       {
+              "type": "PeeledCucumber",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/peeledCucumber.urdf",
+              "fn": {
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "CucumberSlice",
@@ -6499,6 +6595,63 @@
                      "graspable": true
               },
               "customStateVariables": {}
+       },
+       {
+              "type": "CucumberSeed",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/cucumber_seed.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "SeededPeeledCucumberSlice",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/seeded_peeled_cucumber_slice.urdf",
+              "fn": {
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
+       },
+       {
+              "type": "ChoppedSeededPeeledCucumberSlice",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/chopped_seeded_peeled_cucumber_slice.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "PeeledCucumberSlice",
+              "simtype": "ktree",
+              "filename": "3DObjects/Cucumber/peeled_cucumber_slice.urdf",
+              "fn": {
+                     "seedable": true,
+                     "graspable": true,
+                     "temperatureUpdateable": true,
+                     "seeding": {
+                            "radius": 0.2,
+                            "links": [
+                                   "slice"
+                            ]
+                     }
+              },
+              "customStateVariables": {
+                     "seeding": {
+                            "hp": 10
+                     }
+              }
        },
        {
               "type": "SaltedButterParticle",
@@ -6660,6 +6813,15 @@
               "type": "HeavyCreamParticle",
               "simtype": "ktree",
               "filename": "3DObjects/HeavyCream/heavy_cream_particle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "WhippedHeavyCreamParticle",
+              "simtype": "ktree",
+              "filename": "3DObjects/HeavyCream/whipped_heavy_cream_particle.urdf",
               "fn": {
                      "graspable": true
               },
@@ -6850,7 +7012,11 @@
                             "radius": 0.2
                      }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "CeleryStick",
@@ -6992,9 +7158,19 @@
               "simtype": "ktree",
               "filename": "3DObjects/CookedChicken/cooked_chicken.urdf",
               "fn": {
-                     "graspable": true
+                     "graspable": true,
+                     "cuttable": true,
+                     "temperatureUpdateable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
               },
-              "customStateVariables": {}
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
        },
        {
               "type": "Colander",
@@ -7773,6 +7949,279 @@
               "type": "ChoppedCeleryStick",
               "simtype": "ktree",
               "filename": "3DObjects/Celery/choppedCeleryStick.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChocolateChip",
+              "simtype": "ktree",
+              "filename": "3DObjects/ChocolateChips/chocolateChip.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChocolateChipBag",
+              "simtype": "ktree",
+              "filename": "3DObjects/ChocolateChips/chocolateChipBag.urdf",
+              "fn": {
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "bag"
+                            ],
+                            "hp": {
+                                   "bag": 240
+                            },
+                            "axis": {
+                                   "bag": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.071454,
+                                                 0.163439
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "bag": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "ChoppedCookedChicken",
+              "simtype": "ktree",
+              "filename": "3DObjects/CookedChicken/chopped_cooked_chicken.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Corn",
+              "simtype": "ktree",
+              "filename": "3DObjects/Corn/corn.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "CornCan",
+              "simtype": "ktree",
+              "filename": "3DObjects/Corn/cornCan.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true,
+                     "pourable": true,
+                     "pouring": {
+                            "links": [
+                                   "corn"
+                            ],
+                            "hp": {
+                                   "corn": 240
+                            },
+                            "axis": {
+                                   "corn": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "containment": {
+                            "pouring": {
+                                   "outof": {
+                                          "axis": [
+                                                 0,
+                                                 1,
+                                                 0
+                                          ],
+                                          "point": [
+                                                 0,
+                                                 0.04862,
+                                                 0.02352
+                                          ],
+                                          "tipped": [
+                                                 -0.707,
+                                                 0,
+                                                 0,
+                                                 0.707
+                                          ]
+                                   }
+                            }
+                     }
+              },
+              "customStateVariables": {
+                     "pouring": {
+                            "hp": {
+                                   "corn ": 240
+                            }
+                     }
+              }
+       },
+       {
+              "type": "ChoppedFreshBasil",
+              "simtype": "ktree",
+              "filename": "3DObjects/FreshBasil/chopped_fresh_basil.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedFreshCilantro",
+              "simtype": "ktree",
+              "filename": "3DObjects/FreshCilantro/chopped_fresh_cilantro.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "FreshOreganoLeaf",
+              "simtype": "ktree",
+              "filename": "3DObjects/FreshOregano/fresh_oregano_leaf.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "MincedGarlicClove",
+              "simtype": "ktree",
+              "filename": "3DObjects/Garlic/minced_garlic_clove.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ShreddedCabbage",
+              "simtype": "ktree",
+              "filename": "3DObjects/GreenCabbage/shredded_cabbage.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChiliStem",
+              "simtype": "ktree",
+              "filename": "3DObjects/ChiliPepper/chiliStem.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedGreenChiliPepper",
+              "simtype": "ktree",
+              "filename": "3DObjects/ChiliPepper/choppedGreenChiliPepper.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "RedChiliPepperStrip",
+              "simtype": "ktree",
+              "filename": "3DObjects/ChiliPepper/choppedRedChiliPepper.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "JalapenoStem",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jalapeno/jalapenoStem.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "HalfJalapeno",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jalapeno/halfJalapeno.urdf",
+              "fn": {
+                     "seedable": true,
+                     "graspable": true,
+                     "temperatureUpdateable": true,
+                     "seeding": {
+                            "radius": 0.2,
+                            "links": [
+                                   "seed"
+                            ]
+                     }
+              },
+              "customStateVariables": {
+                     "seeding": {
+                            "hp": 10
+                     }
+              }
+       },
+       {
+              "type": "SeededHalfJalapeno",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jalapeno/seededHalfJalapeno.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "cuttable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {
+                     "cutting": {
+                            "hp": 5
+                     }
+              }
+       },
+       {
+              "type": "JalapenoSeed",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jalapeno/jalapenoSeed.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "ChoppedSeededHalfJalapeno",
+              "simtype": "ktree",
+              "filename": "3DObjects/Jalapeno/choppedSeededHalfJalapeno.urdf",
               "fn": {
                      "graspable": true
               },
