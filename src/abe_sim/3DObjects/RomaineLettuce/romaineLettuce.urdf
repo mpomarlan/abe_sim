@@ -8,7 +8,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="lettuceLeaf.obj"/>
+        <mesh filename="lettuceOutside.obj"/>
       </geometry>
     </visual>
     <collision>
