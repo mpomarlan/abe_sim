@@ -9113,5 +9113,29 @@
               "customStateVariables": {
               }
               
+       },
+       {
+              "type": "ChiliConCarne",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/chiliConCarne.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
+       },
+       {
+              "type": "ChiliSinCarne",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/chiliSinCarne.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
        }
 ]
