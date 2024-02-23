@@ -1,0 +1,2130 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.ease-crc.org/ont/SOMA.owl#"
+     xml:base="http://www.ease-crc.org/ont/SOMA.owl"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:dul="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:soma="http://www.ease-crc.org/ont/SOMA.owl#"
+     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
+     xmlns:swrla="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#"
+     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#">
+    <owl:Ontology rdf:about="http://www.ease-crc.org/ont/SOMA.owl">
+        <owl:imports rdf:resource="http://www.ease-crc.org/ont/DUL.owl"/>
+        <owl:versionInfo>current</owl:versionInfo>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled -->
+
+    <owl:AnnotationProperty rdf:about="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled"/>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#UsageGuideline -->
+
+    <owl:AnnotationProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#UsageGuideline">
+        <rdfs:comment>Provides a definition, or usage guideline, aimed at a particular community of the ontology&apos;s users. The community is identified by the subproperty of UsageGuideline.
+
+A style recommendation for usage guidelines is that they should be brief. In contrast to usual concept annotations that can, and should be detailed about the reasons behind modelling decisions, usage guidelines are simply meant to answer questions about when it is appropriate to use a concept, and they must be a practical, easy to query and understand resource.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA.owl"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#nickname -->
+
+    <owl:AnnotationProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#nickname">
+        <rdfs:comment>Similar to rdfs:label, but without GUI or reasoner impact in Protege; avoiding Protege problems is why this is not a label subproperty. Nicknames are used by particular software working with the ontology as a way to give community-specific names to concepts. Communities are identified by the subproperty of nickname.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA.owl"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#symbol -->
+
+    <owl:AnnotationProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#symbol">
+        <rdfs:comment>An annotation property which should be used to record by what symbols or abbreviations, if any, some relation or entity is known in scientific literature.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA.owl"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#disjointReification -->
+
+    <owl:ObjectProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#disjointReification">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#encapsulates -->
+
+    <owl:ObjectProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#encapsulates">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith"/>
+        <rdfs:domain rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+        <rdfs:range rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity"/>
+        <rdfs:comment xml:lang="en">The relation between an Ordered element&apos; and an &apos;Entity&apos; it contains.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">encapsulates</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#hasPreference -->
+
+    <owl:ObjectProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#hasPreference">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality"/>
+        <owl:inverseOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#isPreferenceOf"/>
+        <rdfs:domain rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+        <rdfs:range rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">Relates an agent to its preference quality.</rdfs:label>
+        <rdfs:label xml:lang="en">has preference</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#isOrderedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#isOrderedBy">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith"/>
+        <owl:inverseOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#orders"/>
+        <rdfs:domain rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+        <rdfs:range rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity"/>
+        <rdfs:comment xml:lang="en">The relation between an &apos;Order item&apos; and the &apos;Order&apos; that sorts them (via the relations &apos;precedes&apos; and &apos;follows&apos;)</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">is ordered by</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#isPreferenceOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#isPreferenceOf">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isQualityOf"/>
+        <rdfs:domain rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+        <rdfs:range rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+        <rdfs:comment xml:lang="en">Relates a preference quality to the agent the preference belongs to.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">is preference of</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#orders -->
+
+    <owl:ObjectProperty rdf:about="http://www.ease-crc.org/ont/SOMA.owl#orders">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith"/>
+        <rdfs:domain rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity"/>
+        <rdfs:range rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+        <rdfs:comment xml:lang="en">The relation between an &apos;Order&apos; and the sorted &apos;Order item&apos; (sorted via the relations &apos;precedes&apos; and &apos;follows&apos; between the &apos;Order item&apos;s)</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">orders</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#classifies -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#classifies">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#defines -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#defines">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#definesRole -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#definesRole">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#describes -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#describes">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#follows -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#follows"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasRole -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasRole"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isClassifiedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isClassifiedBy"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isDefinedIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isDefinedIn">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isDescribedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isDescribedBy">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isQualityOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isQualityOf"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isRoleDefinedIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isRoleDefinedIn"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isRoleOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#isRoleOf"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#precedes -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#precedes"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#satisfies -->
+
+    <owl:ObjectProperty rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#satisfies">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Accessor -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Accessor">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Instrument"/>
+        <rdfs:comment>A role classifying an object used to gain access to some other entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#AgentRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#AgentRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#CausativeRole"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#classifies"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>A role classifying an Agent responsible for performing an Action.
+
+The entity playing an AgentRole is endowed with sentience and the capacity to deliberately choose actions in pursuit of goals. This distinguishes Agents from other causes that could bring an event about.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Agent role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Agonist -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Agonist">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>A role that classifies entities with a tendency to either cause an alteration or to preserve some state.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#AlteredObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#AlteredObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object undergoing modifications.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:label xml:lang="en">Altered object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Answer -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Answer">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Message"/>
+        <rdfs:comment>A role that is played by an Information Realization answering some query.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Answer</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Antagonist -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Antagonist">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>A role that classifies entities that are opposed to the tendency of some agonist.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#AvoidedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#AvoidedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is avoided.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Avoided object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Barrier -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Barrier">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Restrictor"/>
+        <rdfs:comment>A role classifying an object used to prevent others from entering or leaving a restricted space or group.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#GoalRole"/>
+        <rdfs:comment>A role classifying an agent for whose benefit an action is performed.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Beneficiary role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#BlockedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#BlockedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is blocked from accessing something.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Blocked object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CausalEventRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CausalEventRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#CausativeRole"/>
+        <rdfs:comment>A role filled by a description of some action or process that brings about a motion.
+
+As an example, consider the utterance &quot;the tennisman served the ball by hitting it with the racket.&quot; In this utterance, the filler of the CausalEventRole is expressed by the &quot;by hitting it with the racket&quot; constituent.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Causal event role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CausativeRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CausativeRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole"/>
+        <rdfs:comment>A role classifying objects that are responsible in bringing about an event.
+
+The paradigmatic example is the Agent performing an Action -- the Agent is the effective cause of the Action it performs. However, not all objects causing events are agents.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Causative role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Channel -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Channel">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#PathRole"/>
+        <rdfs:comment xml:lang="en">A Channel in a Communication Task is the path of travel by a Message, e.g., via WLAN, air (in the case of a Message classifying soundwaves) or a telephone cable.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Channel</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Choice -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Choice">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ResultRole"/>
+        <rdfs:comment xml:lang="en">The output of a, e.g, Selecting Task.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">Choice</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CommitedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CommitedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ConnectedObject"/>
+        <rdfs:comment>An object committed to a bigger whole. After being committed, the object does not exist anymore in its old form.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Commited object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CommunicationTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CommunicationTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ResourceRole"/>
+        <rdfs:comment>A role that appears in communication tasks, and indicates what the communication is about.
+
+CommunicationTopic can only classify a Social object that participates in an Action that is classified as (the execution of) a CommunicationTask.
+
+Note that classifies here is used in the plays-role sense. This isn&apos;t to say that the social object, ie the information exchanged in the communication, is an instance of the topic. Rather, the topic role refers to what the information is about.
+
+For example, if the topic of a communication is flowers, this does not mean the words themselves are flowers, merely that, in some sense, they are about flowers.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Communication topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Conclusion -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Conclusion">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#CreatedObject"/>
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Knowledge"/>
+        <rdfs:comment>An object that is derived from some premise using some inference rules.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Conclusions</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ConnectedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ConnectedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is combined with another object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+        <rdfs:label xml:lang="en">Connected object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Container -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Container">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Restrictor"/>
+        <rdfs:comment>A role classifying an object used to contain others.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Cover -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Cover">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Barrier"/>
+        <rdfs:comment>An object used to cover up others, such as a lid used as a cover for a pot.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CoveredObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CoveredObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BlockedObject"/>
+        <rdfs:comment>An object that is covered.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Covered object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CreatedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CreatedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is created.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:label xml:lang="en">Created object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#CutObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#CutObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#AlteredObject"/>
+        <rdfs:comment>An object being cut down into pieces.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label>Cut object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Cutter -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Cutter">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Tool"/>
+        <rdfs:comment>A role to classify an object used to cut other objects. Usually should poses sharpness as a quality. Execptions are not considered in this context. Such as a wind, water, or other natural agents cutting(eroding) the rocks.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Deposit -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Deposit">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Instrument"/>
+        <rdfs:comment>A role classifying an object ontop which others are put to e.g. store them, or to place them in a meaningful way for future activities.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#DepositedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#DepositedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object placed ontop of another one.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Deposited object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Destination -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Destination">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Location"/>
+        <rdfs:comment>A role classifying the location where an event or object is directed towards.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#DestroyedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#DestroyedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is detroyed.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:label xml:lang="en">Destroyed object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#DetectedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#DetectedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is detected.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Detected object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#EnclosedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#EnclosedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#IncludedObject"/>
+        <rdfs:comment>An object included within the spatial boundaries of another object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Enclosed object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Role"/>
+        <rdfs:comment>A role classifying a participant in an event.
+
+In linguistics, this is also known as a thematic role.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Event adjacent role</rdfs:label>
+        <rdfs:label xml:lang="en">Thematic role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ExcludedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ExcludedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is not contained in something. This is meant very general and includes, e.g., elements excluded from a set, or things that are spatially excluded from the boundaries of some object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label>Excluded object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ExistingObjectRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ExistingObjectRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#RelationAdjacentRole"/>
+        <rdfs:comment>A role that requires of its filler simply to exist, unlike other roles that may demand e.g. agentive or instrumental participation in some executable schema or plan (AgentRole and Instrument respectively).
+
+The intention behind such a simple role is to have a way to represent, in a schematic formalism used to describe some scene, that an object is present. In particular, the schema used to convey this information is the ESTSchemaTheory, which has ExistingObjectRole as its sole defined role.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Existing object role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ExperiencerRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ExperiencerRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#PerformerRole"/>
+        <rdfs:comment>A role used in frame semantics to classify agents performing perception actions, or being the subjects affected by some biological process.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Experiencer role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ExtractedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ExtractedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is removed from a container or system.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Extracted object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#FrameRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#FrameRole">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Role"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#GoalRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#GoalRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole"/>
+        <rdfs:comment>A role classifying objects that constitute the goal of an action.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Goal role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#IncludedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#IncludedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object that is contained in something. This is meant very general and includes, e.g., elements contained in a set, or things that are spatially contained within the boundaries of some object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Included object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#InferenceRules -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#InferenceRules">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Knowledge"/>
+        <rdfs:comment>The role of an object that is used to derive a conclusion from some premises.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Inference rules</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#InsertedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#InsertedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EnclosedObject"/>
+        <rdfs:comment>An object inserted into another object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Inserted object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Instructions -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Instructions">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <rdfs:comment>The role of a plan to follow during an execution task.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Instructions</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Instrument -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Instrument">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ResourceRole"/>
+        <rdfs:comment>An object used to carry out the event.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-SAY.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Item -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Item">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>A role played by a non-agentive object operated on by an action.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Knowledge -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Knowledge">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#LinkedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#LinkedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ConnectedObject"/>
+        <rdfs:comment>An object that is linked to some other object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+        <rdfs:label xml:lang="en">Linked object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Location -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Location">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#SpatioTemporalRole"/>
+        <rdfs:comment>A role classifying a location of interest, often specified as a spatial relation between several objects, themselves usually classified by spatial relation roles.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#LocatumRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#LocatumRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#SpatialRelationRole"/>
+        <rdfs:comment>Denotes the object with primary focal prominence in a spatial or spatio-temporal schema. Terminological variants that appear in the literature on cognitive linguistics include Figure (Talmy 1983) and Trajector (Langacker 1986).</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Locatum role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Message -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Message">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <rdfs:comment xml:lang="en">A message is a discrete unit of communication intended by the source for consumption by some recipient or group of recipients (Source: https://en.wikipedia.org/wiki/Message).
+
+Note that the Role Message classifies the Information Realization, not the content.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Message</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionEvaluationTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionEvaluationTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionTopic"/>
+        <rdfs:comment>A topic used while an Agent describes its own cognitive processes and acions to evaluate them according to some metric.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Meta cognition evaluation topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionMemoryTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionMemoryTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionTopic"/>
+        <rdfs:comment>A topic used while an Agent describes its own cognitive processes and actions, and which covers descriptions of what memories are involved in them.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Meta cognition memory topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionPlanningTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionPlanningTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionTopic"/>
+        <rdfs:comment>A topic used while an Agent describes the planning it does for its own cognitive processes and actions.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Meta cognition planning topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#MetaCognitionTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic for a description that an Agent might make of its own cognitive processes and actions.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#MovedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#MovedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#AlteredObject"/>
+        <rdfs:comment>An object undergoing location change.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:label xml:lang="en">Moved object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Obstacle -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Obstacle">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Barrier"/>
+        <rdfs:comment>An object used to restrict access to a protected space or group.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Option -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Option">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ResourceRole"/>
+        <rdfs:comment xml:lang="en">The Role of objects that are used, e.g., in Selecting Tasks.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">Option</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Order -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Order">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#FormalEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#orders"/>
+                <owl:someValuesFrom rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">An &apos;Order&apos; sorts two or more &apos;Order item&apos;s via the relations &apos;precedes&apos; and &apos;follows&apos;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">Order</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#OrderedElement -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#FormalEntity"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#follows"/>
+                <owl:allValuesFrom rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#precedes"/>
+                <owl:allValuesFrom rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#isOrderedBy"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Order"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">A &apos;Singleton&apos; of an entity that &apos;is ordered by&apos; some &apos;Order&apos;. An &apos;Order item&apos; can only &apos;precede&apos; or &apos;follow&apos; another &apos;Order item&apos;, encoding the sortation of the entities contained within the &apos;Order items&apos;. Different &apos;Order&apos;s need to use different &apos;Order item&apos;s.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">Ordered element</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Origin -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Origin">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Location"/>
+        <rdfs:comment>A role classifying the location where an event or object originated.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#PathRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#PathRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#SpatioTemporalRole"/>
+        <rdfs:comment>A role that classifies the path of a motion.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Path role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Patient -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Patient">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole"/>
+        <rdfs:comment>A role classifying an object that undergoes/is the primary object affected by the event.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-SAY.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#PerformerRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#PerformerRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#CausativeRole"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#classifies"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>A role classifying an Agent responsible for performing an Action.
+
+The entity playing an PerformerRole is endowed with sentience and the capacity to deliberately choose actions in pursuit of goals. This distinguishes Agents from other causes that could bring an event about.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Performer role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#PouredObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#PouredObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Patient"/>
+        <rdfs:comment>An object being poured into or onto some other object. A role of some fluid or substance that is the patient of pouring task.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label>Poured object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Predilection -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Predilection">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#SocialRelation"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#describes"/>
+                <owl:allValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+                            <owl:Class>
+                                <owl:intersectionOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Order"/>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#orders"/>
+                                        <owl:allValuesFrom>
+                                            <owl:Restriction>
+                                                <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#encapsulates"/>
+                                                <owl:allValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Situation"/>
+                                            </owl:Restriction>
+                                        </owl:allValuesFrom>
+                                    </owl:Restriction>
+                                </owl:intersectionOf>
+                            </owl:Class>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">The relation between a &apos;Preference&apos; and the &apos;Order&apos; that the &apos;Preference&apos; defines over Situations.
+
+For the complete model, see &apos;Preference&apos;.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label>Predilection</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Preference -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Preference">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#SocialQuality"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#isPreferenceOf"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">A &apos;Preference&apos; is a &apos;Quality&apos; of an &apos;Agent&apos; that orders &apos;Situation&apos;s by some heuristic based on the happiness, satisfaction, gratification, morality, enjoyment, and utility (see alse https://en.wikipedia.org/wiki/Preference) they provide to their bearing Agent.
+
+The pattern is as follows: A &apos;Preference&apos; &apos;is described by&apos; a &apos;Predilection&apos;, which also &apos;describes&apos; an &apos;Order&apos; that &apos;orders&apos; &apos;Order item&apos;s that contain only &apos;Situation&apos;s. The &apos;Situation&apos;s then are modeled according to what the preference entails.
+
+That a &apos;Preference&apos; orders &apos;Situation&apos;s might be unintuitive, but makes the model very general. A few examples:
+
+Example 1
+
+&quot;Peter likes coffee and dislikes tea&quot;.
+Here, between different hypothetical situations where he plays the role of a performer in a drinking task, Peter prefers the situations in which role of the drunken object is played by some coffee (vs. some tea). Note that the coffe and tea are hypothetical objects as well and could, for example, be represented via reified Concepts.
+
+Example 2
+
+&quot;Would you like this pot of coffee, or this pot of tea, Peter?&quot;
+Here, as opposed to Example 1, the pot of coffee and the pot of tea are not hypothetical, but concrete.
+
+Example 3
+
+&quot;Would you like this pot of coffee, or should I brew you some tea?&quot;
+Here, the pot of coffee is concrete and the tea is not.
+
+Example 4
+
+Situations are not restricted to Tasks; other event types are possible as well.
+For example, Peter might prefer the Containment State of a tiger being inside a cage vs. the Containment State of the tiger being outside of the cage.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label xml:lang="en">Preference</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#PreferenceOrder -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#PreferenceOrder">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#SocialRelation"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#orders"/>
+                <owl:someValuesFrom rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#OrderedElement"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#orders"/>
+                <owl:allValuesFrom>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#encapsulates"/>
+                        <owl:allValuesFrom rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description"/>
+                    </owl:Restriction>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#describes"/>
+                <owl:allValuesFrom rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">The relation between a &apos;Preference&apos; and the &apos;Order&apos; that the &apos;Preference&apos; defines over Descriptions of Situations.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+        <rdfs:label>Preference order</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Premise -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Premise">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Knowledge"/>
+        <rdfs:comment>The role of an object that is used to infer some conclusion via some inference rules.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Premises</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Protector -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Protector">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Restrictor"/>
+        <rdfs:comment>A role classifying an object that protects another by preventing other entities from coming in contact with the protected object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Query -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Query">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Message"/>
+        <rdfs:comment xml:lang="en">A role played by some Information Realization that carries meaning, where this meaning is a query of some sort.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Query</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Receiver -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Receiver">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ExperiencerRole"/>
+        <rdfs:comment xml:lang="en">The role played by an Agent in a Communication Task that perceives and interpretes some incoming Message.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Receiver</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#RecipientRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#RecipientRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole"/>
+        <rdfs:comment>A role which classifies an agent who receives an object modified or created by an action.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Recipent role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Reification -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Reification">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description"/>
+        <rdfs:comment>A description that *describes* a formal entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#RelationAdjacentRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#RelationAdjacentRole">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Role"/>
+        <rdfs:comment>A role classifying an object participating in some relation, e.g. a participant in a spatial relation or a linguistic fragment in a rhetorical relation to another.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Relation adjacent role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#RelatumRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#RelatumRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#SpatialRelationRole"/>
+        <rdfs:comment>Denotes the reference object in a spatial or spatio-temporal schema, i.e. the object with secondary focal prominence. Terminological variants: Ground (Talmy 1983), Landmark (Langacker 1986).</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Relatum role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#RemovedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#RemovedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ExcludedObject"/>
+        <rdfs:comment>An object that is removed from another.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label>Removed object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ResourceRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ResourceRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole"/>
+        <rdfs:comment>A role classifying objects that are useful or even necessary to sustain the unfolding of an event.
+
+Resources are usually not agentive; a different set of roles classifies the agentive participants in actions. Likewise, typically resources do not play causative or goal roles for the event.
+
+Resources are often consumed by their participation in an event, but this need not always be the case. An instrument and capital are examples of resources that are reusable.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Resource role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#RestrictedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#RestrictedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BlockedObject"/>
+        <rdfs:comment>An object with restrictions to access something.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Restricted object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Restrictor -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Restrictor">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Instrument"/>
+        <rdfs:comment>A role classifying an object used to deny access to some other entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ResultRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ResultRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#GoalRole"/>
+        <rdfs:comment>A role classifying the object that is the outcome of a creation or modification action or process.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Result role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Sender -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Sender">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#PerformerRole"/>
+        <rdfs:comment xml:lang="en">The Role played by an Agent in a Communication Task that emits some Information Realization with the purpose of percipience by some Receiver.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Sender</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ShapedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ShapedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#AlteredObject"/>
+        <rdfs:comment>An object undergoing shape change.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:label xml:lang="en">Shaped object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Singleton -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Singleton">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Set"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#encapsulates"/>
+                        <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                        <owl:onClass rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:comment>A &apos;Set&apos; that contains exactly one member.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-AGENT.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#SocialQuality -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#SocialQuality">
+        <rdfs:subClassOf rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality"/>
+        <rdfs:comment>Any aspect of an entity that specifies social characteristics.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label>Social quality</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#SourceMaterialRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#SourceMaterialRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ResourceRole"/>
+        <rdfs:comment>A role classifying a substance or object that enters a process of transformation intended to create some other object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Source material role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#SpatialRelationRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#SpatialRelationRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#RelationAdjacentRole"/>
+        <rdfs:comment>Roles classifying entities participating in some spatial relation.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Spatial relation role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#SpatioTemporalRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#SpatioTemporalRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EventAdjacentRole"/>
+        <rdfs:comment>Roles that classify entities which locate an event or object in space and time.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Spatio-temporal role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#StimulusRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#StimulusRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#CausativeRole"/>
+        <rdfs:comment>A role classifying an object that is perceived by some agent and thus triggers some reaction (e.g., a perception event).</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Stimulus role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#StoredObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#StoredObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#EnclosedObject"/>
+        <rdfs:comment>An object being stored into some other object, usually inside a container.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#SupportedObject -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#SupportedObject">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ConnectedObject"/>
+        <rdfs:comment>An object that is supported by some supporter.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Supported object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Supporter -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Supporter">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Restrictor"/>
+        <rdfs:comment>A role classifying an object used to support others.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudActionTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudActionTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic used when an Agent states what they are doing.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud action topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudGeneralKnowledgeTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudGeneralKnowledgeTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudKnowledgeTopic"/>
+        <rdfs:comment>A topic used when an Agent states general knowledge they have.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud general knowledge topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudKnowledgeTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudKnowledgeTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic used when an Agent states some item of knowledge. This knowledge can be general, or specific to the environment and task at hand.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud knowledge topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudObstructionTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudObstructionTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic used when an Agent describes some state of affairs that prevents them from performing an action.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud obstruction topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudOpinionTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudOpinionTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic used when an Agent expresses an opinion about the action they perform or the environment they are in.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud opinion topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudPerceptionTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudPerceptionTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic used when an Agent describes what they currently perceive.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud perception topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudPlanTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudPlanTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic"/>
+        <rdfs:comment>A topic used when an Agent describes what they intend to do. Note, this is not about describing the process through which this plan was constructed; that is covered by the MetaCognitionPlanningTopic.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud plan topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudSceneKnowledgeTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudSceneKnowledgeTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudKnowledgeTopic"/>
+        <rdfs:comment>A topic used when an Agent describes what they know about their environment, including knowledge of world states that they do not currently perceive.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label>Think aloud scene knowledge topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#ThinkAloudTopic">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#CommunicationTopic"/>
+        <rdfs:comment>A topic relevant for a think-aloud communication.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-ACT.owl"/>
+        <rdfs:label xml:lang="en">Think aloud topic</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#TimeRole -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#TimeRole">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#SpatioTemporalRole"/>
+        <rdfs:comment>A role filled by a description of the location in time and/or duration of an event or object.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+        <rdfs:label xml:lang="en">Time role</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Tool -->
+
+    <owl:Class rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Tool">
+        <rdfs:subClassOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Instrument"/>
+        <rdfs:comment>A role to classify an object used to modify or actuate others.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-OBJ.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent">
+        <rdfs:comment xml:lang="en">Generally, agents are goal-directed entities that are able to monitor their environment to select and perform efficient means-ends actions that are available in a given situation to achieve an intended goal. Agency, therefore, implies the ability to perceive and to change the environment of the agent. Crucially, it also entails intentionality to represent the goal-state in the future, equifinal variability to be able to achieve the intended goal-state with different actions in different contexts, and rationality of actions in relation to their goal to produce the most efficient action available (Source: https://en.wikipedia.org/wiki/Agency_(psychology)).
+
+While we follow this definition, we do so loosely: We do not require the intentionality to be sourced by the agent. E.g., a running computer program (see Software instance) can be seen as an actor and therefore participate in Actions, e.g. some Communication Action, while its intentionality has been bestowed upon it from the agents who started the program or gave an input (e.g., via a mouse click) to achieve some goal.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Concept -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Concept">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#FormalEntity -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#FormalEntity"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Goal -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Goal"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Object -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Object"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Relation -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Relation">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Role -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Role">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-STATE.owl"/>
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-WF.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Set -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Set"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Situation -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Situation">
+        <rdfs:isDefinedBy rdf:resource="http://www.ease-crc.org/ont/SOMA-PROC.owl"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#SocialObject -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#SocialObject"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#SocialRelation -->
+
+    <owl:Class rdf:about="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#SocialRelation"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Alice -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Alice">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Bob -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Bob">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#Claire -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Claire">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#David -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#David">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Agent"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dAnimalProductFood -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dAnimalProductFood">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <disjointReification rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dVeganFood"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dEdible"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dBlackCoffee -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dBlackCoffee">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dCoffee"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dCafeAuLait -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dCafeAuLait">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dCoffee"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dChiliConCarne -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dChiliConCarne">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dAnimalProductFood"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dChiliSinCarne -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dChiliSinCarne">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dVeganFood"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dCoffee -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dCoffee">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dDrinkable"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dComestible -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dComestible">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dDrinkable -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dDrinkable">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dComestible"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dEdible -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dEdible">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dComestible"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dReceiveForConsumption -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dReceiveForConsumption">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dTea -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dTea">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dDrinkable"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#dVeganFood -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#dVeganFood">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+        <dul:specializes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dEdible"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesCafeAuLait -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesCafeAuLait">
+        <encapsulates rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#sdAliceReceivesCafeAuLait"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesTea -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesTea">
+        <encapsulates rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#sdAliceReceivesTea"/>
+        <dul:follows rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesCafeAuLait"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#oeBobReceivesVeganFood -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#oeBobReceivesVeganFood">
+        <encapsulates rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#sdBobReceivesVeganFood"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#poAlice -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#poAlice">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#PreferenceOrder"/>
+        <orders rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesCafeAuLait"/>
+        <orders rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#oeAliceReceivesTea"/>
+        <dul:describes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#prefAlice"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#poBob -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#poBob">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#PreferenceOrder"/>
+        <orders rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#oeBobReceivesVeganFood"/>
+        <dul:describes rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#prefBob"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#prefAlice -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefAlice">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+        <dul:isQualityOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Alice"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#prefBob -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefBob">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+        <dul:isQualityOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Bob"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#prefClaire -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefClaire">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+        <dul:isQualityOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Claire"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#prefDavid -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefDavid">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Preference"/>
+        <dul:isQualityOf rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#David"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryAlice -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryAlice">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Alice"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryBob -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryBob">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Bob"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryClaire -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryClaire">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Claire"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryDavid -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryDavid">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#BeneficiaryRole"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#David"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rFrame -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rFrame">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#FrameRole"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dReceiveForConsumption"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rItemBlackCoffee -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rItemBlackCoffee">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dBlackCoffee"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rItemCafeAuLait -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rItemCafeAuLait">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dCafeAuLait"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rItemChiliConCarne -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rItemChiliConCarne">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dChiliConCarne"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rItemCoffee -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rItemCoffee">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dCoffee"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rItemTea -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rItemTea">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dTea"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#rItemVeganFood -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#rItemVeganFood">
+        <rdf:type rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Item"/>
+        <dul:classifies rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#dVeganFood"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#sdAliceReceivesCafeAuLait -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#sdAliceReceivesCafeAuLait">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryAlice"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rFrame"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rItemCafeAuLait"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#sdAliceReceivesTea -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#sdAliceReceivesTea">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryAlice"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rFrame"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rItemTea"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ease-crc.org/ont/SOMA.owl#sdBobReceivesVeganFood -->
+
+    <owl:NamedIndividual rdf:about="http://www.ease-crc.org/ont/SOMA.owl#sdBobReceivesVeganFood">
+        <rdf:type rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Description"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rBeneficiaryBob"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rFrame"/>
+        <dul:defines rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#rItemVeganFood"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Alice"/>
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Bob"/>
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#Claire"/>
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#David"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefAlice"/>
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefBob"/>
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefClaire"/>
+            <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#prefDavid"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Rules
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#r">
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#s">
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.ease-crc.org/ont/SOMA.owl#a">
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+    </rdf:Description>
+    <rdf:Description>
+        <swrla:isRuleEnabled rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</swrla:isRuleEnabled>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>Reflexivity of specializes</rdfs:label>
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
+        <swrl:body>
+            <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+                        <swrl:classPredicate rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#Reification"/>
+                        <swrl:argument1 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#r"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+            </rdf:Description>
+        </swrl:body>
+        <swrl:head>
+            <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#specializes"/>
+                        <swrl:argument1 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#r"/>
+                        <swrl:argument2 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#r"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+            </rdf:Description>
+        </swrl:head>
+    </rdf:Description>
+    <rdf:Description>
+        <swrla:isRuleEnabled rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</swrla:isRuleEnabled>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>Disjointness of specializer</rdfs:label>
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
+        <swrl:body>
+            <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#specializes"/>
+                        <swrl:argument1 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#r"/>
+                        <swrl:argument2 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#s"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                        <rdf:first>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+                                <swrl:propertyPredicate rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#disjointReification"/>
+                                <swrl:argument1 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#s"/>
+                                <swrl:argument2 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#a"/>
+                            </rdf:Description>
+                        </rdf:first>
+                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                    </rdf:Description>
+                </rdf:rest>
+            </rdf:Description>
+        </swrl:body>
+        <swrl:head>
+            <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#disjointReification"/>
+                        <swrl:argument1 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#r"/>
+                        <swrl:argument2 rdf:resource="http://www.ease-crc.org/ont/SOMA.owl#a"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+            </rdf:Description>
+        </swrl:head>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
