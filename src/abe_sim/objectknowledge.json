@@ -9077,5 +9077,65 @@
                      }
               }
               
+       },
+       {
+              "type": "CoffeeCup",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/coffeeCup.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
+       },
+       {
+              "type": "CoffeeCupWithMilk",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/coffeeCupMilk.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
+       },
+       {
+              "type": "TeaCup",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/teaCup.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
+       },
+       {
+              "type": "ChiliConCarne",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/chiliConCarne.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
+       },
+       {
+              "type": "ChiliSinCarne",
+              "simtype": "ktree",
+              "filename": "3DObjects/TeaParty/chiliSinCarne.urdf",
+              "fn": {
+                     "temperatureUpdateable": true,
+                     "graspable": true
+              },
+              "customStateVariables": {
+              }
+              
        }
 ]
