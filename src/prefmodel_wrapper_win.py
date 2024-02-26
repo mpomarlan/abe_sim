@@ -43,6 +43,7 @@ aliases = {"coffee": "dCoffee", "cup of coffee": "dCoffee",
            "vegan food": "dVeganFood",
            "chili sin carne": "dChiliSinCarne",
            "chili con carne": "dChiliConCarne"}
+reification2Alias = {"dCafeAuLait": "cafe au lait", "dTea": "tea"}
 
 reification2ObjectName = {"coffee": "coffee",
                           "dCoffee": "coffee",
@@ -75,10 +76,12 @@ def requestSay(s):
         speaker["tts"].runAndWait()
     #wav = speaker["tts"]._speaker.tts(s, speaker=speaker["tts"]._speaker.speakers[0], language=speaker["tts"]._speaker.languages[0])    
     interactionState["requestedWAV"] = wavPath
-def requestPerformAction(action, parameters):
-    item = reification2ObjectName.get(parameters.get("Item",""),"")
+def requestPerformAction(action, parameters, context=None):
+    if context is None:
+        context = ""
+    item = reification2ObjectName.get(aliases.get(parameters.get("Item")),"")
     beneficiary = parameters.get("BeneficiaryRole","")
-    requestSay("Ok, will bring %s to %s." % (item, beneficiary))
+    requestSay("%s. Ok, I will bring %s to %s." % (context, item, beneficiary))
     interactionState["requestedObject"] = item
 def queryPreferencesAnalogous(frame, agent, item, wide=False, blacklist=None):
     # Find topmost agent's preference that uses an item that specializes what the item in description also specializes 
@@ -246,8 +249,8 @@ def fn_sidx_start(iS, gS):
             requestSay("I did not understand that, could you repeat the command please?")
             return False
         if beneficiary is None:
-            print("  BNone", {k[len("dialog/"):]:v for k, v in gS if k.startswith("dialog/")})
-            requestPerformAction("Transporting", {k[len("dialog/"):]:v for k, v in gS if k.startswith("dialog/")})
+            print("  BNone", {k[len("dialog/"):]:v for k, v in gS.items() if k.startswith("dialog/")})
+            requestPerformAction("Transporting", {k[len("dialog/"):]:v for k, v in gS.items() if k.startswith("dialog/")})
             iS["fn_sidx"] = fn_sidx_start
             iS["entities"] = {}
             return False
@@ -263,7 +266,9 @@ def fn_sidx_start(iS, gS):
             iS["entities"] = {}
             return False
         else:
-            feasible[item] = True
+            feasible[aliases.get(item)] = True
+            requestSay("I understand we have %s in stock." % item)
+            return False
     if "AssertUnfeasibility" == intent:
         item = gS.get("dialog/Item")
         if item is None:
@@ -272,7 +277,9 @@ def fn_sidx_start(iS, gS):
             iS["entities"] = {}
             return False
         else:
-            feasible[item] = False
+            feasible[aliases.get(item)] = False
+            requestSay("I understand, we are out of %s" % item)
+            return False
     if "AssertTransportGoal" == intent:
         beneficiary = gS.get("dialog/BeneficiaryRole")
         item = gS.get("dialog/Item")
@@ -331,9 +338,10 @@ def fn_sidx_begin_bring(iS, gS):
                     iS["entities"]["blist"] = bl
                     return False
                 else:
-                    requestSay("We don't have %s anymore, but we have %s instead so I will bring %s that." % (bl[0], pref, verbalizeBeneficiary(iS["entities"]["beneficiary"])))
-                    print("  Replacement", {k[len("dialog/"):]:v for k, v in gS if k.startswith("dialog/")})
-                    requestPerformAction("Transporting", {k[len("dialog/"):]:v for k, v in gS if k.startswith("dialog/")})
+                    #requestSay("We don't have %s anymore, but we have %s instead so I will bring %s that." % (bl[0], pref, verbalizeBeneficiary(iS["entities"]["beneficiary"])))
+                    gS["dialog/Item"] = reification2Alias.get(pref)
+                    print("  Replacement", {k[len("dialog/"):]:v for k, v in gS.items() if k.startswith("dialog/")})
+                    requestPerformAction("Transporting", {k[len("dialog/"):]:v for k, v in gS.items() if k.startswith("dialog/")}, context = "We don't have %s anymore, but we have %s instead." % (bl[0], pref, verbalizeBeneficiary(iS["entities"]["beneficiary"])))
                     iS["fn_sidx"] = fn_sidx_start
                     iS["entities"] = {}
                     return False
