@@ -43,7 +43,7 @@
   <joint name="cup_to_coffee" type="fixed">
     <parent link="cup"/>
     <child link="coffee"/>
-    <origin rpy="0 0 0" xyz="0 0.110023 0"/>
+    <origin rpy="0 0 0" xyz="0 0.12 0"/>
   </joint>
 </robot>
 
