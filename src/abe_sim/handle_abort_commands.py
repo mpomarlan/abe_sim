@@ -1,5 +1,6 @@
 import json
 import re
+import inflection
 
 import requests
 import time
@@ -7,39 +8,46 @@ from world import World
 from constants import *
 
 
-def extract_abe_world_state_objects():
+def camel_to_snake(word: str):
+    if word is None:
+        return None
+    return inflection.underscore(word)
+
+
+def snake_to_camel(word: str):
+    if word is None:
+        return None
+    return inflection.camelize(word, uppercase_first_letter=False)
+
+
+def extract_abe_world_state_objects(objects):
     world_state_objects = []
-    try:
-        with open(WORLD_STATE_FILE_PATH, 'r') as world_state_file:
-            data = json.load(world_state_file)
-            for obj_name, obj_data in data.items():
-                if obj_data.get('simtype') == 'ktree':
-                    fn_values = obj_data.get('fn', {})
-                    characteristics = [key.lower() for key, value in fn_values.items() if
-                                       isinstance(value, bool) and value is True]
-                    obj_dict = {
-                        'name': obj_name,
-                        'type': obj_data.get('type'),
-                        'characteristics': set(characteristics),
-                        'at': obj_data.get('at'),
-                        'immobile': obj_data.get('immobile')
-                    }
+    for obj_name, obj_data in objects.items():
+        if obj_data.get('simtype') == 'ktree':
+            fn_values = obj_data.get('fn', {})
+            characteristics = [key.lower() for key, value in fn_values.items() if
+                               isinstance(value, bool) and value is True]
+            obj_dict = {
+                'name': camel_to_snake(obj_name),
+                'type': obj_data.get('type'),
+                'characteristics': set(characteristics),
+                'at': camel_to_snake(obj_data.get('at')),
+                'immobile': obj_data.get('immobile')
+            }
 
-                    grasping = obj_data.get('customStateVariables', {}).get('grasping', {}).get('actuallyGrasping', {})
-                    grasping_left = grasping.get("hand_left", [])
-                    grasping_right = grasping.get("hand_right", [])
-                    if grasping_left is not None:
-                        obj_dict['holding_left'] = grasping_left
-                    if grasping_right is not None:
-                        obj_dict['holding_right'] = grasping_right
-                    # TODO: here also add keys for properties such as closed or open and on or off when they are
-                    #  added in abe_sim
+            grasping = obj_data.get('customStateVariables', {}).get('grasping', {}).get('actuallyGrasping', {})
+            grasping_left = list(map(lambda x: camel_to_snake(x), grasping.get("hand_left", [])))
+            grasping_right = list(map(lambda x: camel_to_snake(x), grasping.get("hand_right", [])))
+            if grasping_left is not None:
+                obj_dict['holding_left'] = grasping_left
+            if grasping_right is not None:
+                obj_dict['holding_right'] = grasping_right
+            # TODO: here also add keys for properties such as closed or open and on or off when they are
+            #  added in abe_sim
 
-                    world_state_objects.append(obj_dict)
+            world_state_objects.append(obj_dict)
 
-        return world_state_objects
-    except FileNotFoundError:
-        print("File not found.")
+    return world_state_objects
 
 
 def compute_pddl_init_state(abe_world_state_objects):
@@ -86,7 +94,7 @@ def compute_pddl_init_state(abe_world_state_objects):
 
 
 def compute_pddl_problem(world):
-    abe_world_state_objects = world.worldDump()
+    abe_world_state_objects = extract_abe_world_state_objects(world.worldDump())
     init_state = compute_pddl_init_state(abe_world_state_objects)
     return f"(define {PDDL_PROBLEM_HEADER} {init_state} {PDDL_GOAL})"
 
@@ -106,11 +114,11 @@ def infer_pddl_type(abe_world_object):
             return PDDL_VESSEL_TYPE
     if abe_type == PDDL_FRIDGE_TYPE:
         return abe_type
-    if "oven" in abe_type or "microwave" in abe_type or "foodprocessor" in abe_type:
+    if "oven" in abe_type or "microwave" in abe_type or "food_processor" in abe_type:
         return PDDL_DEVICE_TYPE
-    if "kitchencabinet" in abe_type:
+    if "kitchen_cabinet" in abe_type:
         return PDDL_CLOPENABLE_STORAGE_TYPE
-    if "kitchencounter" in abe_type:
+    if "kitchen_counter" in abe_type:
         return PDDL_NOTCLOPENABLE_STORAGE_TYPE
     if ABE_CONTAINER_CHARACTERISTIC in characteristics:
         return PDDL_CONTAINER_TYPE
@@ -157,6 +165,6 @@ def handle_abort_commands(world: World):
             return
 
         plan = result['output']['sas_plan']
-        steps = map(extract_command, re.findall(r'\((\S+)\s+(.*)\)', plan))
-        # TODO: output is always lower case. Make the names match with names from world
-        print(steps)
+        steps = list(map(extract_command, re.findall(r'\((\S+)\s+(.*)\)', plan)))
+        print([(step, list(map(lambda x: snake_to_camel(x), params))) for step, params in steps])
+
