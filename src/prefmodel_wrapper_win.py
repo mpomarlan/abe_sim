@@ -69,12 +69,14 @@ def unPrefix(s):
         return s
     return s[idx+1:]
 def requestSay(s):
-    speaker["tts"].save_to_file(s, wavPath)
-    speaker["tts"].runAndWait()
-    if doTheSpeaking:
-        speaker["tts"].say(s)
+    interactionState["requestedText"] = str(s)
+    if interactionState["makeWAV"]:
+        speaker["tts"].save_to_file(s, wavPath)
         speaker["tts"].runAndWait()
-    #wav = speaker["tts"]._speaker.tts(s, speaker=speaker["tts"]._speaker.speakers[0], language=speaker["tts"]._speaker.languages[0])    
+        if doTheSpeaking:
+            speaker["tts"].say(s)
+            speaker["tts"].runAndWait()
+        #wav = speaker["tts"]._speaker.tts(s, speaker=speaker["tts"]._speaker.speakers[0], language=speaker["tts"]._speaker.languages[0])    
     interactionState["requestedWAV"] = wavPath
 def requestPerformAction(action, parameters, context=None):
     if context is None:
@@ -493,11 +495,12 @@ def thread_function_flask():
         try:
             msg = request.get_json(force=True)
         except SyntaxError:
-            return json.dumps({'wav': '', 'object': ''}), requests.status_codes.codes.BAD_REQUEST
+            return json.dumps({'wav': '', 'object': '', 'text': ''}), requests.status_codes.codes.BAD_REQUEST
         print("  ", msg)
         text = msg.get("text", "")
+        interactionState["makeWAV"] = msg.get("makeWAV", True)
         onStateUpdate(text, interactionState, utteranceSemantics)
-        return json.dumps({'wav': interactionState["requestedWAV"], "object": interactionState["requestedObject"]}), requests.status_codes.codes.ALL_OK
+        return json.dumps({'wav': interactionState["requestedWAV"], "object": interactionState["requestedObject"], 'text': interactionState.get('requestedText', "")}), requests.status_codes.codes.ALL_OK
     flask.run(port=44444, debug=True, use_reloader=False)
 
 if __name__ == '__main__':
