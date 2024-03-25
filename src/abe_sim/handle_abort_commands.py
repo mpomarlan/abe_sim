@@ -1,11 +1,13 @@
 import json
 import re
-import inflection
-
-import requests
 import time
-from world import World
+
+import inflection
+import requests
+
 from constants import *
+from src.abe_sim.dbpedia_utils import DBPEDIA_PERISHABLE_FOODS, DBPEDIA_UTENSILS, DBPEDIA_VESSELS
+from world import World
 
 
 def camel_to_snake(word: str):
@@ -29,7 +31,7 @@ def extract_abe_world_state_objects(objects):
                                isinstance(value, bool) and value is True]
             obj_dict = {
                 'name': camel_to_snake(obj_name),
-                'type': obj_data.get('type'),
+                'type': camel_to_snake(obj_data.get('type')),
                 'characteristics': set(characteristics),
                 'at': camel_to_snake(obj_data.get('at')),
                 'immobile': obj_data.get('immobile')
@@ -100,25 +102,29 @@ def compute_pddl_problem(world):
 
 
 def infer_pddl_type(abe_world_object):
-    abe_type = abe_world_object['name'].lower()
+    abe_name = abe_world_object['name'].lower()
+    abe_type = abe_world_object['type'].lower()
     characteristics = abe_world_object['characteristics']
 
     if ABE_GRASPABLE_CHARACTERISTIC in characteristics:
-        if characteristics & ABE_PERISHABLE_CHARACTERISTICS or "fresh" in abe_type:
+        if characteristics & ABE_PERISHABLE_CHARACTERISTICS or "fresh" in abe_name \
+                or abe_type in DBPEDIA_PERISHABLE_FOODS:
             return PDDL_PERISHABLE_TYPE
         if characteristics & ABE_NONPERISHABLE_CHARACTERISTICS:
             return PDDL_NONPERISHABLE_TYPE
-        if characteristics & ABE_UTENSIL_CHARACTERISTICS or "fork" in abe_type or "spoon" in abe_type:
+        if characteristics & ABE_UTENSIL_CHARACTERISTICS or "fork" in abe_name or "spoon" in abe_name \
+                or abe_type in DBPEDIA_UTENSILS:
             return PDDL_UTENSIL_TYPE
-        if characteristics & ABE_VESSEL_CHARACTERISTICS or "pot" in abe_type or "pan" in abe_type:
+        if characteristics & ABE_VESSEL_CHARACTERISTICS or "pot" in abe_name or "pan" in abe_name \
+                or abe_type in DBPEDIA_VESSELS:
             return PDDL_VESSEL_TYPE
-    if abe_type == PDDL_FRIDGE_TYPE:
-        return abe_type
-    if "oven" in abe_type or "microwave" in abe_type or "food_processor" in abe_type:
+    if abe_name == PDDL_FRIDGE_TYPE:
+        return abe_name
+    if "oven" in abe_name or "microwave" in abe_name or "food_processor" in abe_name:
         return PDDL_DEVICE_TYPE
-    if "kitchen_cabinet" in abe_type:
+    if "kitchen_cabinet" in abe_name:
         return PDDL_CLOPENABLE_STORAGE_TYPE
-    if "kitchen_counter" in abe_type:
+    if "kitchen_counter" in abe_name:
         return PDDL_NOTCLOPENABLE_STORAGE_TYPE
     if ABE_CONTAINER_CHARACTERISTIC in characteristics:
         return PDDL_CONTAINER_TYPE
@@ -167,4 +173,3 @@ def handle_abort_commands(world: World):
         plan = result['output']['sas_plan']
         steps = list(map(extract_command, re.findall(r'\((\S+)\s+(.*)\)', plan)))
         print([(step, list(map(lambda x: snake_to_camel(x), params))) for step, params in steps])
-
