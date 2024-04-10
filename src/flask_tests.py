@@ -17,6 +17,19 @@ r = requests.post("http://localhost:54321/abe-sim-command/to-cancel", data=bytes
 response = json.loads(r.text)['response']
 print("CANCELLATION:", response)
 
+def cancelAbeSmart(smart = False):
+    req = {'smart': smart}
+    r = requests.post("http://localhost:54321/abe-sim-command/to-cancel", data=bytes(json.dumps(req), "utf-8"))
+    response = json.loads(r.text)['response']
+    print("CANCELLATION:", response)
+    
+### Command _: fetch mediumBowl3 to kitchen counter
+def fetch():
+    req= {'object': 'mediumBowl3', 'kitchenStateIn': None, 'setWorldState': False}
+    r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(json.dumps(req), "utf-8"))
+    response = json.loads(r.text)['response']
+    print("FETCHING:", response)
+
 ### Command _: go to specified pose. Not specifying pose will yield an error message.
 req = {}
 r = requests.post("http://localhost:54321/abe-sim-command/to-go-to-pose", data=bytes(json.dumps(req), "utf-8"))
