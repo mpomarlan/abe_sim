@@ -5,9 +5,9 @@ import time
 import inflection
 import requests
 
-from constants import *
-from src.abe_sim.dbpedia_utils import DBPEDIA_PERISHABLE_FOODS, DBPEDIA_UTENSILS, DBPEDIA_VESSELS
-from world import World
+from abe_sim.constants import *
+from abe_sim.dbpedia_utils import DBPEDIA_PERISHABLE_FOODS, DBPEDIA_UTENSILS, DBPEDIA_VESSELS
+from abe_sim.world import World
 
 
 def camel_to_snake(word: str):
@@ -38,12 +38,15 @@ def extract_abe_world_state_objects(objects):
             }
 
             grasping = obj_data.get('customStateVariables', {}).get('grasping', {}).get('actuallyGrasping', {})
-            grasping_left = list(map(lambda x: camel_to_snake(x), grasping.get("hand_left", [])))
-            grasping_right = list(map(lambda x: camel_to_snake(x), grasping.get("hand_right", [])))
-            if grasping_left is not None:
-                obj_dict['holding_left'] = grasping_left
-            if grasping_right is not None:
-                obj_dict['holding_right'] = grasping_right
+            if not grasping:
+                world_state_objects.append(obj_dict)
+                continue
+            grasping_left = next(iter(grasping.get("hand_left", [])), None)
+            grasping_right = next(iter(grasping.get("hand_right", [])), None)
+            if grasping_left:
+                obj_dict['holding_left'] = list(map(lambda x: camel_to_snake(x), grasping_left[0]))
+            if grasping_right:
+                obj_dict['holding_right'] = list(map(lambda x: camel_to_snake(x), grasping_right[0]))
             # TODO: here also add keys for properties such as closed or open and on or off when they are
             #  added in abe_sim
 
@@ -118,8 +121,12 @@ def infer_pddl_type(abe_world_object):
         if characteristics & ABE_VESSEL_CHARACTERISTICS or "pot" in abe_name or "pan" in abe_name \
                 or abe_type in DBPEDIA_VESSELS:
             return PDDL_VESSEL_TYPE
-    if abe_name == PDDL_FRIDGE_TYPE:
-        return abe_name
+    if abe_name == PDDL_FRIDGE_TYPE or abe_type == PDDL_FRIDGE_TYPE:
+        return PDDL_FRIDGE_TYPE
+    if abe_name == PDDL_TRASHCAN_TYPE or abe_type == PDDL_TRASHCAN_TYPE:
+        return PDDL_TRASHCAN_TYPE
+    if "peel" in abe_type or "seed" in abe_type:
+        return PDDL_DISPOSABLE_TYPE
     if "oven" in abe_name or "microwave" in abe_name or "food_processor" in abe_name:
         return PDDL_DEVICE_TYPE
     if "kitchen_cabinet" in abe_name:
@@ -172,6 +179,7 @@ def handle_abort_commands(world: World):
 
         plan = result['output']['sas_plan']
         steps = list(map(extract_command, re.findall(r'\((\S+)\s+(.*)\)', plan)))
+        steps.pop()  # last element of plan contains the cost information, not actually a step
         retq = [(action, list(map(lambda x: snake_to_camel(x), params))) for action, params in steps]
         print(retq)
         return retq
