@@ -12,7 +12,7 @@ response = json.loads(r.text)['response']
 print("SIMULATION TIME:", response)
 
 ### Command _: cancel any ongoing action. Robot will also drop anything it carries and will stop trying to clopen anything.
-req = {}
+req = {"smart": False}
 r = requests.post("http://localhost:54321/abe-sim-command/to-cancel", data=bytes(json.dumps(req), "utf-8"))
 response = json.loads(r.text)['response']
 print("CANCELLATION:", response)

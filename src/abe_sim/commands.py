@@ -89,11 +89,12 @@ def toCancel(requestData, w, agentName, todos):
             w.setObjectProperty((agentName,), ('customStateVariables', 'grasping', 'intendToGrasp', ef), [])
         _cancelClopens(w, agentName)
         _cancelGardenAction(w, agentName, todos)
-        return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
+        #return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
     else:
         garden = {0: _pddl2PG(plan[0])}
         w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
         todos['goals'] = [{0: _pddl2PG(x)} for x in plan[1:]]
+    return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
 
 
 def toUpdateAvatar(requestData, w, agentName, todos):
