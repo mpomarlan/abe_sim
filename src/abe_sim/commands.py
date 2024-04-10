@@ -13,7 +13,7 @@ def _cancelGardenAction(w, agentName, todos):
         
 def _cancelClopens(w, agentName):
     for ef in w.getObjectProperty((agentName,), ('fn', 'clopening', 'clopeningEFs'), []):
-        w.setObjectProperty((), ('customStateVariables', 'clopening', 'action', ef), None)
+        w.setObjectProperty((agentName,), ('customStateVariables', 'clopening', 'action', ef), None)
         
 def _checkArgs(args):
     retq = []
@@ -51,11 +51,50 @@ def toGetTime(requestData, w, agentName, todos):
     return requests.status_codes.codes.ALL_OK, {"response": {"time": w.getObjectProperty((agentName,), ('customStateVariables', 'timing', 'timer'), None)}}
     
 def toCancel(requestData, w, agentName, todos):
-    for ef in w.getObjectProperty((agentName,), ('fn', 'grasping', 'effectors'), []):
-        w.setObjectProperty((), ('customStateVariables', 'grasping', 'intendToGrasp', ef), [])
-    _cancelClopens(w, agentName)
-    _cancelGardenAction(w, agentName, todos)
-    return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
+    def _getHand(w, agentName, item):
+        free = None
+        for ef in w.getObjectProperty((agentName,), ('fn', 'grasping', 'effectors'), []):
+            iGs = w.getObjectProperty((agentName,), ('customStateVariables', 'grasping', 'intendToGrasp', ef))
+            if item in w.getObjectProperty((agentName,), ('customStateVariables', 'grasping', 'intendToGrasp', ef)):
+                return ef
+            if 0 == len(iGs):
+                free = ef
+        if free is None:
+            free = "hand_right"
+        return free
+    def _pddl2PG(step):
+        action, parameters = step
+        if "put" == action:
+            #:action put :parameters (?gr - locatable ?dest - container)
+            item, dest = parameters
+            hand = _getHand(w, agentName, item) # put is used for objects already in hand
+            return {'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'container': dest, 'hand': hand}}
+        if "move" == action:
+            #:action move :parameters (?gr - locatable ?src - container ?dest - container)
+            item, _, dest = parameters
+            return {'type': 'G', 'description': {'goal': 'placedItem', 'item': item, 'container': dest, 'hand': 'hand_right'}}
+        if "close" == action:
+            #:action close :parameters (?clo - clopenable)
+            item = parameters[0]
+            return {'type': 'G', 'description': {'goal': 'closed', 'container': item, 'hand': 'hand_right'}}
+        if "turnoff" == action:
+            #:action turnoff :parameters (?dev - device)
+            item = parameters[0]
+            return {'type': 'G', 'description': {'goal': 'turnedOff', 'device': dest, 'hand': 'hand_right'}}
+    plan = None
+    if requestData.get("smart", False):
+        plan = handle_abort_commands(w)
+    if (not requestData.get("smart", False)) or (plan is None) or (0 == len(plan)):
+        for ef in w.getObjectProperty((agentName,), ('fn', 'grasping', 'effectors'), []):
+            w.setObjectProperty((agentName,), ('customStateVariables', 'grasping', 'intendToGrasp', ef), [])
+        _cancelClopens(w, agentName)
+        _cancelGardenAction(w, agentName, todos)
+        return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
+    else:
+        garden = {0: _pddl2PG(plan[0])}
+        w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), garden)
+        todos['goals'] = [{0: _pddl2PG(x)} for x in plan[1:]]
+
 
 def toUpdateAvatar(requestData, w, agentName, todos):
     def _adjustTarget(p,q,ef,csv):
@@ -1281,7 +1320,7 @@ def processActionRequest(fn, requestData, w, agentName, todos):
 def processInstantRequest(fn, requestData, w, agentName, todos):
     status, response = fn(requestData, w, agentName, todos)
     return False, status, response
-    
+
 commandFns = {
     "to-get-time": [processInstantRequest, toGetTime, None], 
     "to-cancel": [processInstantRequest, toCancel, None],

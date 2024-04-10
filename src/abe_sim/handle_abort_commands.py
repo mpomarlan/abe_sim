@@ -168,8 +168,10 @@ def handle_abort_commands(world: World):
         result = response['result']
         if response['status'] != 'ok' or result is None or result['stderr'] != '' or result['output'] == {}:
             print('No plan found. Abe cannot cancel gracefully.')
-            return
+            return None
 
         plan = result['output']['sas_plan']
         steps = list(map(extract_command, re.findall(r'\((\S+)\s+(.*)\)', plan)))
-        print([(step, list(map(lambda x: snake_to_camel(x), params))) for step, params in steps])
+        retq = [(action, list(map(lambda x: snake_to_camel(x), params))) for action, params in steps]
+        print(retq)
+        return retq

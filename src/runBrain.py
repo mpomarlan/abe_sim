@@ -236,7 +236,7 @@ def runBrain():
     #signal.signal(signal.SIGBREAK, handleINT)
     signal.signal(signal.SIGINT, handleINT)
     signal.signal(signal.SIGTERM, handleINT)
-    todos = {"currentAction": None, "goals": [], "requestData": {}, "command": None, "cancelled": False}
+    todos = {"currentAction": None, "goals": [], "requestData": {}, "command": None, "cancelled": False, "altered": False}
     if vpg:
         cmd = "python3 %s" % str(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./abe_sim/vistreewrapper.py"))
         visProc = subprocess.Popen(cmd, subprocess.PIPE, creationflags=subprocess.CREATE_NEW_CONSOLE)
@@ -256,10 +256,12 @@ def runBrain():
                     todos["requestData"] = requestData
                     todos["command"] = command
                     todos["cancelled"] = False
+                    todos["altered"] = False
                 else:
                     if todos["currentAction"] is None:
                         todos["goals"] = []
                         todos["cancelled"] = False
+                        todos["altered"] = False
                     requestDictionary.pop(commandId)
                 responseDictionary[commandId] = doingAction, status, response
                 with answeringRequest:
@@ -277,12 +279,13 @@ def runBrain():
                 if (0 not in garden) or (garden[0].get('previousStatus', False)) or ("error" in garden[0]):
                     if (0 == len(todos["goals"])) or ("error" in garden[0]):
                         requestDictionary.pop(todos["currentAction"])
-                        if todos["cancelled"]:
+                        if todos["cancelled"] or todos["altered"]:
                             responseDictionary[todos["currentAction"]] = [False, requests.status_codes.codes.GONE, 'Action cancelled by user.']
                         else:
                             responseDictionary[todos["currentAction"]] = stopProcessCommand(todos["command"], todos["requestData"], w, agentName)
                         todos["currentAction"] = None
                         todos["cancelled"] = False
+                        todos["altered"] = False
                         with executingAction:
                             executingAction.notify_all()
                     else:
