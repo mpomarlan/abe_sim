@@ -5,8 +5,8 @@
 
     (:types
         locatable - object
-        container utensil food - locatable
-        vessel clopenable notclopenablestorage - container
+        container utensil food disposable - locatable
+        vessel clopenable notclopenablestorage trash_can - container
         device fridge clopenablestorage - clopenable
         perishable nonperishable - food
     )
@@ -30,6 +30,7 @@
         (safe-device ?dev - device) ; off, safe-clopenable, nu exista food care se afla (tranzitiv) in device, nu exista vessel, nu exista utensils
         (safe-vessel ?ves - vessel) ;ori in fridge (in caz ca (,) contine alimente perisabile) ori in storage, ori in notclopenablestorage
         (safe-utensil ?ut - utensil) ; intr-un clopenablestorage sau notclopenablestorage (de exemplu dulap, masa, etc...)
+        (safe-disposable ?disp - disposable) ; intr-un clopenablestorage sau notclopenablestorage (de exemplu dulap, masa, etc...)
         (transitive-at ?obj - locatable ?loc - locatable)
 
     )
@@ -161,23 +162,32 @@
     (:derived
         (safe-vessel ?ves - vessel) ;ori in fridge (in caz ca (,) contine alimente perisabile) ori in storage, ori in notclopenablestorage
         (or
-            (exists
-                (?st - clopenablestorage)
-                (at ?ves ?st)
-            )
-            (exists
-                (?st - notclopenablestorage)
-                (at ?ves ?st)
-            )
-            (exists
-                (?fr - fridge)
-                (and
-                    (at ?ves ?fr)
-                    (exists
+            (and
+                (not (exists
                         (?p - perishable)
                         (at ?p ?ves)
                     )
+                )
+                (or
+                    (exists
+                        (?st - clopenablestorage)
+                        (at ?ves ?st)
+                    )
+                    (exists
+                        (?st - notclopenablestorage)
+                        (at ?ves ?st)
+                    )
+                )
+            )
 
+            (exists
+                (?p - perishable)
+                (and
+                    (at ?p ?ves)
+                    (exists
+                        (?fr - fridge)
+                        (at ?ves ?fr)
+                    )
                 )
             )
         )
@@ -198,8 +208,16 @@
     )
 
     (:derived
+        (safe-disposable ?disp - disposable) ; intr-un clopenablestorage sau notclopenablestorage (de exemplu dulap, masa, etc...)
+        (exists
+            (?can - trashcan)
+            (at ?disp ?can)
+        )
+    )
+
+    (:derived
         (robot-can-grasp)
-        (or
+        (and
             (not (exists
                     (?obj - locatable)
                     (holding-left ?obj)
