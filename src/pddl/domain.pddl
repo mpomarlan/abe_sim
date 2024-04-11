@@ -6,7 +6,8 @@
     (:types
         locatable - object
         container utensil food disposable - locatable
-        vessel clopenable notclopenablestorage trash_can - container
+        vessel storage trash_can - container
+        clopenable notclopenablestorage - storage
         device fridge clopenablestorage - clopenable
         perishable nonperishable - food
     )
@@ -36,7 +37,7 @@
     )
 
     (:action move
-        :parameters (?gr - locatable ?src - container ?dest - container)
+        :parameters (?gr - locatable ?src - container ?dest - storage)
         :precondition (and
             (robot-can-grasp)
             (not (immobile ?gr))
@@ -49,7 +50,7 @@
     )
 
     (:action put
-        :parameters (?gr - locatable ?dest - container)
+        :parameters (?gr - locatable ?dest - storage)
         :precondition (and
             (or
                 (holding-left ?gr)
