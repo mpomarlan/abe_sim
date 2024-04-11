@@ -3,7 +3,7 @@ import os
 BASE_PATH = os.path.dirname(__file__)
 DOMAIN_FILE_PATH = BASE_PATH + "\\..\\pddl\\domain.pddl"
 WORLD_STATE_FILE_PATH = BASE_PATH + "\\..\\WS1.log"
-
+    
 PDDL_PLANNER_URL = "https://solver.planning.domains:5001"
 PDDL_PROBLEM_HEADER = "(problem abe_cancel_problem) (:domain abe_cancel)"
 PDDL_GOAL = """

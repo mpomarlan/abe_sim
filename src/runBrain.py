@@ -238,7 +238,7 @@ def runBrain():
     signal.signal(signal.SIGTERM, handleINT)
     todos = {"currentAction": None, "goals": [], "requestData": {}, "command": None, "cancelled": False, "altered": False}
     if vpg:
-        cmd = "python3 %s" % str(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./abe_sim/vistreewrapper.py"))
+        cmd = "\"" + sys.executable + ("\" \"%s\"" % str(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./abe_sim/vistreewrapper.py")))
         visProc = subprocess.Popen(cmd, subprocess.PIPE, creationflags=subprocess.CREATE_NEW_CONSOLE)
         treeVizThread = threading.Thread(target=thread_function_websockets, args=(updateTreeViz, gardenCopyLock, gardenCopy))
         treeVizThread.start()
