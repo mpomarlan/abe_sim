@@ -130,6 +130,7 @@ class World():
         self._idx2KinematicTree = {}
         self._customDynamicsAPI = {'ktree': {}, 'kcon': {}, 'marker': {}}
         self._customDynamics = []
+        self._lastProfile = {"stepSimulation":0, "customDynamics": {}}
         if customDynamics is not None:
             self._customDynamics = list(customDynamics)
         self._profile = 0
@@ -207,6 +208,8 @@ class World():
           'getObjectTypeKnowledge': (lambda x : self.getObjectTypeKnowledge(x)),
           'getProcessOutcome': (lambda x : self.getProcessOutcome(x)), 
           'getProcessResource': (lambda x: self.getProcessResource(x))}
+    def getLastProfile(self):
+        return self._lastProfile
     def getObjectTypeKnowledge(self, otype):
         return copy.deepcopy(self._objectKnowledge.get(otype, None))
     def copy(self):
@@ -1147,6 +1150,7 @@ class World():
         return retq
     def update(self, customDynamics=None):
         #print("FRAME")
+        self._lastProfile = {"stepSimulation": 0, "customDynamics": {}}
         self._detProfGet = {}
         s = time.perf_counter()
         self._cacheTime += 1
@@ -1156,9 +1160,11 @@ class World():
         self._profileOVR = 0
         self._profileGET = 0
         self._profileSET = 0
+        sR = time.perf_counter()
         if 0 < len(self._limbo):
             c = self._limbo.pop()
             stubbornTry(lambda : pybullet.removeBody(c['idx']))
+        eR = time.perf_counter()
         # Only allow custom dynamics to write the properties or potentially remove the object they apply to.
         if customDynamics is None:
             customDynamics = []
@@ -1169,11 +1175,15 @@ class World():
                     for updateFn in list(self._customDynamicsUpdaters[objType][name]):
                         if name not in objRecs:
                             break
+                        sF = time.perf_counter()
                         updateFn(name, self._customDynamicsAPI[objType][name])
+                        eF = time.perf_counter()
+                        self._lastProfile["customDynamics"][name] = self._lastProfile["customDynamics"].get(name,0) + (eF-sF)
         eD = time.perf_counter()
         sS = time.perf_counter()
         stubbornTry(lambda : pybullet.stepSimulation(self._pybulletConnection))
         eS = time.perf_counter()
+        self._lastProfile["stepSimulation"] = (None, (eS-sS) + (eR-sR))
         self._computedCollisions = True
         self._frameStepCount = 1
         e = time.perf_counter()

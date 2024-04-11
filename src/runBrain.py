@@ -292,6 +292,9 @@ def runBrain():
                         w.setObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), todos["goals"][0])
                         todos["goals"] = todos["goals"][1:]
         stepEnd = time.perf_counter()
+        stepDuration = (stepEnd-stepStart)
+        agentLoad = 100*(w.getLastProfile()["customDynamics"].get(agentName,0)/stepDuration)
+        w.setObjectProperty((agentName,), ("customStateVariables", "agentLoad"), agentLoad)
         #print(w.getObjectProperty(('abe', 'hand_right_roll'), 'position'), w.getObjectProperty(('abe', 'hand_right_roll'), 'linearVelocity'), pybullet.getContactPoints(bodyA=w._kinematicTrees['abe']['idx']))
         # TODO: clarify whether this branch is still needed.
         #     - it was inserted here because of M1 troubles in the Venice meeting(?)
@@ -299,7 +302,7 @@ def runBrain():
         #     by making lock passing between threads difficult
         #if not isAMac:
         if True:
-            time.sleep(max((frameDurationFactor/(sfr*1.0))-(stepEnd-stepStart), 0.001))
+            time.sleep(max((frameDurationFactor/(sfr*1.0))-stepDuration, 0.001))
 
 if "__main__" == __name__:
     runBrain()

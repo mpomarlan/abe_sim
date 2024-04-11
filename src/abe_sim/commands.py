@@ -299,6 +299,7 @@ def toGetStateUpdates(requestData, w, agentName, todos):
     trackedProcs = {'nearing', 'parkingArm', 'grasping', 'ungrasping', 'armNearingItemHandle', 'loweringItem', 'opening', 'closing', 'transferringContents', 'mixing', 'lining', 'shaping', 'sprinkling', 'cuttingItem'}
     garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
     acts = [_strP(x) for x in garden.values() if ('process' in x['description']) and (x['description']['process'] in trackedProcs) and _active(x, garden)]
+    agentLoad = w.getObjectProperty((agentName,), ("customStateVariables", "agentLoad"), 0)
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
@@ -307,7 +308,7 @@ def toGetStateUpdates(requestData, w, agentName, todos):
             updates[name]['position'] = {'base': [updates[name]['joints']['world_to_base_x'], updates[name]['joints']['base_x_to_base_y'], 0], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
             halfYaw = 0.5*updates[name]['joints']['base_y_to_base_yaw']
             updates[name]['orientation'] = {'base': [0,0, math.sin(halfYaw), math.cos(halfYaw)], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
-    return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "currentCommand": str(todos["command"]), "abeActions": acts}}
+    return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "agentLoad": agentLoad, "currentCommand": str(todos["command"]), "abeActions": acts}}
 
 def toPreloadObject(requestData, w, agentName, todos):
     otype = requestData.get('type', None)
