@@ -2822,7 +2822,7 @@
                      "graspable": true,
                      "containment": {
                             "height": {
-                                   "cookingPot": 0.5
+                                   "pot": 0.5
                             },
                             "pouring": {
                                    "outof": {
