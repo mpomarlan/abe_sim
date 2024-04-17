@@ -83,8 +83,17 @@ def toCancel(requestData, w, agentName, todos):
             item = parameters[0]
             return {'type': 'G', 'description': {'goal': 'turnedOff', 'device': dest, 'hand': 'hand_right'}}
     plan = None
+    garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
+    if 0 not in garden:
+        return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
     if requestData.get("smart", False):
-        plan = handle_abort_commands(w)
+        topGoal = garden[0]["description"]
+        blacklist = set(["goal", "process", "amount", "unit", "duration", "hand", "temperature"])
+        relevantEntities = set([v for k,v in topGoal.items() if k not in blacklist])
+        for ef in w.getObjectProperty((agentName,), ('fn', 'grasping', 'effectors'), []):
+            intended = w.getObjectProperty((agentName,), ('customStateVariables', 'grasping', 'intendToGrasp', ef), [])
+            relevantEntities = relevantEntities.union(intended)
+        plan = handle_abort_commands(w, relevantEntities)
     if (not requestData.get("smart", False)) or (plan is None) or (0 == len(plan)):
         for ef in w.getObjectProperty((agentName,), ('fn', 'grasping', 'effectors'), []):
             w.setObjectProperty((agentName,), ('customStateVariables', 'grasping', 'intendToGrasp', ef), [])

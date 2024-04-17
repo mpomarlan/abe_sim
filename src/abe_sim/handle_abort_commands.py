@@ -55,7 +55,7 @@ def extract_abe_world_state_objects(objects):
     return world_state_objects
 
 
-def compute_pddl_init_state(abe_world_state_objects):
+def compute_pddl_init_state(abe_world_state_objects, relevant_world_state_objects):
     pddl_init_predicates = []
     pddl_objects = []
     for abe_object in abe_world_state_objects:
@@ -70,6 +70,9 @@ def compute_pddl_init_state(abe_world_state_objects):
         inferred_type = infer_pddl_type(abe_object)
         if inferred_type is not None:
             pddl_objects.append(f"{name} - {inferred_type}")
+
+            if name in relevant_world_state_objects:
+                pddl_init_predicates.append(f"(relevant {name})")
 
             location = abe_object['at']
             if location is not None and location not in ABE_ROBOT_NAMES:
@@ -98,9 +101,10 @@ def compute_pddl_init_state(abe_world_state_objects):
       """
 
 
-def compute_pddl_problem(world):
+def compute_pddl_problem(world, relevantEntities):
     abe_world_state_objects = extract_abe_world_state_objects(world.worldDump())
-    init_state = compute_pddl_init_state(abe_world_state_objects)
+    relevant_world_state_objects = set([x["name"] for x in abe_world_state_objects]).intersection(relevantEntities)
+    init_state = compute_pddl_init_state(abe_world_state_objects, relevant_world_state_objects)
     return f"(define {PDDL_PROBLEM_HEADER} {init_state} {PDDL_GOAL})"
 
 
@@ -144,11 +148,11 @@ def extract_command(match):
     return command, parameters
 
 
-def handle_abort_commands(world: World):
+def handle_abort_commands(world: World, relevantEntities: set):
     with open(DOMAIN_FILE_PATH, 'r') as domain_file:
 
         print('Defining PDDL problem dynamically from world state...')
-        problem = compute_pddl_problem(world)
+        problem = compute_pddl_problem(world, relevantEntities)
         print(f'PDDL problem definition complete.')
 
         req_body = {
