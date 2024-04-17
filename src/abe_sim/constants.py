@@ -11,31 +11,52 @@ PDDL_GOAL = """
         (and
             (forall
                 (?pf - perishable)
-                (safe-perishable ?pf)
+                (or
+                    (not (relevant ?pf))
+                    (safe-perishable ?pf)
+                )
             )
             (forall
                 (?npf - nonperishable)
-                (safe-nonperishable ?npf)
+                (or
+                    (not (relevant ?npf))
+                    (safe-nonperishable ?npf)
+                )
             )
             (forall
                 (?cl - clopenable)
-                (safe-clopenable ?cl)
+                (or
+                    (not (relevant ?cl))
+                    (safe-clopenable ?cl)
+                )
             )
             (forall
                 (?dev - device)
-                (safe-device ?dev)
+                (or
+                    (not (relevant ?dev))
+                    (safe-device ?dev)
+                )
             )
             (forall
                 (?ves - vessel)
-                (safe-vessel ?ves)
+                (or
+                    (not (relevant ?ves))
+                    (safe-vessel ?ves)
+                )
             )
             (forall
                 (?ut - utensil)
-                (safe-utensil ?ut)
+                (or
+                    (not (relevant ?ut))
+                    (safe-utensil ?ut)
+                )
             )
             (forall
                 (?dis - disposable)
-                (safe-disposable ?dis)
+                (or
+                    (not (relevant ?dis))
+                    (safe-disposable ?dis)
+                )
             )
         )
     )"""

@@ -16,6 +16,7 @@
     ;(:constants )
 
     (:predicates
+        (relevant ?obj - object)
         (at ?obj - locatable ?loc - locatable)
         (holding-left ?obj - locatable)
         (holding-right ?obj - locatable)
@@ -211,7 +212,7 @@
     (:derived
         (safe-disposable ?disp - disposable) ; intr-un clopenablestorage sau notclopenablestorage (de exemplu dulap, masa, etc...)
         (exists
-            (?can - trashcan)
+            (?can - trash_can)
             (at ?disp ?can)
         )
     )
