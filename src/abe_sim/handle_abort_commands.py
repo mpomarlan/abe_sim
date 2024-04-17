@@ -149,6 +149,7 @@ def extract_command(match):
 
 
 def handle_abort_commands(world: World, relevantEntities: set):
+    relevantEntities = set([camel_to_snake(x) for x in relevantEntities])
     with open(DOMAIN_FILE_PATH, 'r') as domain_file:
 
         print('Defining PDDL problem dynamically from world state...')
