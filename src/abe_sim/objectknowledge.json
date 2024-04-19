@@ -43,12 +43,12 @@
                                    "hand_right"
                             ],
                             "graspingActivationRadius": {
-                                   "hand_left": 0.1,
-                                   "hand_right": 0.1
-                            },
-                            "graspingDeactivationRadius": {
                                    "hand_left": 0.2,
                                    "hand_right": 0.2
+                            },
+                            "graspingDeactivationRadius": {
+                                   "hand_left": 0.3,
+                                   "hand_right": 0.3
                             },
                             "link2EF": {
                                    "hand_left_roll": "hand_left",

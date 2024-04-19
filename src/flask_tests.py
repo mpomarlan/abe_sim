@@ -23,10 +23,16 @@ def cancelAbeSmart(smart = False):
     response = json.loads(r.text)['response']
     print("CANCELLATION:", response)
     
-### Command _: fetch mediumBowl3 to kitchen counter
-def fetch():
-    req= {'object': 'mediumBowl3', 'kitchenStateIn': None, 'setWorldState': False}
+### Command _: fetch onion to kitchen counter
+def fetchOnion():
+    req= {'object': 'onion', 'kitchenStateIn': None, 'setWorldState': False}
     r = requests.post("http://localhost:54321/abe-sim-command/to-fetch", data=bytes(json.dumps(req), "utf-8"))
+    response = json.loads(r.text)['response']
+    print("FETCHING:", response)
+
+def cutOnion():
+    req= {'object': 'onion', 'cuttingTool': 'cookingKnife', 'cutPattern': 'dice', 'kitchenStateIn': None, 'setWorldState': False}
+    r = requests.post("http://localhost:54321/abe-sim-command/to-cut", data=bytes(json.dumps(req), "utf-8"))
     response = json.loads(r.text)['response']
     print("FETCHING:", response)
 

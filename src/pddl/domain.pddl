@@ -51,7 +51,7 @@
     )
 
     (:action put
-        :parameters (?gr - locatable ?dest - storage)
+        :parameters (?gr - locatable ?dest - notclopenablestorage)
         :precondition (and
             (or
                 (holding-left ?gr)
