@@ -9137,5 +9137,1140 @@
               "customStateVariables": {
               }
               
+       },
+       {
+              "type": "CreamedButter",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/creamed_butter.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CocoaFlourMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cocoa_flour_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CocoaFlourButterMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cocoa_flour_butter_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CocoaFlourButterCornflakesMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cocoa_flour_butter_cornflakes_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "Icing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/icing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie2BeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie2_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie2IntermediateMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie2_intermediate_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie2Dough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie2_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie3BeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie3_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie3IntermediateMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie3_intermediate_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie3Dough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie3_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie4BeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie4_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie4Dough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie4_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie5BeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie5_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie5IntermediateMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie5_intermediate_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookie5Dough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie5_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookieBeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookieIntermediateMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie_intermediate_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "AlmondCookieDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/almondcookie_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "ChickenSaladSauceMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/chicken_salad_sauce_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BrownieBeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/brownie_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BrownieEggSugarMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/brownie_egg_sugar_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BrownieFlourSugarMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/brownie_flour_sugar_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BrownieDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/brownie_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BisquickShortcakeIntermediateMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/bisquick_shortcake_intermediate_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BisquickShortcakeDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/bisquick_shortcake_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BlackBeanSalad2Dressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/black_Bean_Salad2_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BlackBeanSalad2StirredMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/black_Bean_Salad2_stirred_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BlackBeanSalad4LiquidMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/black_Bean_Salad4_liquid_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BroccoliSaladDressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/broccoli_salad_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CupcakesIntermediateMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cupcakes_intermediate_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "ChocolateFudgeCookiesStirredMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/chocolate_fudge_cookies_stirred_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "ClassicGreekSaladDressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/classic_greek_salad_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "ClassicPotatoSaladDressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/classic_potato_salad_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CoconutTuilesBeatenButter",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/coconut_tuiles_beaten_butter.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CoconutTuilesButterSugarMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/coconut_tuiles_butter_sugar_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CoconutTuilesBeatenEggMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/coconut_tuiles_beaten_egg_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "ColeSlawDressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cole_slaw_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CroutonsVinegarSaladDressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/croutons_vinegar_salad_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CucumberSlicesLiquidMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cucumber_slices_liquid_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "MashedBanana",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/mashed_banana.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BananaBreadCreamedMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/banana_bread_creamed_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BananaBreadBeatenMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/banana_bread_beaten_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BananaBreadBatter",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/banana_bread_batter.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "CherryTomatoSaladDressing",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/cherry_tomato_salad_dressing.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "OatmealCookiesSiftedIngredients",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/oatmeal_cookies_sifted_ingredients.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "OatmealCookiesOatsMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/oatmeal_cookies_oats_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "OatmealCookiesDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/oatmeal_cookies_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "MexicanWeddingCookiesDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/mexican_wedding_cookies_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "BlackBeanSweetPotatoMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/black_bean_sweet_potato_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "GingerSnapsCreamedButter",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/ginger_snaps_creamed_butter.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "GingerSnapsCreamEggsMolassesMix",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/ginger_snaps_cream_eggs_molasses_mix.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "GingerSnapsDryMixture",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/ginger_snaps_dry_mixture.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
+       },{
+              "type": "GingerSnapsDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Particles/ginger_snaps_dough.urdf",
+              "fn": {
+                     "absorbable": true,
+                     "consumable": true,
+                     "transportable": true,
+                     "mixable": true,
+                     "sticky": true,
+                     "temperatureUpdateable": true,
+                     "mixing": {
+                            "mixableRadius": 0.4,
+                            "substanceRadius": 0.4
+                     }
+              },
+              "customStateVariables": {
+                     "mixing": {
+                            "hp": 720
+                     }
+              }
        }
 ]

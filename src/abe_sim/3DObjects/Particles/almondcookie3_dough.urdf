@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<robot name="almondcookie3_dough">
+  <link name="almondcookie3_dough">
+    <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="2e-5" ixy="0" ixz="0" iyy="2e-5" iyz="0" izz="2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="almondcookie3_dough.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="almondcookie3_dough.obj"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
