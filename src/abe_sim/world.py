@@ -121,6 +121,7 @@ dirPath = os.path.dirname(os.path.realpath(__file__))
 
 class World():
     def __init__(self, pybulletOptions="", useGUI=True, name="pybulletWorld", gravity=None, backgroundTemperature=None, heatExchangeCoefficient=None, worldSize=1000000.0, objectKnowledge=None, processKnowledge=None, customDynamics=None, simFrameRate=None):
+        self._kincompDyn = None
         self._name = name
         self._limbo = []
         self._ylem = {}
@@ -548,6 +549,8 @@ class World():
         #for isApplicable, updateFn in self._customDynamics:
         #    if isApplicable(lambda x, y=None: self.getObjectProperty((name,), x, y)):
         for disposition, updateFn in self._customDynamics:
+            if (('fn', 'kinematicallyControlable') == disposition):
+                self._kincompDyn = updateFn
             if self.getObjectProperty((name,), disposition):
                 self._customDynamicsUpdaters[simtype][name].append(updateFn)    
     def addNewObject(self, description):
@@ -1178,7 +1181,10 @@ class World():
                         sF = time.perf_counter()
                         updateFn(name, self._customDynamicsAPI[objType][name])
                         eF = time.perf_counter()
-                        self._lastProfile["customDynamics"][name] = self._lastProfile["customDynamics"].get(name,0) + (eF-sF)
+                        inc = 0
+                        if updateFn == self._kincompDyn:
+                            inc = (eF-sF)
+                        self._lastProfile["customDynamics"][name] = self._lastProfile["customDynamics"].get(name,0) + inc
         eD = time.perf_counter()
         sS = time.perf_counter()
         stubbornTry(lambda : pybullet.stepSimulation(self._pybulletConnection))
