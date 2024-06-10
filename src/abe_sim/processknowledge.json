@@ -3241,6 +3241,12 @@
                         }
                 },
                 "chopping": {
+                        "Apple": {
+                                "default": {
+                                        "toDelete":true,
+                                        "toAdd": [
+                                                "HalfApple",
+                                                        [[[0,0.01,0],[0,0,1,0]], [[0,-0.01,0],[0,0,0,1]]]]}},
                         "BreadSlice": {
                                 "default": {
                                         "toDelete": true,

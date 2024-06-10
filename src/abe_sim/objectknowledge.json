@@ -1,5 +1,86 @@
 [
        {
+              "type": "Apple",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Apple/Apple.urdf",
+              "fn": {
+                     "choppable": true,
+                     "stabable": true,
+                     "graspable": true,
+                     "cutting": {
+                            "force": 0.3,
+                            "radius": 0.2
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "HalfApple",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Apple/Half_Apple.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Fork",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Fork/Fork.urdf",
+              "fn": {
+                     "canStab": true,
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Bowl",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Bowl/Bowl.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Bottle",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Bottle/BeerBottle.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Knife",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Knife/Knife.urdf",
+              "fn": {
+                     "canCut": true,
+                     "graspable": true,
+                     "cutting": {
+                            "links": [
+                                   "knife"
+                            ],
+                            "length": {
+                                   "knife": [
+                                          0,
+                                          0,
+                                          1
+                                   ]
+                            },
+                            "axis": {
+                                   "knife": [
+                                          -1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     }
+              },
+              "customStateVariables": {}
+       },
+       {
               "type": "Abe",
               "simtype": "ktree",
               "filename": "3DObjects/Abe/abe.urdf",
@@ -1941,42 +2022,6 @@
               "customStateVariables": {}
        },
        {
-              "type": "Apple",
-              "simtype": "ktree",
-              "filename": "3DObjects/Apple/apple.urdf",
-              "fn": {
-                     "cuttable": true,
-                     "graspable": true,
-                     "temperatureUpdateable": true,
-                     "cutting": {
-                            "force": 0.3,
-                            "radius": 0.2
-                     }
-              },
-              "customStateVariables": {}
-       },
-       {
-              "type": "HalfApple",
-              "simtype": "ktree",
-              "filename": "3DObjects/Apple/half_apple.urdf",
-              "fn": {
-                     "graspable": true,
-                     "seedable": true,
-                     "temperatureUpdateable": true,
-                     "seeding": {
-                            "radius": 0.1,
-                            "links": [
-                                   "seeds"
-                            ]
-                     }
-              },
-              "customStateVariables": {
-                     "seeding": {
-                            "hp": 10
-                     }
-              }
-       },
-       {
               "type": "SeededHalfApple",
               "simtype": "ktree",
               "filename": "3DObjects/Apple/seeded_half_apple.urdf",
@@ -3146,16 +3191,6 @@
                             "hp": 5
                      }
               }
-       },
-       {
-              "type": "Fork",
-              "simtype": "ktree",
-              "filename": "3DObjects/Fork/fork.urdf",
-              "fn": {
-                     "temperatureUpdateable": true,
-                     "graspable": true
-              },
-              "customStateVariables": {}
        },
        {
               "type": "GarlicPowderParticle",
