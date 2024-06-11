@@ -23,6 +23,7 @@ import abe_sim.world as world
 from abe_sim.motionPlanning import updateMotionPlanning
 from abe_sim.kinematicControl import updateKinematicControl
 from abe_sim.grasping import updateGrasping, updateGraspingConstraint
+from abe_sim.stabbing import updateStabbing
 from abe_sim.timing import updateTiming
 from abe_sim.processGardening import updateGarden
 from abe_sim.transporting import updateTransportingConstraint, updateTransporting
@@ -145,7 +146,7 @@ def runBrain():
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation, kwargs] (kwargs optional)')
     parser.add_argument('-vpg', '--visualizeProcessGarden',action="store_true", help="Enable visualization of the process garden in a separate text window.")
     arguments = parser.parse_args()
-    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'canUpdateTemperature'), updateTemperatureSetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening], [('fn', 'turnable'), updateTurning], [('fn', 'mingleable'), updateMingling]]
+    customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'stabable'), updateStabbing], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'canUpdateTemperature'), updateTemperatureSetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'clopenable'), updateClopening], [('fn', 'turnable'), updateTurning], [('fn', 'mingleable'), updateMingling]]
 
     objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
     objectTypeKnowledge = {x['type']: x for x in objectTypeKnowledge}

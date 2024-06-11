@@ -29,7 +29,10 @@
               "filename": "3DObjects/FancySkinned/Fork/Fork.urdf",
               "fn": {
                      "canStab": true,
-                     "graspable": true
+                     "graspable": true,
+                     "stabbing": {
+                         "axis": [-1,0,0]
+                     }
               },
               "customStateVariables": {}
        },
