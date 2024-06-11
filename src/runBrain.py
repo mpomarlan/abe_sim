@@ -220,7 +220,7 @@ def runBrain():
     waitingFor = 0
     
     if (agentName is None) or (agentName not in w._kinematicTrees.keys()):
-        agentName = [x['name'] for x in w._kinematicTrees.values() if 'Abe' == x['type']][0]
+        agentName = {k:x['name'] for k,x in enumerate(w._kinematicTrees.values()) if 'Abe' == x['type']}.get(0)
     
     executingAction = threading.Condition()
     updateTreeViz = threading.Condition()

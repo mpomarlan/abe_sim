@@ -1,5 +1,13 @@
 [
        {
+              "type": "DemoTable",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Table/Table.urdf",
+              "immobile": true,
+              "fn": {},
+              "customStateVariables": {}
+       },
+       {
               "type": "Apple",
               "simtype": "ktree",
               "filename": "3DObjects/FancySkinned/Apple/Apple.urdf",
@@ -37,6 +45,15 @@
               "type": "Bowl",
               "simtype": "ktree",
               "filename": "3DObjects/FancySkinned/Bowl/Bowl.urdf",
+              "fn": {
+                     "graspable": true
+              },
+              "customStateVariables": {}
+       },
+       {
+              "type": "Glass",
+              "simtype": "ktree",
+              "filename": "3DObjects/FancySkinned/Glass/Glass.urdf",
               "fn": {
                      "graspable": true
               },
