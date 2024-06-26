@@ -307,8 +307,12 @@ def toGetStateUpdates(requestData, w, agentName, todos):
         return ''
     trackedProcs = {'nearing', 'parkingArm', 'grasping', 'ungrasping', 'armNearingItemHandle', 'loweringItem', 'opening', 'closing', 'transferringContents', 'mixing', 'lining', 'shaping', 'sprinkling', 'cuttingItem'}
     garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
+    if garden is None: # this may happen when there is no agent in the scene
+        garden = {} # TODO: decide whether getObjectProperty should enforce a default value also when the identifier is invalid
     acts = [_strP(x) for x in garden.values() if ('process' in x['description']) and (x['description']['process'] in trackedProcs) and _active(x, garden)]
     agentLoad = w.getObjectProperty((agentName,), ("customStateVariables", "agentLoad"), 0)
+    if agentLoad is None:
+        agetnLoad = 0 # TODO: same as above
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
