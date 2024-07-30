@@ -47,13 +47,15 @@ def updateStabbing(name, customDynamicsAPI):
         normsq=math.sqrt(sum([x*x for x in diff]))
         if(normsq<0.01):
             continue
+        norm = math.sqrt(normsq)
         diff=[x/norm for x in diff]
         axis=w._kinematicTrees[stabber]["fn"]["stabbing"]["axis"]
-        axis=stubbornTry(lambda v,q: pybullet.rotateVector(ornStabber,axis))
+        axis=stubbornTry(lambda : pybullet.rotateVector(ornStabber,axis))
         dot=sum([x*y for x,y in zip(diff,axis)])
-        if 0.8>dot:
+        print("DOTDOTDOT", dot)
+        if 0.4>dot:
             continue
         constraintName = ("STABBING_%s_%s_%s_%s" % (stabber, stabberLink, name, childLink))
         w.addObject({"fn": {"stabbingConstraint": True}, "name": constraintName, "simtype": "kcon", "parent": stabber, "child": name, "parentLink": stabberLink, "childLink": childLink, "jointType": "fixed", "maxForce": maxForce})
-        w._kinematicTrees[name]["customStateVariables"].append(constraintName)
+        w._kinematicTrees[name]["customStateVariables"]["stabbedBy"] = stabbedBy + [constraintName]
                 
