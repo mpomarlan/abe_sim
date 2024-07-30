@@ -27,6 +27,7 @@ def updateGrasping(name, customDynamicsAPI):
     if "grasping" not in w._kinematicTrees[name]["customStateVariables"]:
         w._kinematicTrees[name]["customStateVariables"]["grasping"] = {}
     csvGrasping = w._kinematicTrees[name]["customStateVariables"]["grasping"]
+    #print("GRASPING", name, csvGrasping)
     fn = w._kinematicTrees[name].get("fn") or {}
     fnGrasping = fn.get("grasping") or {}
     fnKinematicControl = fn.get("kinematicControl") or {}
@@ -35,15 +36,18 @@ def updateGrasping(name, customDynamicsAPI):
     efs = fnGrasping.get("effectors") or []
     newActuallyGrasped = {}
     for ef in efs:
+        #print("    ", ef)
         intendedSet = set([_toIdentifier(x) for x in intendedGrasped.get(ef, [])])
         actuallyGraspedEF = {_toIdentifier(x[0]): x[1] for x in actuallyGrasped.get(ef, [])}
         if (0 == len(intendedSet)) and (0 == len(actuallyGraspedEF)):
             continue
+        #print("    ...")
         efLink = fnKinematicControl.get("efLink", {}).get(ef)
         graspingActivationRadius = fnGrasping.get("graspingActivationRadius", {}).get(ef) or 0.1
         graspingDeactivationRadius = fnGrasping.get("graspingDeactivationRadius", {}).get(ef) or 0.2
         aabb = w.getAABB((name, efLink))
         aabbActivation = w.adjustAABBRadius(aabb, graspingActivationRadius)
+        #print("    activationBox", aabbActivation, graspingActivationRadius)
         aabbDeactivation = w.adjustAABBRadius(aabb, graspingDeactivationRadius)
         overlapsActivation = set([x[0] for x in w.checkOverlap(aabbActivation) if x[0]!=name])
         overlapsDeactivation = set([x[0] for x in w.checkOverlap(aabbDeactivation) if x[0]!=name])
@@ -64,9 +68,11 @@ def updateGrasping(name, customDynamicsAPI):
         for e in toRemove:
             actuallyGraspedEF.pop(e)
         for e in intendedSet:
-            if not w._kinematicTrees[e[0]].get("fn", {}).get("graspable"):
+            if not w._kinematicTrees.get(e[0],{}).get("fn", {}).get("graspable"):
                 continue
+            #print("    intended graspable", e)
         # check whether intended grasped items are not actually grasped, but close enough; if so, add a constraint to make them grasped
+            #print("    overlap?", e[0], overlapsActivation)
             if ((e not in actuallyGraspedEF) or (w._kinematicConstraints.get(actuallyGraspedEF[e], {}).get("name") is None)) and (e[0] in overlapsActivation):
                 child = e[0]
                 if 1 == len(e):
@@ -80,5 +86,7 @@ def updateGrasping(name, customDynamicsAPI):
                     w._kinematicTrees[child]["customStateVariables"] = {}
                 w._kinematicTrees[child]["customStateVariables"]["graspedBy"] = constraintName
         newActuallyGrasped[ef] = sorted([[list(k), v] for k, v in actuallyGraspedEF.items()])
+        #print("    ", newActuallyGrasped[ef])
     csvGrasping["actuallyGrasping"] = newActuallyGrasped
+    #print("....", csvGrasping["actuallyGrasping"])
 
