@@ -108,6 +108,35 @@ def toCancel(requestData, w, agentName, todos):
 
 
 def toUpdateAvatar(requestData, w, agentName, todos):
+    def _setArm(w, bea, arm, posBase, ornBase, pos, orn, vel, angVel):
+        #w.setObjectProperty((bea, "hand_left_roll"), )
+        links = None
+        armPos, armOrn = w.objectPoseRelativeToObject(posBase, ornBase, pos, orn)
+        rpy = stubbornTry(lambda : pybullet.getEulerFromQuaternion(armOrn))
+        vals = armPos + rpy
+        if "base" == arm:
+            links = ["base_x", "base_y", None, None, None, "base_yaw"]
+        elif "left" == arm:
+            links = ["hand_left_x", "hand_left_y", "hand_left_z", "hand_left_roll", "hand_left_pitch", "hand_left_yaw"]
+        elif "right" == arm:
+            links = ["hand_right_x", "hand_right_y", "hand_right_z", "hand_right_roll", "hand_right_pitch", "hand_right_yaw"]
+        if links is None:
+            return
+        for l,v in zip(links,vals):
+            if l is not None:
+                w.setObjectProperty((bea, l), "jointPosition", v)
+        return
+    def _move(w, x, posArmOld, ornArmOld, posArm, ornArm):
+        pos, orn, vel, angVel = w.getKinematicData((x,))
+        posRel, ornRel = w.objectPoseRelativeToObject(posArmOld, ornArmOld, pos, orn)
+        posNew, ornNew = w.objectPoseRelativeToWorld(posArm, ornArm, posRel, ornRel)
+        ornDiff = stubbornTry(lambda : pybullet.getDifferenceQuaternion(ornRel, ornNew))
+        velNew = stubbornTry(lambda : pybullet.rotateVector(ornDiff, vel))
+        angVelNew = stubbornTry(lambda : pybullet.rotateVector(ornDiff, angVel))
+        w.setObjectProperty((x,), "position", posNew)
+        w.setObjectProperty((x,), "orientation", ornNew)
+        w.setObjectProperty((x,), "linearVelocity", velNew)
+        w.setObjectProperty((x,), "angularVelocity", angVelNew)
     def _adjustTarget(p,q,ef,csv):
         if isinstance(p, str):
             p = json.loads(p)
@@ -124,32 +153,45 @@ def toUpdateAvatar(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {"response": "Did not find object %s." % bea}
     if ("Bea" != w._kinematicTrees[bea]["type"]):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {"response": "Object %s is not a human avatar." % bea}
+    actuallyGrasping = w._kinematicTrees[bea].get("customStateVariables", {}).get("grasping", {}).get("actuallyGrasping", {})
     posHead = requestData.get("positionHead")
     ornHead = requestData.get("orientationHead")
     posLeft = requestData.get("positionLeft")
     ornLeft = requestData.get("orientationLeft")
+    velLeft = requestData.get("velocityLeft", [0,0,0])
+    angVelLeft = requestData.get("angularVelocityLeft", [0,0,0])
     posRight = requestData.get("positionRight")
     ornRight = requestData.get("orientationRight")
+    velRight = requestData.get("velocityRight", [0,0,0])
+    angVelRight = requestData.get("angularVelocityRight", [0,0,0])
     graspLeft = requestData.get("graspLeft", [])
     graspRight = requestData.get("graspRight", [])
     clopenLeft = requestData.get("clopenLeft")
     clopenRight = requestData.get("clopenRight")
+    objectsToMoveLeft = requestData.get("objectsToMoveLeft", []) + [x[0] for x in actuallyGrasping.get("hand_left",{})]
+    objectsToMoveRight = requestData.get("objectsToMoveRight", []) + [x[0] for x in actuallyGrasping.get("hand_right",{})]
     csv = w._kinematicTrees[bea]["customStateVariables"]
     posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
-    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
-    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
-    targetBase = None
-    targetLeft = None
-    targetRight = None
-    if (posHead is not None) and (ornHead is not None):
-        targetBase = [[posHead[0], posHead[1], 0], stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,pybullet.getEulerFromQuaternion(ornHead)[2])))]
-    if (posLeft is not None) and (ornLeft is not None):
-        targetLeft = [posLeft, ornLeft]
-    if (posRight is not None) and (ornRight is not None):
-        targetRight = [posRight, ornRight]
-    csv["kinematicControl"]["target"] = {"base": targetBase,
-                                         "hand_left": targetLeft,
-                                         "hand_right": targetRight}
+    #targetBase = None
+    #targetLeft = None
+    #targetRight = None
+    #if (posHead is not None) and (ornHead is not None):
+    #    targetBase = [[posHead[0], posHead[1], 0], stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,pybullet.getEulerFromQuaternion(ornHead)[2])))]
+    #if (posLeft is not None) and (ornLeft is not None):
+    #    targetLeft = [posLeft, ornLeft]
+    #if (posRight is not None) and (ornRight is not None):
+    #    targetRight = [posRight, ornRight]
+    #csv["kinematicControl"]["target"] = {"base": targetBase,
+    #                                     "hand_left": targetLeft,
+    #                                     "hand_right": targetRight}
+    #posBaseOld, ornBaseOld, _, _ = w.getKinematicData((bea, "base_yaw"))
+    posLeftOld, ornLeftOld, _, _ = w.getKinematicData((bea, "hand_left_roll"))
+    posRightOld, ornRightOld, _, _ = w.getKinematicData((bea, "hand_right_roll"))
+    _setArm(w, bea, "base", [0,0,0], [0,0,0,1], posBase, ornBase, [0,0,0], [0,0,0])
+    _setArm(w, bea, "left", posBase, ornBase, posLeft, ornLeft, velLeft, angVelLeft)
+    _setArm(w, bea, "right", posBase, ornBase, posRight, ornRight, velRight, angVelRight)
+    _ = [_move(w, x, posLeftOld, ornLeftOld, posLeft, ornLeft) for x in objectsToMoveLeft]
+    _ = [_move(w, x, posRightOld, ornRightOld, posRight, ornRight) for x in objectsToMoveRight]
     csv["grasping"]["intendToGrasp"] = {"hand_left": graspLeft, "hand_right": graspRight}
     csv["clopening"]["action"] = {"hand_left": clopenLeft, "hand_right": clopenRight}
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}    
