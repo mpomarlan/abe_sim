@@ -171,7 +171,8 @@ def toUpdateAvatar(requestData, w, agentName, todos):
     objectsToMoveLeft = requestData.get("objectsToMoveLeft", []) + [x[0] for x in actuallyGrasping.get("hand_left",{})]
     objectsToMoveRight = requestData.get("objectsToMoveRight", []) + [x[0] for x in actuallyGrasping.get("hand_right",{})]
     csv = w._kinematicTrees[bea]["customStateVariables"]
-    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
+    posBase, ornBase = _adjustTarget(posHead, ornHead, "base", csv)
+    posBase = (posBase[0], posBase[1], 0)
     #targetBase = None
     #targetLeft = None
     #targetRight = None
