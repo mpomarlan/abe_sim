@@ -109,7 +109,6 @@ def toCancel(requestData, w, agentName, todos):
 
 def toUpdateAvatar(requestData, w, agentName, todos):
     def _setArm(w, bea, arm, posBase, ornBase, pos, orn, vel, angVel):
-        #w.setObjectProperty((bea, "hand_left_roll"), )
         links = None
         armPos, armOrn = w.objectPoseRelativeToObject(posBase, ornBase, pos, orn)
         rpy = stubbornTry(lambda : pybullet.getEulerFromQuaternion(armOrn))
@@ -188,11 +187,16 @@ def toUpdateAvatar(requestData, w, agentName, todos):
     #posBaseOld, ornBaseOld, _, _ = w.getKinematicData((bea, "base_yaw"))
     posLeftOld, ornLeftOld, _, _ = w.getKinematicData((bea, "hand_left_roll"))
     posRightOld, ornRightOld, _, _ = w.getKinematicData((bea, "hand_right_roll"))
-    _setArm(w, bea, "base", [0,0,0], [0,0,0,1], posBase, ornBase, [0,0,0], [0,0,0])
-    _setArm(w, bea, "left", posBase, ornBase, posLeft, ornLeft, velLeft, angVelLeft)
-    _setArm(w, bea, "right", posBase, ornBase, posRight, ornRight, velRight, angVelRight)
+    posBea, ornBea, _, _ = w.getKinematicData((bea,))
+    _setArm(w, bea, "base", posBea, ornBea, posBase, ornBase, [0,0,0], [0,0,0])
+    posLeftBase, ornLeftBase, _, _ = w.getKinematicData((bea, "hand_left_base"))
+    posRightBase, ornRightBase, _, _ = w.getKinematicData((bea, "hand_right_base"))
+    _setArm(w, bea, "left", posLeftBase, ornLeftBase, posLeft, ornLeft, velLeft, angVelLeft)
+    _setArm(w, bea, "right", posRightBase, ornRightBase, posRight, ornRight, velRight, angVelRight)
     _ = [_move(w, x, posLeftOld, ornLeftOld, posLeft, ornLeft) for x in objectsToMoveLeft]
     _ = [_move(w, x, posRightOld, ornRightOld, posRight, ornRight) for x in objectsToMoveRight]
+    apR, aoR, _, _ = w.getKinematicData((bea, "hand_right_roll"))
+    print(posBea, ornBea, posRightBase, ornRightBase, posRight, ornRight, apR, aoR)
     csv["grasping"]["intendToGrasp"] = {"hand_left": graspLeft, "hand_right": graspRight}
     csv["clopening"]["action"] = {"hand_left": clopenLeft, "hand_right": clopenRight}
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}    
