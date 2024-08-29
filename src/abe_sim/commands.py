@@ -152,6 +152,7 @@ def toUpdateAvatar(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {"response": "Did not find object %s." % bea}
     if ("Bea" != w._kinematicTrees[bea]["type"]):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {"response": "Object %s is not a human avatar." % bea}
+    print("ToUpdateAvatar", requestData)
     actuallyGrasping = w._kinematicTrees[bea].get("customStateVariables", {}).get("grasping", {}).get("actuallyGrasping", {})
     posHead = requestData.get("positionHead")
     ornHead = requestData.get("orientationHead")
@@ -167,8 +168,8 @@ def toUpdateAvatar(requestData, w, agentName, todos):
     graspRight = requestData.get("graspRight", [])
     clopenLeft = requestData.get("clopenLeft")
     clopenRight = requestData.get("clopenRight")
-    objectsToMoveLeft = requestData.get("objectsToMoveLeft", []) + [x[0] for x in actuallyGrasping.get("hand_left",{})]
-    objectsToMoveRight = requestData.get("objectsToMoveRight", []) + [x[0] for x in actuallyGrasping.get("hand_right",{})]
+    objectsToMoveLeft = requestData.get("objectsToMoveLeft", []) + [x[0][0] for x in actuallyGrasping.get("hand_left",[])]
+    objectsToMoveRight = requestData.get("objectsToMoveRight", []) + [x[0][0] for x in actuallyGrasping.get("hand_right",[])]
     csv = w._kinematicTrees[bea]["customStateVariables"]
     posBase, ornBase = _adjustTarget(posHead, ornHead, "base", csv)
     posBase = (posBase[0], posBase[1], 0)
