@@ -221,7 +221,11 @@ def runBrain():
     waitingFor = 0
     
     if (agentName is None) or (agentName not in w._kinematicTrees.keys()):
-        agentName = {k:x['name'] for k,x in enumerate(w._kinematicTrees.values()) if 'Abe' == x['type']}.get(0)
+        agentNames = [x['name'] for k,x in enumerate(w._kinematicTrees.values()) if 'Abe' == x['type']]
+        if 0 == agentNames:
+            agentName = None
+        else:
+            agentName = agentNames[0]
     
     executingAction = threading.Condition()
     updateTreeViz = threading.Condition()
@@ -303,7 +307,7 @@ def runBrain():
         #     by making lock passing between threads difficult
         #if not isAMac:
         if True:
-            time.sleep(max((frameDurationFactor/(sfr*1.0))-stepDuration, 0.001))
+            time.sleep(max((frameDurationFactor/(sfr*1.0))-stepDuration, 0.01))
 
 if "__main__" == __name__:
     runBrain()
