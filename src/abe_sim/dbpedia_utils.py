@@ -51,8 +51,13 @@ def extract_info_from_dbpedia(where_clause: str):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
     # Set the SPARQL query
     sparql_query = f"""
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX gold: <http://purl.org/linguistics/gold/>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX dbc: <http://dbpedia.org/resource/Category:>
     SELECT DISTINCT ?thing
-   WHERE {{
+    WHERE {{
     {where_clause}
     }}
 
