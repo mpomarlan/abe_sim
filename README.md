@@ -57,6 +57,7 @@ Frequently asked questions about a software component
 # Forks url:
 [https://github.com/mpomarlan/abe_sim](https://github.com/mpomarlan/abe_sim)
 [https://github.com/RRachelRR/abe_sim](https://github.com/RRachelRR/abe_sim)
+(some forks private or stale)
 # Full name:
 Abe_Sim (muhai-project/abe_sim)
 # Full title:
@@ -118,7 +119,7 @@ At this point the simulated agent is ready to receive commands via HTTP POST req
 # Keywords:
 simulation environment, simulated robot
 # License:
-[https://github.com/mpomarlan/abe_sim/blob/main/LICENSE](https://github.com/mpomarlan/abe_sim/blob/main/LICENSE)
+BSD 2-clause
 # Logo:
 Main logo used to represent the target software component
 # Name:
