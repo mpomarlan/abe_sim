@@ -266,7 +266,12 @@ def toGetObjectConstants(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
     mass = w.getObjectProperty((oname,), "mass")
     dispositions = {k:v for k,v in w._kinematicTrees[oname]["fn"].items() if isinstance(v, bool)}
-    return requests.status_codes.codes.ALL_OK, {'response': {"mass": mass, "dispositions": dispositions}}
+    retq = {"mass": mass, "dispositions": dispositions, "clopenableLinks": [], "turnableLinks": []}
+    if dispositions.get("clopenable", False):
+        retq["clopenableLinks"] = w.getObjectProperty((oname,), ("fn", "clopening", "clopenableLinks"))
+    if dispositions.get("turnable", False):
+        retq["turnableLinks"] = w.getObjectProperty((oname,), ("fn", "turning", "links"))
+    return requests.status_codes.codes.ALL_OK, {'response': retq}
 
 def toGetStateUpdates(requestData, w, agentName, todos):
     def _active(p, garden):
