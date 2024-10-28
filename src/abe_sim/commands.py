@@ -134,6 +134,8 @@ def toUpdateAvatar(requestData, w, agentName, todos):
     graspRight = requestData.get("graspRight", [])
     clopenLeft = requestData.get("clopenLeft")
     clopenRight = requestData.get("clopenRight")
+    turnLeft = requestData.get("turnLeft", [])
+    turnRight = requestData.get("turnRight", [])
     csv = w._kinematicTrees[bea]["customStateVariables"]
     posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
     posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
@@ -152,6 +154,7 @@ def toUpdateAvatar(requestData, w, agentName, todos):
                                          "hand_right": targetRight}
     csv["grasping"]["intendToGrasp"] = {"hand_left": graspLeft, "hand_right": graspRight}
     csv["clopening"]["action"] = {"hand_left": clopenLeft, "hand_right": clopenRight}
+    csv["turning"]["action"] = {"hand_left_roll": turnLeft, "hand_right_roll": turnRight}
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}    
 
 def toGetKitchen(requestData, w, agentName, todos):
