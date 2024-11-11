@@ -134,6 +134,8 @@ def toUpdateAvatar(requestData, w, agentName, todos):
     graspRight = requestData.get("graspRight", [])
     clopenLeft = requestData.get("clopenLeft")
     clopenRight = requestData.get("clopenRight")
+    turnLeft = requestData.get("turnLeft", [])
+    turnRight = requestData.get("turnRight", [])
     csv = w._kinematicTrees[bea]["customStateVariables"]
     posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
     posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
@@ -152,6 +154,7 @@ def toUpdateAvatar(requestData, w, agentName, todos):
                                          "hand_right": targetRight}
     csv["grasping"]["intendToGrasp"] = {"hand_left": graspLeft, "hand_right": graspRight}
     csv["clopening"]["action"] = {"hand_left": clopenLeft, "hand_right": clopenRight}
+    csv["turning"]["action"] = {"hand_left_roll": turnLeft, "hand_right_roll": turnRight}
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}    
 
 def toGetKitchen(requestData, w, agentName, todos):
@@ -261,14 +264,27 @@ def toSetObjectPose(requestData, w, agentName, todos):
     return requests.status_codes.codes.ALL_OK, {"response": "Ok."}
 
 def toGetObjectConstants(requestData, w, agentName, todos):
+    def _link2MinMax(w, oname, linkName):
+        linkIdx = w._kinematicTrees[oname]["links"][linkName]["idx"]
+        ans = stubbornTry(lambda : pybullet.getJointInfo(w._kinematicTrees[oname]["idx"], linkIdx, w._pybulletConnection))
+        return (linkName, ans[8], ans[9])
     oname = requestData.get("object")
     if oname not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested object does not exist in world.'}
     mass = w.getObjectProperty((oname,), "mass")
     dispositions = {k:v for k,v in w._kinematicTrees[oname]["fn"].items() if isinstance(v, bool)}
-    return requests.status_codes.codes.ALL_OK, {'response': {"mass": mass, "dispositions": dispositions}}
+    retq = {"mass": mass, "dispositions": dispositions, "clopenableLinks": [], "turnableLinks": []}
+    if dispositions.get("clopenable", False):
+        clopenableLinks = w.getObjectProperty((oname,), ("fn", "clopening", "clopenableLinks"))
+        retq["clopenableLinks"] = [_link2MinMax(w, oname, l) for l in clopenableLinks]
+    if dispositions.get("turnable", False):
+        turnableLinks = w.getObjectProperty((oname,), ("fn", "turning", "links"))
+        retq["turnableLinks"] = [_link2MinMax(w, oname, l) for l in turnableLinks]
+    return requests.status_codes.codes.ALL_OK, {'response': retq}
 
 def toGetStateUpdates(requestData, w, agentName, todos):
+    def _joints2Links(objData, joints2Values):
+        return {objData["idx2Link"][objData["joints"][k]["idx"]]: v for k, v in joints2Values.items()}
     def _active(p, garden):
         for e in p['children']:
             if (not garden[e]['previousStatus']) and ('constraintFollowed' != garden[e]['description']['goal']):
@@ -312,10 +328,10 @@ def toGetStateUpdates(requestData, w, agentName, todos):
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
-        updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': w.getObjectProperty((name,), 'jointPositions')}
+        updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': _joints2Links(w._kinematicTrees[name], w.getObjectProperty((name,), 'jointPositions'))}
         if name == agentName:
-            updates[name]['position'] = {'base': [updates[name]['joints']['world_to_base_x'], updates[name]['joints']['base_x_to_base_y'], 0], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
-            halfYaw = 0.5*updates[name]['joints']['base_y_to_base_yaw']
+            updates[name]['position'] = {'base': [updates[name]['joints']['base_x'], updates[name]['joints']['base_y'], 0], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
+            halfYaw = 0.5*updates[name]['joints']['base_yaw']
             updates[name]['orientation'] = {'base': [0,0, math.sin(halfYaw), math.cos(halfYaw)], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
     return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "agentLoad": agentLoad, "currentCommand": str(todos["command"]), "abeActions": acts}}
 

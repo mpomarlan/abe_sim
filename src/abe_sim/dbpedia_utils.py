@@ -62,12 +62,18 @@ def extract_info_from_dbpedia(where_clause: str):
     }}
 
     """
+    print("Querying dbpedia:\n", sparql_query)
     # Set the SPARQL query
-    sparql.setQuery(sparql_query)
-    # Set the return format to JSON
-    sparql.setReturnFormat(JSON)
-    # Execute the query and store the results
-    results = sparql.query().convert()
+    results = {"results": {"bindings": []}}
+    try:
+        sparql.setQuery(sparql_query)
+        # Set the return format to JSON
+        sparql.setReturnFormat(JSON)
+        # Execute the query and store the results
+        results = sparql.query().convert()
+    except Exception as e:
+        print("WARNING: Query failed because of exception, see details below. Will simply treat query as returning no results, this should only impact action cancellation.")
+        print(e)
     # Extract the values from the results and store them in a list
     result_set = set()
     for result in results["results"]["bindings"]:
