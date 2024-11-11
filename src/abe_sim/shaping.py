@@ -15,6 +15,46 @@ def updateShaped(name, customDynamicsAPI):
             w.removeObject((name,))
             return
 
+def updatePressingIntoShape(name, customDynamicsAPI):
+    def _distance(a, b):
+        dx, dy, dz = a[0]-b[0], a[1]-b[1], a[2]-b[2]
+        return (dx*dx + dy*dy + dz*dz)
+    w = customDynamicsAPI["leetHAXXOR"]()
+    fnShaping = w._kinematicTrees[name].get("fn", {}).get("shaping") or {}
+    for a in fnShaping.get("actuators", []):
+        position = w.getKinematicData((name,))[0]
+        radius = fnShaping.get("radius", {}).get(a) or 0
+        aabb = w.getAABB((name, a))
+        aabbAdj = w.adjustAABBRadius(aabb, radius)
+        closeObjects = set([x[0] for x in w.checkOverlap(aabbAdj)])
+        close2Type = {}
+        type2Amount = {}
+        type2Adds = {}
+        for co in closeObjects:
+            ct = w._kinematicTrees[co]["type"]
+            toAdds = [x[0] for x in w.getProcessOutcome({"process": "shaping", "patient": ct, "instrument": w._kinematicTrees[name]["type"]}).get("toAdd", [])]
+            if len(toAdds):
+                type2Adds[ct] = toAdds
+                type2Amount[ct] = len(w.getProcessResource({"process": "shaping", "patient": ct}))
+                if ct not in close2Type:
+                    close2Type[ct] = []
+                close2Type[ct].append(co)
+                close2Type[ct] = sorted(close2Type[ct], key=lambda x: _distance(w.getKinematicData((x,)), position))[:type2Amount[ct]]
+        for ct, cobs in close2Type.items():
+            if type2Amount[ct] > len(cobs):
+                continue
+            positions = [w.getKinematicData((x,))[0] for x in cobs]
+            px, py, pz = sum([x[0] for x in positions])/len(positions), sum([x[1] for x in positions])/len(positions), sum([x[2] for x in positions])/len(positions)
+            for shapedType in type2Adds[ct]:
+                objDesc = w.getObjectTypeKnowledge(shapedType)
+                if "customStateVariables" not in objDesc:
+                    objDesc["customStateVariables"] = {}
+                objDesc["customStateVariables"]["provenance"] = list(cobs)
+                objDesc["orientation"] = [0,0,0,1]
+                objDesc["position"] = [px, py, pz]
+                objDesc["name"] = "%s_%d" % (shapedType, w.getNewObjectCounter())
+                w.addObject(objDesc)
+    
 def updateShaping(name, customDynamicsAPI):
     w = customDynamicsAPI["leetHAXXOR"]()
     fnShaping = w._kinematicTrees[name].get("fn", {}).get("shaping") or {}

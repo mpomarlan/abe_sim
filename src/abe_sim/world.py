@@ -258,10 +258,12 @@ class World():
         if ('process' not in processDescription) or ('patient' not in processDescription) or (role not in self._processKnowledge):
             return None
         relevantKnowledge = self._processKnowledge[role][processDescription['process']][processDescription['patient']]
-        specificKey = frozenset([(k, v) for k,v in processDescription.items() if k not in ['process', 'patient']])
+        specificKey = ', '.join(sorted([f'{k}: {v}' for k,v in processDescription.items() if k not in ['process', 'patient']]))
         default = relevantKnowledge.get('default', None)
         if specificKey in relevantKnowledge:
             return copy.deepcopy(relevantKnowledge[specificKey])
+        ### TODO: reinstate comparing descriptions to find closest
+        '''
         retq = None
         minDiff = None
         for k, v in relevantKnowledge.items():
@@ -274,6 +276,7 @@ class World():
                 retq = None
         if retq is not None:
             return copy.deepcopy(retq)
+        '''
         return copy.deepcopy(default)
     def getProcessOutcome(self, processDescription):
         return self._getProcessRoleKnowledge(processDescription, 'outcome')

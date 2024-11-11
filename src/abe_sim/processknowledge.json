@@ -9205,6 +9205,30 @@
                                 }
                         }
                 },
+                "shaping": {
+                        "DoughParticle": {
+                            "instrument: CrescentCookieCutter": {
+                                "toAdd": [
+                                        [
+                                                "DoughClump",
+                                                [
+                                                        [
+                                                                0,
+                                                                0,
+                                                                0
+                                                        ],
+                                                        [
+                                                                0,
+                                                                0,
+                                                                0,
+                                                                1
+                                                        ]
+                                                ]
+                                        ]
+                                ]
+                            }
+                        }
+                },
                 "slicing": {
                         "Bread": {
                                 "default": {
@@ -10186,6 +10210,13 @@
                                         "SugarParticle"
                                 ]
                         ]
+                },
+                "shaping": {
+                    "DoughParticle": [
+                        "DoughParticle",
+                        "DoughParticle",
+                        "DoughParticle"
+                    ]
                 }
         }
 }

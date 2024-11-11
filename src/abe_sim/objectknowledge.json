@@ -594,7 +594,6 @@
                      "canClopen": true,
                      "canGrasp": true,
                      "kinematicallyControlable": true,
-                     "canShape": true,
                      "canTurn": true,
                      "turning": {
                          "links": [
@@ -1051,6 +1050,24 @@
                             }
                      }
               }
+       },
+       {
+              "type": "CrescentCookieCutter",
+              "simtype": "ktree",
+              "filename": "3DObjects/CookieCutter/crescentCookieCutter.urdf",
+              "fn": {
+                     "graspable": true,
+                     "canPressIntoShape": true,
+                     "shaping": {
+                            "actuators": [
+                                   "crescentCookieCutter"
+                            ],
+                            "radius": {
+                                   "crescentCookieCutter": 0.05
+                            }
+                     }
+              },
+              "customStateVariables": {}
        },
        {
               "type": "CuttingBoard",
