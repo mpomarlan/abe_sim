@@ -302,7 +302,7 @@ def runBrain():
         #     by making lock passing between threads difficult
         #if not isAMac:
         if True:
-            time.sleep(max((frameDurationFactor/(sfr*1.0))-stepDuration, 0.001))
+            time.sleep(max((frameDurationFactor/(sfr*1.0))-stepDuration, 0.01))
 
 if "__main__" == __name__:
     runBrain()
