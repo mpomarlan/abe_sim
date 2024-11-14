@@ -26,7 +26,7 @@ def updatePressingIntoShape(name, customDynamicsAPI):
         radius = fnShaping.get("radius", {}).get(a) or 0
         aabb = w.getAABB((name, a))
         aabbAdj = w.adjustAABBRadius(aabb, radius)
-        closeObjects = set([x[0] for x in w.checkOverlap(aabbAdj)])
+        closeObjects = set([x[0] for x in w.checkOverlap(aabbAdj) if w._kinematicTrees[x[0]].get("fn", {}).get("shapeable", False)])
         close2Type = {}
         type2Amount = {}
         type2Adds = {}
