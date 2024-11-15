@@ -64,7 +64,7 @@ def updateGrasping(name, customDynamicsAPI):
         for e in toRemove:
             actuallyGraspedEF.pop(e)
         for e in intendedSet:
-            if not w._kinematicTrees[e[0]].get("fn", {}).get("graspable"):
+            if not w._kinematicTrees.get(e[0],{}).get("fn", {}).get("graspable"):
                 continue
         # check whether intended grasped items are not actually grasped, but close enough; if so, add a constraint to make them grasped
             if ((e not in actuallyGraspedEF) or (w._kinematicConstraints.get(actuallyGraspedEF[e], {}).get("name") is None)) and (e[0] in overlapsActivation):

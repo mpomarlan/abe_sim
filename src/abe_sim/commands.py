@@ -108,6 +108,34 @@ def toCancel(requestData, w, agentName, todos):
 
 
 def toUpdateAvatar(requestData, w, agentName, todos):
+    def _setArm(w, bea, arm, posBase, ornBase, pos, orn, vel, angVel):
+        links = None
+        armPos, armOrn = w.objectPoseRelativeToObject(posBase, ornBase, pos, orn)
+        rpy = stubbornTry(lambda : pybullet.getEulerFromQuaternion(armOrn))
+        vals = armPos + rpy
+        if "base" == arm:
+            links = ["base_x", "base_y", None, None, None, "base_yaw"]
+        elif "left" == arm:
+            links = ["hand_left_x", "hand_left_y", "hand_left_z", "hand_left_roll", "hand_left_pitch", "hand_left_yaw"]
+        elif "right" == arm:
+            links = ["hand_right_x", "hand_right_y", "hand_right_z", "hand_right_roll", "hand_right_pitch", "hand_right_yaw"]
+        if links is None:
+            return
+        for l,v in zip(links,vals):
+            if l is not None:
+                w.setObjectProperty((bea, l), "jointPosition", v)
+        return
+    def _move(w, x, posArmOld, ornArmOld, posArm, ornArm):
+        pos, orn, vel, angVel = w.getKinematicData((x,))
+        posRel, ornRel = w.objectPoseRelativeToObject(posArmOld, ornArmOld, pos, orn)
+        posNew, ornNew = w.objectPoseRelativeToWorld(posArm, ornArm, posRel, ornRel)
+        ornDiff = stubbornTry(lambda : pybullet.getDifferenceQuaternion(ornRel, ornNew))
+        velNew = stubbornTry(lambda : pybullet.rotateVector(ornDiff, vel))
+        angVelNew = stubbornTry(lambda : pybullet.rotateVector(ornDiff, angVel))
+        w.setObjectProperty((x,), "position", posNew)
+        w.setObjectProperty((x,), "orientation", ornNew)
+        w.setObjectProperty((x,), "linearVelocity", velNew)
+        w.setObjectProperty((x,), "angularVelocity", angVelNew)
     def _adjustTarget(p,q,ef,csv):
         if isinstance(p, str):
             p = json.loads(p)
@@ -124,34 +152,40 @@ def toUpdateAvatar(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {"response": "Did not find object %s." % bea}
     if ("Bea" != w._kinematicTrees[bea]["type"]):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {"response": "Object %s is not a human avatar." % bea}
+    actuallyGrasping = w._kinematicTrees[bea].get("customStateVariables", {}).get("grasping", {}).get("actuallyGrasping", {})
     posHead = requestData.get("positionHead")
     ornHead = requestData.get("orientationHead")
     posLeft = requestData.get("positionLeft")
     ornLeft = requestData.get("orientationLeft")
+    velLeft = requestData.get("velocityLeft", [0,0,0])
+    angVelLeft = requestData.get("angularVelocityLeft", [0,0,0])
     posRight = requestData.get("positionRight")
     ornRight = requestData.get("orientationRight")
+    velRight = requestData.get("velocityRight", [0,0,0])
+    angVelRight = requestData.get("angularVelocityRight", [0,0,0])
     graspLeft = requestData.get("graspLeft", [])
     graspRight = requestData.get("graspRight", [])
     clopenLeft = requestData.get("clopenLeft")
     clopenRight = requestData.get("clopenRight")
+    objectsToMoveLeft = requestData.get("objectsToMoveLeft", []) + [x[0][0] for x in actuallyGrasping.get("hand_left",[])]
+    objectsToMoveRight = requestData.get("objectsToMoveRight", []) + [x[0][0] for x in actuallyGrasping.get("hand_right",[])]
     turnLeft = requestData.get("turnLeft", [])
     turnRight = requestData.get("turnRight", [])
     csv = w._kinematicTrees[bea]["customStateVariables"]
-    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
-    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
-    posHead, ornHead = _adjustTarget(posHead, ornHead, "base", csv)
-    targetBase = None
-    targetLeft = None
-    targetRight = None
-    if (posHead is not None) and (ornHead is not None):
-        targetBase = [[posHead[0], posHead[1], 0], stubbornTry(lambda : pybullet.getQuaternionFromEuler((0,0,pybullet.getEulerFromQuaternion(ornHead)[2])))]
-    if (posLeft is not None) and (ornLeft is not None):
-        targetLeft = [posLeft, ornLeft]
-    if (posRight is not None) and (ornRight is not None):
-        targetRight = [posRight, ornRight]
-    csv["kinematicControl"]["target"] = {"base": targetBase,
-                                         "hand_left": targetLeft,
-                                         "hand_right": targetRight}
+    posBase, ornBase = _adjustTarget(posHead, ornHead, "base", csv)
+    posBase = (posBase[0], posBase[1], 0)
+    posLeftOld, ornLeftOld, _, _ = w.getKinematicData((bea, "hand_left_roll"))
+    posRightOld, ornRightOld, _, _ = w.getKinematicData((bea, "hand_right_roll"))
+    posBea, ornBea, _, _ = w.getKinematicData((bea,))
+    _setArm(w, bea, "base", posBea, ornBea, posBase, ornBase, [0,0,0], [0,0,0])
+    posLeftBase, ornLeftBase, _, _ = w.getKinematicData((bea, "hand_left_base"))
+    posRightBase, ornRightBase, _, _ = w.getKinematicData((bea, "hand_right_base"))
+    _setArm(w, bea, "left", posLeftBase, ornLeftBase, posLeft, ornLeft, velLeft, angVelLeft)
+    _setArm(w, bea, "right", posRightBase, ornRightBase, posRight, ornRight, velRight, angVelRight)
+    _ = [_move(w, x, posLeftOld, ornLeftOld, posLeft, ornLeft) for x in objectsToMoveLeft]
+    _ = [_move(w, x, posRightOld, ornRightOld, posRight, ornRight) for x in objectsToMoveRight]
+    apR, aoR, _, _ = w.getKinematicData((bea, "hand_right_roll"))
+    print(posBea, ornBea, posRightBase, ornRightBase, posRight, ornRight, apR, aoR)
     csv["grasping"]["intendToGrasp"] = {"hand_left": graspLeft, "hand_right": graspRight}
     csv["clopening"]["action"] = {"hand_left": clopenLeft, "hand_right": clopenRight}
     csv["turning"]["action"] = {"hand_left_roll": turnLeft, "hand_right_roll": turnRight}
@@ -283,8 +317,6 @@ def toGetObjectConstants(requestData, w, agentName, todos):
     return requests.status_codes.codes.ALL_OK, {'response': retq}
 
 def toGetStateUpdates(requestData, w, agentName, todos):
-    def _joints2Links(objData, joints2Values):
-        return {objData["idx2Link"][objData["joints"][k]["idx"]]: v for k, v in joints2Values.items()}
     def _active(p, garden):
         for e in p['children']:
             if (not garden[e]['previousStatus']) and ('constraintFollowed' != garden[e]['description']['goal']):
@@ -323,15 +355,17 @@ def toGetStateUpdates(requestData, w, agentName, todos):
         return ''
     trackedProcs = {'nearing', 'parkingArm', 'grasping', 'ungrasping', 'armNearingItemHandle', 'loweringItem', 'opening', 'closing', 'transferringContents', 'mixing', 'lining', 'shaping', 'sprinkling', 'cuttingItem'}
     garden = w.getObjectProperty((agentName,), ('customStateVariables', 'processGardening', 'garden'), {})
+    if garden is None: # this may happen when there is no agent in the scene
+        garden = {} # TODO: decide whether getObjectProperty should enforce a default value also when the identifier is invalid
     acts = [_strP(x) for x in garden.values() if ('process' in x['description']) and (x['description']['process'] in trackedProcs) and _active(x, garden)]
     agentLoad = w.getObjectProperty((agentName,), ("customStateVariables", "agentLoad"), 0)
     updates = {}
     for name, data in w._kinematicTrees.items():
         mesh = stubbornTry(lambda : pybullet.getVisualShapeData(data['idx'], -1, w._pybulletConnection))[0][4].decode("utf-8")
-        updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': _joints2Links(w._kinematicTrees[name], w.getObjectProperty((name,), 'jointPositions'))}
+        updates[name] = {'filename': str(data['filename']), 'position': list(w.getObjectProperty((name,), 'position')), 'orientation': list(w.getObjectProperty((name,), 'orientation')), 'at': str(w.getObjectProperty((name,), 'at')), 'mesh': mesh, 'customStateVariables': copy.deepcopy(data.get('customStateVariables', {})), 'joints': w.getObjectProperty((name,), 'jointPositions')}
         if name == agentName:
-            updates[name]['position'] = {'base': [updates[name]['joints']['base_x'], updates[name]['joints']['base_y'], 0], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
-            halfYaw = 0.5*updates[name]['joints']['base_yaw']
+            updates[name]['position'] = {'base': [updates[name]['joints']['world_to_base_x'], updates[name]['joints']['base_x_to_base_y'], 0], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'position')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'position'))}
+            halfYaw = 0.5*updates[name]['joints']['base_y_to_base_yaw']
             updates[name]['orientation'] = {'base': [0,0, math.sin(halfYaw), math.cos(halfYaw)], 'hand_right_roll': list(w.getObjectProperty((name, 'hand_right_roll'), 'orientation')), 'hand_left_roll': list(w.getObjectProperty((name, 'hand_left_roll'), 'orientation'))}
     return requests.status_codes.codes.ALL_OK, {"response": {"updates": updates, "agentLoad": agentLoad, "currentCommand": str(todos["command"]), "abeActions": acts}}
 
