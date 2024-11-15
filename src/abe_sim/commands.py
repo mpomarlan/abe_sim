@@ -315,7 +315,7 @@ def toGetStateUpdates(requestData, w, agentName, todos):
         elif 'lining' == description['process']:
             return 'LiningContainer(%s, %s, %s)' % (description['item'], description['lining'], description['hand'])
         elif 'shaping' == description['process']:
-            return 'ShapingStuffInto(%s, %s, %s, %s)' % (description['item'], description['shapedType'], description['destination'], description['hand'])
+            return 'ShapingStuffInto(%s, %s, %s)' % (description['item'], description['shapedType'], description['hand'])
         elif 'sprinkling' == description['process']:
             return 'SprinklingContents(%s, %s, %s)' % (description['item'], description['shaker'], description['hand'])
         elif 'cuttingItem' == description['process']:
