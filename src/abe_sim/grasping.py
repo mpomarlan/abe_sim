@@ -3,6 +3,8 @@ import time
 
 from abe_sim.world import getDictionaryEntry
 
+graspParams = {"maxForce": 1000}
+
 def updateGraspingConstraint(name, customDynamicsAPI):
     w = customDynamicsAPI["leetHAXXOR"]()
     parent = w._kinematicConstraints[name]["parent"]
@@ -47,7 +49,7 @@ def updateGrasping(name, customDynamicsAPI):
         aabbDeactivation = w.adjustAABBRadius(aabb, graspingDeactivationRadius)
         overlapsActivation = set([x[0] for x in w.checkOverlap(aabbActivation) if x[0]!=name])
         overlapsDeactivation = set([x[0] for x in w.checkOverlap(aabbDeactivation) if x[0]!=name])
-        maxForce = fnGrasping.get("maxForce", {}).get(ef) or 1000
+        maxForce = graspParams["maxForce"] or 1000#fnGrasping.get("maxForce", {}).get(ef) or 1000
         dists = {}
         toRemove = []
         for e in actuallyGraspedEF.keys():

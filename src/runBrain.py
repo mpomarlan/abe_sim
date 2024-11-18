@@ -22,7 +22,7 @@ import abe_sim.world as world
 
 from abe_sim.motionPlanning import updateMotionPlanning
 from abe_sim.kinematicControl import updateKinematicControl
-from abe_sim.grasping import updateGrasping, updateGraspingConstraint
+from abe_sim.grasping import updateGrasping, updateGraspingConstraint, graspParams
 from abe_sim.timing import updateTiming
 from abe_sim.processGardening import updateGarden
 from abe_sim.transporting import updateTransportingConstraint, updateTransporting
@@ -144,7 +144,9 @@ def runBrain():
     parser.add_argument('-w', '--loadWorldDump', default=None, help='Path to a file containing a json world dump from a previous run of Abe Sim')
     parser.add_argument('-l', '--loadObjectList', default='./abe_sim/defaultScene.json', help='Path containing a json list of objects to load in the scene. Each element in the list must be of form [type, name, position, orientation, kwargs] (kwargs optional)')
     parser.add_argument('-vpg', '--visualizeProcessGarden',action="store_true", help="Enable visualization of the process garden in a separate text window.")
+    parser.add_argument("-gmf", "--graspMaxForce", default="1000.0", help="Grasping constraint maxforce in Newton. Default 1000.")
     arguments = parser.parse_args()
+    graspParams["maxForce"] = float(arguments.graspMaxForce)
     customDynamics = buildSpecs('./abe_sim/procdesc.yml') + [[('fn', 'canTime'), updateTiming], [('fn', 'kinematicallyControlable'), updateKinematicControl], [('fn', 'canGrasp'), updateGrasping], [('fn', 'graspingConstraint'), updateGraspingConstraint], [('fn', 'processGardener'), updateGarden], [('fn', 'transportingConstraint'), updateTransportingConstraint], [('fn', 'transportable'), updateTransporting], [('fn', 'sticky'), updateStickiness], [('fn', 'temperatureUpdateable'), updateTemperatureGetter], [('fn', 'canUpdateTemperature'), updateTemperatureSetter], [('fn', 'mixable'), updateMixing], [('fn', 'shapeable'), updateShaped], [('fn', 'canShape'), updateShaping], [('fn', 'canPressIntoShape'), updatePressingIntoShape], [('fn', 'clopenable'), updateClopening], [('fn', 'turnable'), updateTurning], [('fn', 'mingleable'), updateMingling]]
 
     objectTypeKnowledge = json.loads(open('./abe_sim/objectknowledge.json').read())
