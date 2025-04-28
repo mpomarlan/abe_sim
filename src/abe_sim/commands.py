@@ -761,6 +761,8 @@ def toFlattenStart(requestData, w, agentName, todos):
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested portion does not exist in world.'}
     if tool not in w._kinematicTrees:
         return requests.status_codes.codes.NOT_FOUND, {'response': 'Requested flatteningTool does not exist in world.'}
+    if not all([w._kinematicTrees[portion].get('fn', {}).get('flattenable', False) for portion in portions]):
+        return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Some requested portion cannot be flattened.'}
     if not w._kinematicTrees[tool].get('fn', {}).get('canFlatten', False):
         return requests.status_codes.codes.I_AM_A_TEAPOT, {'response': 'Requested flatteningTool cannot flatten.'}
     toolLink = w._kinematicTrees[tool]['fn']['flattening']['links'][0]
@@ -1218,7 +1220,7 @@ def toPeelEnd(requestData, w, agentName):
     topGoal, status, response = _checkTopGoal(w, agentName)
     if requests.status_codes.codes.ALL_OK != status:
         return status, response
-    return requests.status_codes.codes.ALL_OK, {'response': {"peeledIngredient": requestData["containerForPeeledIngredient"], 'peelOfIngredient': requestData['inputIngredient'], 'kitchenStateOut': w.worldDump()}}
+    return requests.status_codes.codes.ALL_OK, {'response': {"peeledIngredient": requestData["containerForPeeledIngredient"], 'peelOfIngredient': requestData['containerForPeels'], 'kitchenStateOut': w.worldDump()}}
 
 def toSeedStart(requestData, w, agentName, todos):
     item = requestData.get("inputIngredient", None)
@@ -1418,6 +1420,7 @@ commandFns = {
     "to-boil": [processActionRequest, toBoilStart, toBoilEnd],
     "to-fry": [processActionRequest, toFryStart, toFryEnd],
     "to-melt": [processActionRequest, toMeltStart, toMeltEnd],
+    "to-wash": [processActionRequest, toWashStart, toWashEnd],
     "to-sprinkle": [processActionRequest, toSprinkleStart, toSprinkleEnd],
     "to-flour": [processActionRequest, toFlourStart, toFlourEnd],
     "to-grease": [processActionRequest, toGreaseStart, toGreaseEnd],

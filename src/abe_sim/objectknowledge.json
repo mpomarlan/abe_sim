@@ -1124,14 +1124,18 @@
               "simtype": "ktree",
               "filename": "3DObjects/Dough/dough_clump.urdf",
               "fn": {
-                     "graspable": "true",
+                     "graspable": true,
                      "transportable": true,
                      "temperatureUpdateable": true,
-                     "bakeable": true
+                     "bakeable": true,
+                     "flattenable": true
               },
               "customStateVariables": {
                      "baking": {
                             "hp": 3000
+                     },
+                     "flattening": {
+                            "hp": 300
                      }
               }
        },
@@ -1148,6 +1152,22 @@
               },
               "customStateVariables": {}
        },
+       {
+              "type": "FlattenedDough",
+              "simtype": "ktree",
+              "filename": "3DObjects/Dough/flattened_dough_clump.urdf",
+              "fn": {
+                     "graspable": true,
+                     "transportable": true,
+                     "temperatureUpdateable": true,
+                     "bakeable": true
+              },
+              "customStateVariables": {
+                     "baking": {
+                            "hp": 3000
+                     }
+              }
+       },       
        {
               "type": "Floor",
               "simtype": "ktree",
@@ -3780,7 +3800,30 @@
               "filename": "3DObjects/RollingPin/rollingPin.urdf",
               "fn": {
                      "temperatureUpdateable": true,
-                     "graspable": true
+                     "canFlatten": true,
+                     "graspable": true,
+                     "grasping": {
+                            "handle": "grip1",
+                            "axis": {
+                                   "grip1": [
+                                          0,
+                                          1,
+                                          0
+                                   ]
+                            }
+                     },
+                     "flattening": {
+                            "links": [
+                                   "body"
+                            ],
+                            "axis": {
+                                   "body": [
+                                          1,
+                                          0,
+                                          0
+                                   ]
+                            }
+                     }
               },
               "customStateVariables": {}
        },

@@ -92,6 +92,26 @@ cutting:
     process: cutting
     instrument: [trajector, type]
 # Something fries if left for long enough in a container that can fry.
+flattening:
+  disposition: [self, fn, flattenable]
+  progress:
+    trajector:
+      disposition: [trajector, fn, canFlatten]
+      part: [trajector, fn, flattening, links]
+    source:
+      mode: close
+      radius: [self, fn, flattening, radius]
+    path:
+      mode: alignment
+      reference: [trajector, fn, flattening, axis, $trajector-part]
+      threshold: 0.7
+    goal: 
+      direction: towards
+      threshold: 0.7
+  resource: [self, customStateVariables, flattening, hp]
+  completion:
+      process: flattening
+      instrument: [trajector, type]
 frying:
   disposition: [self, fn, fryable]
   progress:

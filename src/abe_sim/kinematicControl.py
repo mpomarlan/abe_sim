@@ -97,6 +97,9 @@ def jacobianTranspose(w, fnKinematicControl, robotName, efLink, efPositionInLink
         alpha = doteJJte/dotJJte
     # dq = alpha*Jt*e
     factor = getFactorForTranspose(alpha*e[:3], currentVelocity, accelerationLimitSquared)
+    numpy.set_printoptions(precision=2)
+    with open("log.txt","a") as outfile:
+        _=outfile.write("%s\n"% str([e, currentVelocity, factor*alpha*Jte]))
     return factor*alpha*Jte
 
 def jacobianPseudoinverseDLS(w, fnKinematicControl, robotName, efLink, efPositionInLink, efOrientationInLink, targetPosition, targetOrientation, usableDoFs, efBasePosition, efBaseOrientation, efBaseLinearVelocity, efBaseAngularVelocity, dampingSq=0.1, linearD=0.1, angularD=0.1, mobileBase=False):
