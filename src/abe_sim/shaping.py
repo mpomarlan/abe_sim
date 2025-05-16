@@ -39,7 +39,7 @@ def updatePressingIntoShape(name, customDynamicsAPI):
                 if ct not in close2Type:
                     close2Type[ct] = []
                 close2Type[ct].append(co)
-                close2Type[ct] = sorted(close2Type[ct], key=lambda x: _distance(w.getKinematicData((x,)), position))[:type2Amount[ct]]
+                close2Type[ct] = sorted(close2Type[ct], key=lambda x: _distance(w.getKinematicData((x,))[0], position))[:type2Amount[ct]]
         for ct, cobs in close2Type.items():
             if type2Amount[ct] > len(cobs):
                 continue
